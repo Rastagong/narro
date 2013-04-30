@@ -175,6 +175,18 @@ class Mobile(EvenementConcret):
     def _getTileSuivant(self):
         return (_getXTileSuivant(), getYTileSuivant())
 
+    def _getPersoCharset(self):
+        return self._persoCharset
+
+    def _setPersoCharset(self, new):
+        self._persoCharset = new
+
+    def _getNomTileset(self):
+        return self._nomTileset
+    
+    def _setNomTileset(self, new):
+        self._nomTileset = new
+
     x, _x = property(_getX), property(_getX)
     y, _y = property(_getY), property(_getY)
     _xTile, xTile = property(_getXTile), property(_getXTile)
@@ -187,3 +199,5 @@ class Mobile(EvenementConcret):
     _tileSuivant, tileSuivant = property(_getTileSuivant), property(_getTileSuivant)
     _tilePrecedent, tilePrecedent = property(_getTilePrecedent), property(_getTilePrecedent)
     c = property(_getC)
+    nomTileset = property(_getNomTileset, _setNomTileset)
+    persoCharset = property(_getPersoCharset, _setPersoCharset)

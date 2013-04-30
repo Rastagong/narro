@@ -1,4 +1,4 @@
-import pygame,configparser,pdb,math,directions,numpy,objgraph,mysize
+import pygame, configparser, math, directions, numpy
 from pygame.locals import *
 import pygame.surfarray as surfarray
 from collections import OrderedDict
@@ -7,6 +7,8 @@ from constantes import *
 from observateur import *
 from zonePensee import *
 
+if SESSION_DEBUG:
+    import pdb
 
 class Carte(Observateur):
     """Classe représentant une carte au niveau des données"""
@@ -22,7 +24,7 @@ class Carte(Observateur):
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
         self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, self._tilesReserves, i = self._jeu.dicoSurfaces, list(), dict(), dict(), dict(), 0
-        self._surface = pygame.Surface((FENETRE["longueurFenetre"], FENETRE["largeurFenetre"]), flags=HWSURFACE)
+        #self._surface = pygame.Surface((FENETRE["longueurFenetre"], FENETRE["largeurFenetre"]), flags=HWSURFACE|SRCALPHA)
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
         while i < self._nombreCouches:
             self._pnj[i], self._tilesReserves[i]  = dict(), dict()
@@ -49,9 +51,7 @@ class Carte(Observateur):
         self._tilesLayers = []
         i = 0
         while i < self._nombreCouches:
-            #self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32)))
-            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA|HWSURFACE))
-            #self._tilesLayers[i].set_colorkey((0,0,0))
+            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA|HWSURFACE).convert_alpha())
             i += 1
 
         i = 0
@@ -166,6 +166,7 @@ class Carte(Observateur):
         """Supprime un PNJ à l'écran."""
         if nomPNJ in self._pnj[couche].keys():
             del self._pnj[couche][nomPNJ]
+            self._toutAChanger = True
 
     def poserPNJ(self, positionCarte, c, positionSource, nomTileset, couleurTransparente, nomPNJ, positionCarteSuivante=False):
         """Ordonne l'affichage à l'écran d'un PNJ à une nouvelle position et l'effacement du PNJ à sa position précedente"""
@@ -255,7 +256,8 @@ class Carte(Observateur):
 
     def initialiserScrolling(self, x, y):
         """Après la création de la carte, initialise le scrolling à la position du joueur si nécessaire.
-        <x> est l'abscisse du joueur, <y> son ordonnée. Ces coordonnées sont données en tiles."""
+        <x> est l'abscisse du joueur, <y> son ordonnée. Ces coordonnées sont données en pixels."""
+        self._ecranVisible.top, self._ecranVisible.left = 0, 0
         scrollingAInitialiserX, scrollingAInitialiserY, x, y = True, True, x, y
         if FENETRE["largeurFenetre"] >= self._largeur * 32: #Carte petite
             scrollingAInitialiserY = False
@@ -296,16 +298,33 @@ class Carte(Observateur):
     def _appliquerTransformationGlobale(self, nomTransformation, **p):
         """Applique la transformation globale <nomTransformation> avec le dico de paramètres <p>."""
         if nomTransformation == "Rouge":
-            pixels = surfarray.pixels3d(self._surface)[:FENETRE["longueurFenetre"], :FENETRE["largeurFenetre"]] #On exclut la zone de pensée
+            pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"], :FENETRE["largeurFenetre"]] #On exclut la zone de pensée
             pixels[:,:,1:] = 0
         elif nomTransformation == "Noir":
-            pixels = surfarray.pixels3d(self._surface)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
+            pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
             pixels /= p["coef"]
             if p["coef"] >= 12:
                 pixels[:] = (0,0,0)
         elif nomTransformation == "NoirTotal":
-            pixels = surfarray.pixels3d(self._surface)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
+            pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
             pixels[:] = (0,0,0)
+        elif nomTransformation == "RemplirNoir":
+            self._fenetre.fill((0,0,0))
+        elif "SplashText" in nomTransformation:
+            if "couleurFond" in p.keys():
+                couleurFond=p["couleurFond"]
+            else:
+                couleurFond=None
+            surfaceTexte = self._jeu.zonePensee.polices["splashText"].render(p["texte"], p["antialias"], p["couleurTexte"], couleurFond)
+            self._fenetre.blit(surfaceTexte, p["position"])
+        elif nomTransformation == "Nuit":
+            self._fenetre.fill((0,0,0))
+            c = 0
+            while c < self._nombreCouches: 
+                for nomPnj in self._pnj[c]: 
+                    self._afficherBlocPnj(c, nomPnj)
+                c += 1
+
 
     def _transformerSurfaceGlobalement(self, affichageComplet=False):
         """A chaque frame, regarde s'il y a des transformations globales à appliquer, et les exécute lorsque c'est le cas.
@@ -326,39 +345,38 @@ class Carte(Observateur):
     def _afficherBlocPnj(self, c, nomPnj):
         """Affiche un PNJ sur un bloc"""
         pnj = self._pnj[c][nomPnj]
-        positionCollage = pnj.positionCarte.copy()
-        positionCollage.move_ip(-self._scrollingX, -self._scrollingY)
+        positionCollage = pnj.positionCarte.move(-self._scrollingX, -self._scrollingY)
         if len(self._transformationsParties) > 0:
             surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)].copy()
             self._transformerPartie(surfaceCollage)
         else:
             surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)]
-        self._surface.blit(surfaceCollage, positionCollage)
+        self._fenetre.blit(surfaceCollage, positionCollage)
     
     def afficher(self):
         """Cette méthode gère l'affichage de la carte"""
-        scrolling, self._blitFrame = False, False
+        self._blitFrame = False
         if self._toutAChanger is True:
             coucheActuelle = 0
+            self._fenetre.fill((0,0,0))
             while coucheActuelle < self._nombreCouches: 
-                self._surface.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
+                self._fenetre.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
                 #Tri des PNJs selon leur ordonnée (de manière croissante) : on affiche ceux en haut de l'écran avant ceux en bas, pour avoir une superposition
                 for nomPnj in nomsPnjs: 
                     self._afficherBlocPnj(coucheActuelle, nomPnj)
                 coucheActuelle += 1
-            self._afficherZonePensee(affichageComplet=True)
-            scrolling, self._toutAChanger = True, False
             self._transformerSurfaceGlobalement()
-            self._fenetre.blit(self._surface, (0,0))
-            pygame.display.flip()
+            self._afficherZonePensee(affichageComplet=True)
+            #self._fenetre.blit(self._surface, (0,0))
             self._blitFrame = True
 
         if self._besoinAffichageZonePensee is True:
-            self._afficherZonePensee()
+            self._afficherZonePensee(affichageComplet=self._blitFrame)
 
         if self._blitFrame is True:
-            self._jeu.horlogeFps.tick(NOMBRE_MAX_DE_FPS)
+            self._jeu.horlogeFps.tick(120)
+            pygame.display.flip()
 
     def _getNombreCouches(self):
         """Retourne le nombre de couches défini sur la carte"""
@@ -392,11 +410,15 @@ class Carte(Observateur):
     def _getParametresTransformations(self):
         return self._parametresTransformations
 
+    def _getTiles(self):
+        return self._tiles
+
     nombreCouches = property(_getNombreCouches)
     hauteurTile = property(_getHauteurTile)
     nom = property(_getNom)
     longueur = property(_getLongueur)
     largeur = property(_getLargeur)
+    tiles = property(_getTiles)
     transformationsGlobales = property(_getTransformationsGlobales, _setTransformationsParties)
     transformationsParties = property(_getTransformationsParties, _setTransformationsParties)
     parametresTransformations = property(_getParametresTransformations)

@@ -1,10 +1,12 @@
 # -*-coding:iso-8859-1 -*
-import pygame, configparser, pdb
+import pygame, configparser,sys
 from pygame.locals import *
 from constantes import *
 from zonePensee import *
 from gestionnairevenements import *
 from carte import *
+if SESSION_DEBUG:
+    import pdb
 
 class Jeu:
     """Classe contenant l'intégralité du jeu"""
@@ -47,11 +49,13 @@ class Jeu:
             config.read(cheminFichierCarte)
             self._cartes[self._carteAExecuter] = Carte(config, self)"""
         if self._premiereCarteChargee is True: #Il y a une carte précédente, on enlève toutes ses transformations (dont les transitions) 
-            del self._carteActuelle.transformationsGlobales[:]
+            """del self._carteActuelle.transformationsGlobales[:]
             del self._carteActuelle.transformationsParties[:]
-            self._carteActuelle.mettreToutAChanger()
+            self._carteActuelle.mettreToutAChanger()"""
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_surface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
+            self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
+            del self._carteActuelle
         ###
         cheminFichierCarte = DOSSIER_RESSOURCES + self._carteAExecuter + EXTENSION_FICHIER_CARTE
         config = configparser.ConfigParser()

@@ -114,6 +114,20 @@ class Joueur(Mobile, Observable):
             if directionActuelle != self._direction and self._direction != "Aucune":
                 self._regardDansDirection[directionActuelle] = False
 
+    def teleporterSurPosition(self, xTile, yTile, direction, couche=-1):
+        if couche == -1:
+            couche = self._c
+        self._ajusterPositionSource(self, direction)
+        self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
+        self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
+        self._positionCarte.left, self._positionCarte.top = xTile*self._jeu.carteActuelle.hauteurTile, yTile*self._jeu.carteActuelle.hauteurTile
+        self._boiteOutils.teleporterSurPosition(self._positionCarte, couche, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
+        self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, couche, joueur=True, appuiJoueur=False, direction=self._directionRegard)
+        self._xDepart, self._yDepart = self._positionCarte.left, self._positionCarte.top
+        Horloge.initialiser(id(self), 1, 1)
+        self._jeu.carteActuelle.initialiserScrolling(self._positionCarte.left, self._positionCarte.top)
+        self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
+
     def _deplacement(self):
         """Gère le déplacement"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile

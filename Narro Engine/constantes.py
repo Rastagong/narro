@@ -51,13 +51,16 @@ INTERVALLE_REPETITION_TOUCHES = 100
 LISTE_EVENTS_AUTORISES = [QUIT, KEYDOWN, KEYUP]
 
 #Le nom de la carte sur laquelle on démarre
-NOM_CARTE_LANCEMENT = "TSM-Auberge"
+NOM_CARTE_LANCEMENT = "LD26-Fin"
 
 #L'extension des fichiers carte
 EXTENSION_FICHIER_CARTE = ".narromap"
 
 #Le volume des musiques en boucle, à mettre à 0.0 pour pas se soûler
 VOLUME_LONGUE_MUSIQUE = 0.0
+
+#Le nom du projet actuel
+PROJET = "LD26"
 
 
 ##Mobile, PNJ, Joueur
@@ -78,7 +81,7 @@ LOG_COORDONNEES_JOUEUR = False
 NOM_EVENEMENT_JOUEUR_PAR_DEFAUT = "Joueur"
 
 #La durée de déplacement du joueur (d'un tile à un autre) par défaut, exprimée en millisecondes.
-DUREE_DEPLACEMENT_JOUEUR_PAR_DEFAUT = 1#250
+DUREE_DEPLACEMENT_JOUEUR_PAR_DEFAUT = 250#250
 
 #La durée par défaut, exprimée en millisecondes, d'un déplacement de mobile d'un tile vers un autre.
 DUREE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 200 #250
@@ -87,7 +90,7 @@ DUREE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 200 #250
 FREQUENCE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 16 #3
 
 #Le nombre de déplacements du joueur au sein d'un tile, sans qu'il y ait animation pour autant.
-FREQUENCE_DEPLACEMENT_JOUEUR_PAR_DEFAUT =  16#16#32 #20
+FREQUENCE_DEPLACEMENT_JOUEUR_PAR_DEFAUT =  32#16#32 #20
 
 #Le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations.
 FREQUENCE_ANIMATION_MOBILE_PAR_DEFAUT = 200 #3
@@ -149,11 +152,14 @@ FENETRE["couleurFenetre"] = (0,0,0) ##Couleur de fond de la fenêtre (hors zones 
 FENETRE["titreFenetre"] = "Narro Engine"
 FENETRE["flagsFenetre"] = pygame.DOUBLEBUF#|pygame.FULLSCREEN|pygame.HWSURFACE
 
+#La taille de la police en splashscreen
+TAILLE_POLICE_SPLASH_SCREEN = int(FENETRE["largeurFenetre"] / 4)
+
 #L'intégralité des directions possibles
 LISTE_DIRECTIONS = ["Haut", "Bas", "Gauche", "Droite", "Aucune"]
 
 #Le nombre maximal de frames par seconde
-NOMBRE_MAX_DE_FPS = 60 #2000
+NOMBRE_MAX_DE_FPS = 60#2000
 
 #Volume par défaut (compris entre 0 et 1
 VOLUME_MUSIQUE = 0.7 #0.0007
@@ -163,6 +169,9 @@ DUREE_PAUSE_BALADE = 300
 
 #Le nombre de blocs entre deux pauses lors d'une balade
 FREQUENCE_PAUSE_BALADE = 2
+
+#Le fait d'être en session de debug. Si <True>, un Debugger/Memory profiler sera initialisé (Pympler). 
+SESSION_DEBUG = False
 
 ##Messages d'erreurs
 ##

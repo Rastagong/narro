@@ -1,5 +1,5 @@
 # -*-coding:iso-8859-1 -*
-import pygame, directions,pdb
+import pygame, directions
 from collections import OrderedDict
 from pygame.locals import *
 from constantes import *
@@ -13,33 +13,70 @@ class GestionnaireEvenements():
         """Initialise le gestionnaire
         <jeu> est l'objet de classe <Jeu>, qui contient toute l'application"""
         self._jeu = jeu
-        ressources = DOSSIER_RESSOURCES
         self._evenements = dict(concrets=dict(), abstraits=dict())
-        self._nomCarte, directionDefaut, self._boiteOutils = None, DIRECTION_DEPART_MOBILE_PAR_DEFAUT, BoiteOutils(self._jeu)
-        self._positionsARegistrer = []
-        ##Concrets
-        #
-        self._evenements["concrets"]["TSM-Auberge"] = OrderedDict()
-        self._evenements["concrets"]["TSM-Drapier"] = OrderedDict()
-        self._evenements["concrets"]["TSM-Chemin"] = OrderedDict()
-        self._evenements["concrets"]["TSM-Champs"] = OrderedDict()
-        self._evenements["concrets"]["GT-Foret1"] = OrderedDict()
-        #self._evenements["concrets"]["GT-Foret1"]["Joueur"] = [ Joueur(self._jeu, self, 0, 27, 1, fichier="Maid.png"), (0,27), directionDefaut]
-        self._evenements["concrets"]["TSM-Auberge"]["Joueur"] = [ Joueur(self._jeu, self, 9, 30, 2, fichier="Maid.png"), (9,30), directionDefaut]
-        #self._evenements["concrets"]["TSM-Drapier"]["Joueur"] = [ Joueur(self._jeu, self, 7, 28, 2, fichier="Maid.png"), (7, 28), directionDefaut]
-        #self._evenements["concrets"]["TSM-Chemin"]["Joueur"] = [ Joueur(self._jeu, self, 5, 15, 3, fichier="Maid.png"), (5, 15), directionDefaut]
-        #self._evenements["concrets"]["TSM-Champs"]["Joueur"] = [ Joueur(self._jeu, self, 6, 59, 2, fichier="Maid.png"), (6, 59), directionDefaut]
-        j, self._positionJoueur = self._jeu.joueur, None
-        self._xJoueur, self._yJoueur, self._cJoueur, self._directionJoueur, self._appuiValidationJoueur = j.x/32, j.y/32, j.c, j.direction, j.appuiValidation
-        ##Abstraits
-        #
-        self._evenements["abstraits"]["Divers"] = dict()
-        self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
-        self._evenements["abstraits"]["Divers"]["ModulateurMusique"] = ModulateurMusique(self._jeu, self)
-        #self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
-        #
+        self._nomCarte, self._boiteOutils, self._positionsARegistrer, self._evenementsATuer = None, BoiteOutils(self._jeu), [], []
+        self._initialiserEvenements()
+        if SESSION_DEBUG:
+            self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
+
+    def _initialiserEvenements(self):
+        module = __import__("listeEvenements" + PROJET, fromlist=[])
+        globals().update(vars(module))
+        directionDefaut = DIRECTION_DEPART_MOBILE_PAR_DEFAUT
+        if PROJET == "TSM":
+            self._evenements["concrets"]["TSM-Auberge"] = OrderedDict()
+            self._evenements["concrets"]["TSM-Drapier"] = OrderedDict()
+            self._evenements["concrets"]["TSM-Chemin"] = OrderedDict()
+            self._evenements["concrets"]["TSM-Champs"] = OrderedDict()
+            self._evenements["concrets"]["GT-Foret1"] = OrderedDict()
+            #self._evenements["concrets"]["GT-Foret1"]["Joueur"] = [ Joueur(self._jeu, self, 0, 27, 1, fichier="Maid.png"), (0,27), directionDefaut]
+            self._evenements["concrets"]["TSM-Auberge"]["Joueur"] = [ Joueur(self._jeu, self, 9, 30, 2, fichier="Maid.png"), (9,30), directionDefaut]
+            #self._evenements["concrets"]["TSM-Drapier"]["Joueur"] = [ Joueur(self._jeu, self, 7, 28, 2, fichier="Maid.png"), (7, 28), directionDefaut]
+            #self._evenements["concrets"]["TSM-Chemin"]["Joueur"] = [ Joueur(self._jeu, self, 5, 15, 3, fichier="Maid.png"), (5, 15), directionDefaut]
+            #self._evenements["concrets"]["TSM-Champs"]["Joueur"] = [ Joueur(self._jeu, self, 6, 59, 2, fichier="Maid.png"), (6, 59), directionDefaut]
+            j, self._positionJoueur = self._jeu.joueur, None
+            self._xJoueur, self._yJoueur, self._cJoueur, self._directionJoueur, self._appuiValidationJoueur = j.x/32, j.y/32, j.c, j.direction, j.appuiValidation
+            self._evenements["abstraits"]["Divers"] = dict()
+            self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
+            self._evenements["abstraits"]["Divers"]["ModulateurMusique"] = ModulateurMusique(self._jeu, self)
+        elif PROJET == "LD26":
+            self._evenements["concrets"]["LD26-Ferme"] = OrderedDict()
+            self._evenements["concrets"]["LD26-Foret"] = OrderedDict()
+            self._evenements["concrets"]["LD26-Fin"] = OrderedDict()
+            #self._evenements["concrets"]["LD26-Ferme"]["Joueur"] = [ Joueur(self._jeu, self, 15, 10, 2, fichier="Anna.png"), (12, 24), "Bas"]
+            #self._evenements["concrets"]["LD26-Foret"]["Joueur"] = [ Joueur(self._jeu, self, 38, 1, 2, fichier="Anna.png"), (38,1), "Bas"]
+            self._evenements["concrets"]["LD26-Fin"]["Joueur"] = [ Joueur(self._jeu, self, 0, 16, 2, fichier="Anna.png"), (0, 16), "Droite"]
+            j, self._positionJoueur = self._jeu.joueur, None
+            self._xJoueur, self._yJoueur, self._cJoueur, self._directionJoueur, self._appuiValidationJoueur = j.x/32, j.y/32, j.c, j.direction, j.appuiValidation
+            self._evenements["abstraits"]["Divers"] = dict()
+            self._evenements["abstraits"]["Divers"]["Narrateur"] = Narrateur(self._jeu, self)
+            self._evenements["abstraits"]["Divers"]["ModulateurMusique"] = ModulateurMusique(self._jeu, self)
+            self._evenements["abstraits"]["Divers"]["PanierFleurs"] = PanierFleurs(self._jeu, self)
 
     def chargerEvenements(self, nomCarte):
+        if PROJET == "TSM":
+            self._chargerEvenementsTSM(nomCarte)
+        elif PROJET == "LD26":
+            self._chargerEvenementsLD26(nomCarte)
+
+    def _chargerEvenementsLD26(self, nomCarte):
+        if nomCarte == "LD26-Ferme":
+            self._evenements["concrets"]["LD26-Ferme"]["Mere"] = [ Mere(self._jeu, self), (13, 9), "Bas"]
+            self._evenements["concrets"]["LD26-Ferme"]["Scholar"] = [Scholar(self._jeu, self), (2, 29), "Haut"]
+            self._evenements["concrets"]["LD26-Ferme"]["Sortie"] = [ Teleporteur(self._jeu, self, "LD26-Foret", 0, 45, 2, "Haut", condition="ScholarParti", fonctionAvant="texteTransition", parametresFAvant="So began our journey."), (2, 29), "Aucune"]
+        elif nomCarte == "LD26-Foret":
+            self._evenements["concrets"]["LD26-Foret"]["Scholar"] = [Scholar2(self._jeu, self), (2, 46), "Gauche"]
+            self._evenements["concrets"]["LD26-Foret"]["Panneau"] = [Panneau(self._jeu, self), (2, 28), "Bas"]
+            self._evenements["concrets"]["LD26-Foret"]["Porte"] = [Porte(self._jeu, self), (1, 28), "Bas"]
+            self._evenements["concrets"]["LD26-Foret"]["Cle1"] = [Cle(self._jeu, self), (39, 40), "Bas"]
+            self._evenements["concrets"]["LD26-Foret"]["Cle2"] = [Cle(self._jeu, self), (39, 41), "Bas"]
+            self._evenements["concrets"]["LD26-Foret"]["Sortie1"] = [ Teleporteur(self._jeu, self, "LD26-Fin", 0, 16, 2, "Haut", fonctionAvant="texteTransition", parametresFAvant="And it continued, over and over. Until night."), (38, 0), "Aucune"]
+            self._evenements["concrets"]["LD26-Foret"]["Sortie2"] = [ Teleporteur(self._jeu, self, "LD26-Fin", 0, 16, 2, "Haut", fonctionAvant="texteTransition", parametresFAvant="And it continued, over and over. Until night."), (39, 0), "Aucune"]
+        elif nomCarte == "LD26-Fin":
+            self._evenements["concrets"]["LD26-Fin"]["Scholar"] = [Scholar3(self._jeu, self), (2, 16), "Gauche"]
+            self._evenements["concrets"]["LD26-Fin"]["Monstre"] = [Monstre(self._jeu, self), (9, 1), "Bas"]
+
+    def _chargerEvenementsTSM(self, nomCarte):
         if nomCarte == "TSM-Auberge" and len(self._evenements["concrets"]["TSM-Auberge"]) == 1:
             self._evenements["concrets"]["TSM-Auberge"]["Cuistot1"] = [ Cuistot(self._jeu, self, "Cuistot1"), (6, 27), "Bas"]
             self._evenements["concrets"]["TSM-Auberge"]["Cuistot2"] = [ Cuistot(self._jeu, self, "Cuistot2"), (15, 27), "Haut"]
@@ -86,6 +123,18 @@ class GestionnaireEvenements():
         if nomCarteActuelle in self._evenements["concrets"]:
             for cle,infosEvenement in self._evenements["concrets"][nomCarteActuelle].items():
                 infosEvenement[0].traiter()
+        self._tuerEvenementsATuer()
+
+    def ajouterEvenementATuer(self, typeEvenement, categorieEvenement, nomEvenement):
+        """Ajoute un évènement à tuer à la fin du traitement des évènements. 
+        On ne peut pas le faire pendant le traitement des évènements car ça changerait la taille du dico pendant l'itération."""
+        self._evenementsATuer.append((typeEvenement, categorieEvenement, nomEvenement))
+
+    def _tuerEvenementsATuer(self):
+        """A la fin du traitement des évènements, tue tous les évènements à tuer."""
+        for (typeEvenement, categorieEvenement, nomEvenement) in self._evenementsATuer:
+            self._evenements[typeEvenement][categorieEvenement].pop(nomEvenement)
+        del self._evenementsATuer[:]
 
     def registerPosition(self, nom, x, y, c, joueur=False, appuiJoueur=False, direction="Aucune"):
         """Enregistre la position d'un évènement nommé <nom> à la position <x><y><c> sur la carte. Elle est exprimée en indices de tiles.

@@ -7,15 +7,24 @@ from zonePensee import *
 from joueur import *
 from interrupteur import *
 
+
+INTERRUPTEURS = {"TSM": list(), "LD26": list()}
+INTERRUPTEURS["TSM"] = ["Ordre1A","Mission1","PlatPosé","NonneTrouvee","NonneEnMarche","NonneArrivee","NonneOrdre","OrdreDrapier","RepasNonne","QueueDrapier","ActionDrapier","AttenteChapeau","ChapeauDonne","ChapeauPose","EntreeMarchand","JoueurComptoir","JoueurDrap","DrapComptoir","DrapDonne","DrapPaiement","CheminRetour","RocherVu","JoueurSeulChamps"]
+INTERRUPTEURS["LD26"] = ["ArriveeScholar", "ScholarDevantPorte", "MereAccueil", "TransitionAccueilScholar", "ExplicationsAuFeu","Depart", "ScholarParti", "panneauLu", "cleTrouvee","porteOuverte","MonstreApparition","MonstreDisparu"]
+
+VARIABLES = {"TSM": list(), "LD26":list()}
+VARIABLES["TSM"] = [("QueueDrapier", 0)]
+VARIABLES["LD26"] = [("ObjetsHospitaliteTrouves", 5)]
+
 class BoiteOutils():
     """Classe permettant aux évènements d'accéder à des méthodes diverses pour réaliser des actions."""
 
     def __init__(self, jeu):
         self._jeu, self._interrupteurs, self._variables = jeu, dict(), dict()
         self._penseeAGerer = self._jeu.zonePensee.penseeAGerer
-        for nomInterrupteur in ["Ordre1A","Mission1","PlatPosé","NonneTrouvee","NonneEnMarche","NonneArrivee","NonneOrdre","OrdreDrapier","RepasNonne","QueueDrapier","ActionDrapier","AttenteChapeau","ChapeauDonne","ChapeauPose","EntreeMarchand","JoueurComptoir","JoueurDrap","DrapComptoir","DrapDonne","DrapPaiement","CheminRetour","RocherVu","JoueurSeulChamps"]: #Initialisation des interrupteurs
+        for nomInterrupteur in INTERRUPTEURS[PROJET]: #Initialisation des interrupteurs
             self._interrupteurs[nomInterrupteur] = Interrupteur(False)
-        for (nom, valeur) in [("QueueDrapier", 0)]:
+        for (nom, valeur) in VARIABLES[PROJET]:
             self._variables[nom] = valeur
         self._sons = dict()
         self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes = dict(), dict(), dict(), dict()
@@ -33,9 +42,31 @@ class BoiteOutils():
         """Prévient la carte que tout est à changer."""
         self._jeu.carteActuelle.mettreToutAChanger()
 
+    def changerPraticabilite(self, x, y, c, nouvellePraticabilite):
+        """Change la praticabilité d'un bloc"""
+        self._jeu.carteActuelle.tiles[x][y].modifierPraticabilite(c, nouvellePraticabilite)
+
     def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv):
         """Change le tile d'un bloc."""
         self._jeu.carteActuelle.changerBloc(x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv)
+
+    def changerSpriteMobile(self, nom, nomTileset, persoCharset):
+        mobile = self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte][nom][0]
+        mobile.nomTileset, mobile.persoCharset = DOSSIER_RESSOURCES+nomTileset, persoCharset
+        self.mettreToutAChanger()
+
+    def determinerPresenceTilesSurCarte(self, c, nomTileset, positionSource):
+        """Retourne les coordonnées de tous les tiles de la couche <c> présents sur la carte qui viennent du tileset <nomTileset> en <positionSource>, sous forme d'une liste."""
+        tilesTrouves, carte, x, y, nomTileset = [], self._jeu.carteActuelle, 0, 0, DOSSIER_RESSOURCES + nomTileset
+        while x < carte.longueur:
+            y = 0
+            while y < carte.largeur:
+                if carte.tiles[x][y].bloc[c].vide == False:
+                    if carte.tiles[x][y].bloc[c].nomTileset == nomTileset and carte._tiles[x][y].bloc[c].positionSource == positionSource:
+                        tilesTrouves.append((x,y))
+                y += 1
+            x += 1
+        return tilesTrouves
 
     def ajouterTransformation(self, globalite, nomTransformation, **parametres):
         """Ordonne à la carte d'appliquer, à chaque frame, la transformation <nomTransformation> avec les <parametres> (un dictionnaire).
@@ -115,11 +146,14 @@ class BoiteOutils():
         if deplacementPossible is True:
             self._jeu.carteActuelle.poserPNJ(positionCarte, c, positionSource, nomTileset, couleurTransparente, nomPNJ)
 
+    def teleporterJoueurSurPosition(self, xTile, yTile, direction, couche=-1):
+        self._jeu.joueur.teleporterSurPosition(xTile, yTile, direction, couche=couche)
+
     def teleporterSurCarte(self, nomCarte, x, y, c, direction):
         """Téléporte le joueur sur la carte <nomCarte> en <x>,<y>,<c> avec un regard en <direction>."""
         jeu = self._jeu
         jeu.carteAExecuter, jeu.changementCarte = nomCarte, True
-        self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte]["Joueur"][0] = EvenementConcret(self._jeu, self._gestionnaire) #Le joueur ne doit plus être traité sur l'ancienne carte
+        self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
         self._gestionnaire.evenements["concrets"][nomCarte]["Joueur"] = [jeu.joueur, (x,y), direction]
         self._gestionnaire.evenements["concrets"][nomCarte].move_to_end("Joueur", last=False)
         jeu.joueur.transfertCarte(x, y, c, direction)
@@ -135,7 +169,7 @@ class BoiteOutils():
         else:
             return False
 
-    def _positionsAdjacentes(self, position, positionArrivee, blocsExclus, c):
+    def _positionsAdjacentes(self, position, positionArrivee, blocsExclus, typeTile, c):
         """Retourne les positions adjacentes (pas en diagonale) à <position>."""
         positionsAdjacentes = [ (position[0]+1, position[1]), (position[0]-1, position[1]), (position[0], position[1]+1), (position[0], position[1]-1) ]
         positionsCorrectes, i = list(), 0
@@ -145,7 +179,15 @@ class BoiteOutils():
             positionAdjacente = positionsAdjacentes[i]
             x, y = positionAdjacente[0], positionAdjacente[1]
             if self._jeu.carteActuelle.tileExistant(x, y) is True and ((self._jeu.carteActuelle.tilePraticable(x, y, c) is True) or (positionAdjacente == positionArrivee)) and ((x,y) not in blocsExclus or positionAdjacente == positionArrivee):
-                positionsCorrectes.append(positionAdjacente)
+                if typeTile is False:
+                    positionsCorrectes.append(positionAdjacente)
+                else: #Vérification du type de tile : on n'ajoute aux positions correctes que ceux faisant partie de la liste fournie
+                    bloc = self._jeu.carteActuelle.tiles[x][y].bloc[c]
+                    while bloc.vide == True and c > 0:
+                        c -= 1
+                        bloc = self._jeu.carteActuelle.tiles[x][y].bloc[c]
+                    if (bloc.nomTileset, bloc.positionSource) in typeTile: #La liste fournie est composée de tuples (<nomTileset>,<positionSource>) des tiles autorisés
+                        positionsCorrectes.append(positionAdjacente)
             i += 1
         return positionsCorrectes
 
@@ -193,11 +235,12 @@ class BoiteOutils():
         (xJoueur, yJoueur) = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
         return self.cheminVersPosition(x, y, c, xJoueur, yJoueur, arretAvant=True, regardAvant=True, blocsExclus=blocsExclus)
 
-    def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE):
+    def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE, typeTile=False):
         """Retourne un chemin (une liste de directions) pour un mobile en <x><y><c> vers <xArrivee><yArrivee> ne passant par aucun bloc de <blocsExclus>.
         Si <arretAvant> vaut <True>, le chemin s'arrêt une case avant la destination. 
         Si <regardAvant> vaut <True>, le PNJ regarde la position d'arrivée à la fin.
-        Si <regardFinal> est fourni, le PNJ regarde dans la direction en question à l'arrivée."""
+        Si <regardFinal> est fourni, le PNJ regarde dans la direction en question à l'arrivée.
+        Si <typeTile> est fourni, le PNJ n'empruntera que les tiles définis dans cette liste de tuples (<nomTileset>,<positionSource>)."""
         positionArrivee, positionDepart = (xArrivee, yArrivee), (int(x), int(y))
         positionsVues, positionsLibres = list(), [positionDepart]
         if positionArrivee == positionDepart:
@@ -228,7 +271,7 @@ class BoiteOutils():
                         chemin.insert(i*frequencePauseBalade, dureePauseBalade)
                         i += 1
                 return chemin
-            voisins = self._positionsAdjacentes(position, positionArrivee, blocsExclus, c)
+            voisins = self._positionsAdjacentes(position, positionArrivee, blocsExclus, typeTile, c)
             i = 0
             while i < len(voisins):
                 voisin = voisins[i]
