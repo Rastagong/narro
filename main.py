@@ -170,8 +170,3 @@ class Narro:
     dicoSurfaces = property(_getDicoSurfaces, _setDicoSurfaces)
     horlogeFps = property(fget=_getHorlogeFps)
     gestionnaireEvenements = property(_getGestionnaireEvenements)
-
-if __name__ == "__main__":
-    jeu = Jeu()
-    jeu.executer()
-    sys.stderr.close()

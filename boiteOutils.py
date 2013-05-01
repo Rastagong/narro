@@ -8,23 +8,15 @@ from .joueur import *
 from .interrupteur import *
 
 
-INTERRUPTEURS = {"TSM": list(), "LD26": list()}
-INTERRUPTEURS["TSM"] = ["Ordre1A","Mission1","PlatPosé","NonneTrouvee","NonneEnMarche","NonneArrivee","NonneOrdre","OrdreDrapier","RepasNonne","QueueDrapier","ActionDrapier","AttenteChapeau","ChapeauDonne","ChapeauPose","EntreeMarchand","JoueurComptoir","JoueurDrap","DrapComptoir","DrapDonne","DrapPaiement","CheminRetour","RocherVu","JoueurSeulChamps"]
-INTERRUPTEURS["LD26"] = ["ArriveeScholar", "ScholarDevantPorte", "MereAccueil", "TransitionAccueilScholar", "ExplicationsAuFeu","Depart", "ScholarParti", "panneauLu", "cleTrouvee","porteOuverte","MonstreApparition","MonstreDisparu"]
-
-VARIABLES = {"TSM": list(), "LD26":list()}
-VARIABLES["TSM"] = [("QueueDrapier", 0)]
-VARIABLES["LD26"] = [("ObjetsHospitaliteTrouves", 5)]
-
 class BoiteOutils():
     """Classe permettant aux évènements d'accéder à des méthodes diverses pour réaliser des actions."""
 
-    def __init__(self, jeu):
+    def __init__(self, jeu, INTERRUPTEURS, VARIABLES):
         self._jeu, self._interrupteurs, self._variables = jeu, dict(), dict()
         self._penseeAGerer = self._jeu.zonePensee.penseeAGerer
-        for nomInterrupteur in INTERRUPTEURS[PROJET]: #Initialisation des interrupteurs
+        for nomInterrupteur in INTERRUPTEURS: #Initialisation des interrupteurs
             self._interrupteurs[nomInterrupteur] = Interrupteur(False)
-        for (nom, valeur) in VARIABLES[PROJET]:
+        for (nom, valeur) in VARIABLES:
             self._variables[nom] = valeur
         self._sons = dict()
         self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes = dict(), dict(), dict(), dict()

@@ -15,10 +15,16 @@ class GestionnaireEvenements():
         <jeu> est l'objet de classe <Jeu>, qui contient toute l'application"""
         self._jeu = jeu
         self._evenements = dict(concrets=dict(), abstraits=dict())
-        self._nomCarte, self._boiteOutils, self._positionsARegistrer, self._evenementsATuer = None, BoiteOutils(self._jeu), [], []
+        self._nomCarte, self._boiteOutils, self._positionsARegistrer, self._evenementsATuer = None, BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], []
         self._initialiserEvenements()
         if SESSION_DEBUG:
             self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
+
+    def _getInterrupteurs(self):
+        """Fonction à redéfinir au sein de chaque projet"""
+
+    def _getVariables(self):
+        """Fonction à redéfinir au sein de chaque projet"""
 
     def _initialiserEvenements(self):
         """Fonction à redéfinir au sein de chaque projet"""

@@ -53,10 +53,6 @@ EXTENSION_FICHIER_CARTE = ".narromap"
 #Le volume des musiques en boucle, à mettre à 0.0 pour pas se soûler
 VOLUME_LONGUE_MUSIQUE = 0.0
 
-#Le nom du projet actuel
-PROJET = "LD26"
-
-
 ##Mobile, PNJ, Joueur
 #
 #Fichier d'image par défaut du joueur, qui doit être situé dans le dossier des ressources
