@@ -1,5 +1,5 @@
 # -*-coding:iso-8859-1 -*
-from constantes import *
+from .constantes import *
 
 class Interrupteur:
 	"""Classe représentant un interrupteur"""

@@ -1,6 +1,6 @@
 # -*-coding:iso-8859-1 -*
-from constantes import *
-from observateur import *
+from .constantes import *
+from .observateur import *
 
 class Observable:
 	"""Interface représentant un objet observable dans le design pattern Observateur."""

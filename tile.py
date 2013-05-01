@@ -1,5 +1,5 @@
 # -*-coding:iso-8859-1 -*
-from bloc import *
+from .bloc import *
 import pygame, configparser
 from pygame.locals import *
 

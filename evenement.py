@@ -1,9 +1,9 @@
 # -*-coding:iso-8859-1 -*
 import pygame
 from pygame.locals import *
-from constantes import *
-from horloge import *
-from interrupteur import *
+from .constantes import *
+from .horloge import *
+from .interrupteur import *
 
 
 

@@ -1,8 +1,8 @@
 # -*-coding:iso-8859-1 -*
 import pygame
 from pygame.locals import *
-from constantes import *
-from evenement import *
+from .constantes import *
+from .evenement import *
 
 class EvenementConcret(Evenement):
     """Classe représentant un évènement concret, c'est-à-dire un évènement lié à une carte."""

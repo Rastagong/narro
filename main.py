@@ -1,23 +1,26 @@
 # -*-coding:iso-8859-1 -*
-import pygame, configparser,sys
+import pygame, configparser
+from sys import stderr
 from pygame.locals import *
-from constantes import *
-from zonePensee import *
-from gestionnairevenements import *
-from carte import *
+from .constantes import *
+from .zonePensee import *
+from .gestionnairevenements import *
+from .carte import *
 if SESSION_DEBUG:
     import pdb
 
-class Jeu:
+class Narro:
     """Classe contenant l'intégralité du jeu"""
     
     ##Méthodes privées
     ##Classées par ordre d'appel dans le code
-    def _initialiserTout(self):
-        """Initialise le moteur"""
+
+    def __init__(self):
         self._initialiserAffichage(**FENETRE)
         self._zonePensee = ZonePensee(self)
-        self._gestionnaireEvenements = GestionnaireEvenements(self)
+
+    def inclureGestionnaire(self, gestionnaireEvenements):
+        self._gestionnaireEvenements = gestionnaireEvenements
         self._gestionnaireEvenements.initialiserBoiteOutils()
 
     def _initialiserAffichage(self, messageErreurInitialisationPygame, messageErreurInitialisationFenetre, longueurFenetre, largeurFenetre, largeurFenetreReelle, couleurFenetre, titreFenetre, flagsFenetre=0):
@@ -79,7 +82,6 @@ class Jeu:
     #
     def executer(self):
         """Exécute le jeu"""
-        self._initialiserTout()
         self._jeuFini, self._carteAExecuter, self._changementCarte, self._cartes = False, str(NOM_CARTE_LANCEMENT), False, dict()
         self._horlogeFps, self._premiereCarteChargee, self._dicoSurfaces = pygame.time.Clock(), False, dict()
         while self._jeuFini is not True: #Tant que le joueur ne veut pas quitter

@@ -1,10 +1,10 @@
 # -*-coding:iso-8859-1 -*
 import pygame, pdb,math
 from pygame.locals import *
-from constantes import *
-from horloge import *
-from interrupteur import *
-from evenementConcret import *
+from .constantes import *
+from .horloge import *
+from .interrupteur import *
+from .evenementConcret import *
 
 class Mobile(EvenementConcret):
     """Classe représentant un évènement mobile, à savoir PNJ ou joueur, qui sont ses classes filles."""

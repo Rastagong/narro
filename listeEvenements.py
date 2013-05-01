@@ -1,11 +1,11 @@
 import pygame,random
 from pygame.locals import *
-from constantes import *
-from evenement import *
-from boiteOutils import *
-from interrupteur import *
-from evenementConcret import *
-from pnj import *
+from .constantes import *
+from .evenement import *
+from .boiteOutils import *
+from .interrupteur import *
+from .evenementConcret import *
+from .pnj import *
 
 if SESSION_DEBUG:
     from debugger import *

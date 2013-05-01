@@ -1,11 +1,11 @@
 # -*-coding:iso-8859-1 -*
 import pygame,pdb,math
 from pygame.locals import *
-from constantes import *
-from observateur import *
-from zonePensee import * 
-from joueur import *
-from interrupteur import *
+from .constantes import *
+from .observateur import *
+from .zonePensee import * 
+from .joueur import *
+from .interrupteur import *
 
 
 INTERRUPTEURS = {"TSM": list(), "LD26": list()}

@@ -1,11 +1,11 @@
 # -*-coding:iso-8859-1 -*
 import pygame,pdb,math
 from pygame.locals import *
-from constantes import *
-from horloge import *
-from interrupteur import *
-from mobile import *
-from observable import *
+from .constantes import *
+from .horloge import *
+from .interrupteur import *
+from .mobile import *
+from .observable import *
 
 
 

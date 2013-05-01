@@ -1,10 +1,10 @@
 # -*-coding:iso-8859-1 -*
 import pygame, queue
 from pygame.locals import *
-from constantes import *
-from horloge import *
-from observable import *
-from interrupteur import *
+from .constantes import *
+from .horloge import *
+from .observable import *
+from .interrupteur import *
 
 class ZonePensee(Observable):
     """Classe gérant la zone de pensée en bas de l'écran."""

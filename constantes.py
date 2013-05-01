@@ -1,8 +1,8 @@
 # -*-coding:iso-8859-1 -*
-import pygame, sys 
+import pygame
+from sys import stderr
 from pygame.locals import *
 
-##@package constantes
 #Contient toutes les constantes de l'application
 #
 #Les constantes de l'application sont des variables utilisées tout au long du programme, et qui ne doivent pas pouvoir être modifiées par la suite.
@@ -11,25 +11,19 @@ from pygame.locals import *
 
 #Données d'odre général
 
-##@var FICHIER_ERREURS
 #Fichier vers lequel sont redirigées les erreurs, mais seulement si cette option est activée (à REDIRECTION_FICHIER_ERREURS)
-#
 #Dans ce fichier seront écrites toutes les erreurs d'exécution si REDIRECTION_FICHIER_ERREURS est activée. 
 #Le mode d'écriture dans le fichier doit être précisé à MODE_FICHIER_ERREURS
 FICHIER_ERREURS = "Erreurs.txt" 
 
-##@var MODE_FICHIER_ERREURS
 #Mode d'écriture du fichier d'erreurs
-#
 #Il y en a plusieurs.
-#@par 
 #« w » : Efface les erreurs précedéntes avant d'écrire les nouvelles
-#@par
 #« a » : Ajoute les nouvelles erreurs aux précédentes
 MODE_FICHIER_ERREURS ="w" 
 
+#Redirection vers un fichier d'erreurs
 #Si True, les erreurs sont redirigées dans un fichier
-#
 #Si False, les erreurs sont simplement affichées à l'écran.
 REDIRECTION_FICHIER_ERREURS = False 
 if REDIRECTION_FICHIER_ERREURS is True:
@@ -194,4 +188,5 @@ MESSAGE_ERREUR_MUTATION_DIRECTION2 = "La direction doit faire partie de la liste
 #
 MESSAGE_ERREUR_UTILISATION_INTERRUPTEUR_INVERSE = "Il est impossible d'activer, désactiver, inverser ou changer l'état d'un interrupteur inversé : son état est indexé sur celui de l'interrupteur source."
 MESSAGE_ERREUR_TILES_NON_ADJACENTS = "Les tiles {0} et {1} doivent être adjacents, et ce horizontalement ou verticalement uniquement (pas en diagonale)."
-
+INITIAL = 0
+from constantes import * #Import des constantes du projet, pour écraser celles du Narro Engine en cas de redéfinition

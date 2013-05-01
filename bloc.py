@@ -1,7 +1,7 @@
 # -*-coding:iso-8859-1 -*
 import pygame
 from pygame.locals import *
-from constantes import *
+from .constantes import *
 
 
 class Bloc:

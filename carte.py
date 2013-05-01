@@ -1,11 +1,12 @@
-import pygame, configparser, math, directions, numpy
+import pygame, configparser, math, narro.directions, numpy
 from pygame.locals import *
+from narro import *
 import pygame.surfarray as surfarray
 from collections import OrderedDict
-from tile import *
-from constantes import *
-from observateur import *
-from zonePensee import *
+from .tile import *
+from .constantes import *
+from .observateur import *
+from .zonePensee import *
 
 if SESSION_DEBUG:
     import pdb
