@@ -1,8 +1,8 @@
 Narro Engine
 ================
-Written by Rastagong (http://rastagong.net)
-License: MIT license (see License file)
-The Narro Engine is a cross-platform RPG engine made with love, dedication, Pygame and Python 3
+Written by Rastagong (http://rastagong.net)  
+License: MIT license (see License file)  
+The Narro Engine is a cross-platform RPG engine made with love, dedication, Pygame and Python 3  
 
 Compiling instructions
 -----------------------
