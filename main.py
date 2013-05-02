@@ -1,6 +1,5 @@
 # -*-coding:iso-8859-1 -*
-import pygame, configparser
-from sys import stderr
+import pygame, configparser, os, sys
 from pygame.locals import *
 from .constantes import *
 from .zonePensee import *
@@ -23,8 +22,10 @@ class Narro:
         self._gestionnaireEvenements = gestionnaireEvenements
         self._gestionnaireEvenements.initialiserBoiteOutils()
 
-    def _initialiserAffichage(self, messageErreurInitialisationPygame, messageErreurInitialisationFenetre, longueurFenetre, largeurFenetre, largeurFenetreReelle, couleurFenetre, titreFenetre, flagsFenetre=0):
+    def _initialiserAffichage(self, messageErreurInitialisationPygame, messageErreurInitialisationFenetre, longueurFenetre, largeurFenetre, largeurFenetreReelle, couleurFenetre, titreFenetre, flagsFenetre=0, forceDirectX=False):
         """Initialise Pygame et la fenêtre"""
+        if sys.platform == "win32" and forceDirectX is True:
+            os.environ["SDL_VIDEODRIVER"] = "directx"
         try:
             pygame.init()
         except pygame.error:
@@ -38,6 +39,7 @@ class Narro:
             raise SystemExit
         self._fenetre.fill(couleurFenetre)
         pygame.display.set_caption(titreFenetre)
+        print(pygame.display.Info(), pygame.display.get_driver())
         if REPETITION_TOUCHES is True:
             pygame.key.set_repeat(1,INTERVALLE_REPETITION_TOUCHES)
         pygame.event.set_allowed(None)

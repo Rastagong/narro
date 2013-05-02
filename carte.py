@@ -1,3 +1,4 @@
+# -*-coding:utf-8 -*
 import pygame, configparser, math, narro.directions, numpy
 from pygame.locals import *
 from narro import *
@@ -25,7 +26,6 @@ class Carte(Observateur):
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
         self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, self._tilesReserves, i = self._jeu.dicoSurfaces, list(), dict(), dict(), dict(), 0
-        #self._surface = pygame.Surface((FENETRE["longueurFenetre"], FENETRE["largeurFenetre"]), flags=HWSURFACE|SRCALPHA)
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
         while i < self._nombreCouches:
             self._pnj[i], self._tilesReserves[i]  = dict(), dict()
@@ -52,7 +52,7 @@ class Carte(Observateur):
         self._tilesLayers = []
         i = 0
         while i < self._nombreCouches:
-            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA|HWSURFACE).convert_alpha())
+            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA).convert_alpha())
             i += 1
 
         i = 0
@@ -210,11 +210,6 @@ class Carte(Observateur):
         else: #Abscisse
             return coor == self._emplacementScrollingX
 
-    def _coordonneeDansPartieAffichable(self, x, y, longueur=1, largeur=1):
-        """Retourne <True> si la coordonnée est dans une partie affichable à l'écran selon le scrolling actuel."""
-        position = Rect(x, y, longueur, largeur)
-        return (self._ecranVisible.contains(position) == 1) or (self._ecranVisible.contains(position) == 0 and self._ecranVisible.colliderect(position) == 1)
-    
     def verifierScrollingPossible(self, x, y, direction):
         """Vérifie si le scrolling est possible pour faciliter le traitement dans gererScrolling"""
         self._scrollingPossible, scrollingDirection = False, True
@@ -346,20 +341,20 @@ class Carte(Observateur):
     def _afficherBlocPnj(self, c, nomPnj):
         """Affiche un PNJ sur un bloc"""
         pnj = self._pnj[c][nomPnj]
-        positionCollage = pnj.positionCarte.move(-self._scrollingX, -self._scrollingY)
-        if len(self._transformationsParties) > 0:
-            surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)].copy()
-            self._transformerPartie(surfaceCollage)
-        else:
-            surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)]
-        self._fenetre.blit(surfaceCollage, positionCollage)
+        if self._ecranVisible.contains(pnj.positionCarte) or self._ecranVisible.colliderect(pnj.positionCarte):
+            positionCollage = pnj.positionCarte.move(-self._scrollingX, -self._scrollingY)
+            if len(self._transformationsParties) > 0:
+                surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)].copy()
+                self._transformerPartie(surfaceCollage)
+            else:
+                surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)]
+            self._fenetre.blit(surfaceCollage, positionCollage)
     
     def afficher(self):
         """Cette méthode gère l'affichage de la carte"""
         self._blitFrame = False
         if self._toutAChanger is True:
             coucheActuelle = 0
-            self._fenetre.fill((0,0,0))
             while coucheActuelle < self._nombreCouches: 
                 self._fenetre.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
@@ -369,14 +364,10 @@ class Carte(Observateur):
                 coucheActuelle += 1
             self._transformerSurfaceGlobalement()
             self._afficherZonePensee(affichageComplet=True)
-            #self._fenetre.blit(self._surface, (0,0))
             self._blitFrame = True
 
-        if self._besoinAffichageZonePensee is True:
-            self._afficherZonePensee(affichageComplet=self._blitFrame)
-
         if self._blitFrame is True:
-            self._jeu.horlogeFps.tick(120)
+            self._jeu.horlogeFps.tick(NOMBRE_MAX_DE_FPS)
             pygame.display.flip()
 
     def _getNombreCouches(self):

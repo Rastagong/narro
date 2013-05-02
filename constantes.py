@@ -140,7 +140,8 @@ FENETRE["largeurFenetre"] = 384
 FENETRE["largeurFenetreReelle"] = 416
 FENETRE["couleurFenetre"] = (0,0,0) ##Couleur de fond de la fenêtre (hors zones spéciales comme tileset, outils...)
 FENETRE["titreFenetre"] = "Narro Engine"
-FENETRE["flagsFenetre"] = pygame.DOUBLEBUF#|pygame.FULLSCREEN|pygame.HWSURFACE
+FENETRE["flagsFenetre"] = DOUBLEBUF#|FULLSCREEN|HWSURFACE
+FENETRE["forceDirectX"] = False
 
 #La taille de la police en splashscreen
 TAILLE_POLICE_SPLASH_SCREEN = int(FENETRE["largeurFenetre"] / 4)
@@ -149,7 +150,7 @@ TAILLE_POLICE_SPLASH_SCREEN = int(FENETRE["largeurFenetre"] / 4)
 LISTE_DIRECTIONS = ["Haut", "Bas", "Gauche", "Droite", "Aucune"]
 
 #Le nombre maximal de frames par seconde
-NOMBRE_MAX_DE_FPS = 60#2000
+NOMBRE_MAX_DE_FPS = 120#2000
 
 #Volume par défaut (compris entre 0 et 1
 VOLUME_MUSIQUE = 0.7 #0.0007
