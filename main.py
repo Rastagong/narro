@@ -39,7 +39,6 @@ class Narro:
             raise SystemExit
         self._fenetre.fill(couleurFenetre)
         pygame.display.set_caption(titreFenetre)
-        print(pygame.display.Info(), pygame.display.get_driver())
         if REPETITION_TOUCHES is True:
             pygame.key.set_repeat(1,INTERVALLE_REPETITION_TOUCHES)
         pygame.event.set_allowed(None)

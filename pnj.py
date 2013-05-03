@@ -11,7 +11,7 @@ from .mobile import *
 class PNJ(Mobile):
     """Classe représentant un PNJ"""
 
-    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,dureeDeplacement=DUREE_DEPLACEMENT_MOBILE_PAR_DEFAUT,frequenceAnimation=FREQUENCE_ANIMATION_MOBILE_PAR_DEFAUT, frequenceDeplacement=FREQUENCE_DEPLACEMENT_MOBILE_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
+    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
         """Initialise le PNJ
         Paramètres obligatoires :
         <jeu> est l'application entière.
@@ -25,16 +25,16 @@ class PNJ(Mobile):
         <repetitionAction> est un booléen. Quand il vaut <True>, les actions sont répétées en boucle.
         <listeActions> est une liste des actions que le PNJ doit suivre.
         Paramètres facultatifs :
-        <dureeDeplacement> désigne, en millisecondes, le temps que doit prendre un déplacement d'un tile à un autre. Valeur par défaut dans les constantes.
-        <frequenceAnimation> désigne le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par défaut dans les constantes.
-        <frequenceDeplacement> désigne le nombre de déplacements du mobile au sein d'un tile (sans qu'il y ait forcément animation). Valeur par déf. dans les constantes.
+        <vitesseDeplacement> désigne la vitesse de déplacement en pixels par seconde.
+        <dureeAnimation> désigne le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par défaut dans les constantes.
+        <dureeAnimationSP> désigne la durée en millisecondes entre deux animations sur place. Valeur par défaut dans les constantes.
         <directionDepart> désigne la direction que prend le mobile au départ. Valeur par défaut dans les constantes.
         <intelligence> est un booléen qui permet au PNJ de débloquer une situation de collision quand il vaut <True>.
         <courage> est un booléen qui définit l'attitude du PNJ en cas de collision : quand le PNJ n'est pas courageux, il abandonne ses actions.
         <poseDepart> est un booléen qui vaut <False> quand le PNJ ne doit pas être posé dès le départ.
         <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
         <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
-        Mobile.__init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,dureeDeplacement=dureeDeplacement,frequenceAnimation=frequenceAnimation,frequenceDeplacement=frequenceDeplacement,directionDepart=directionDepart)
+        Mobile.__init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,vitesseDeplacement=vitesseDeplacement,dureeAnimation=dureeAnimation,dureeAnimationSP=dureeAnimationSP,directionDepart=directionDepart)
         self._deplacementBoucle, self._etapeAction, self._collision = True, 0, False
         self._repetitionActions, self._listeActions = repetitionActions, listeActions
         self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage = False, False, intelligence, poseDepart, courage
@@ -141,12 +141,11 @@ class PNJ(Mobile):
             if self._poseDepart is True:
                 self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
             self._etapeAction += 1
-        elif direction is "RelanceEtoile" and Horloge.sonner(id(self), 1) is True:
+        elif direction is "RelanceEtoile":
             self._blocsExclusTrajet = [ self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[self._etapeAction], self._positionCarte.left, self._positionCarte.top) ]
             self._argsvTrajet["blocsExclus"], self._argsTrajet[0], self._argsTrajet[1] = self._blocsExclusTrajet, self._positionCarte.left/32, self._positionCarte.top/32
             trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
             self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
-            Horloge.initialiser(id(self), 1, 1000)
         elif type(direction) is int: #Une attente
             if self._etapeMarche == 1: #On débute l'attente : initialisation de l'horloge
                 Horloge.initialiser(id(self), 1,direction)
@@ -154,59 +153,53 @@ class PNJ(Mobile):
             if Horloge.sonner(id(self), 1) is True: #Fin de l'attente : on change d'étape de déplacement, on remet celle de marche à 1
                 self._etapeAction += 1
                 self._etapeMarche = 1
-                Horloge.initialiser(id(self), 1, 1)
+                self._tempsPrecedent = pygame.time.get_ticks()
         elif direction in ("Haut","Bas","Gauche","Droite"): #Un pas
-            if Horloge.sonner(id(self), 1) is True: #Si le temps d'attente pour l'étape de marche suivante est passé
-                if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
-                    deplacementPossible = False
-                    (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._coordonneesEtapeMarcheSuivante(direction=direction)
-                    if self._etapeMarche == 1: #On ne vérifie si on peut se déplacer qu'en étape 1
-                        self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
-                        self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
-                        self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
-                        deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
-                    if deplacementPossible is True or self._etapeMarche > 1:
-                        self._regardFait, self._collision = False, False
-                        self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
-                        self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
-                        self._determinerAnimation()
-                        self._ajusterPositionSource(self._enMarche.voir(), direction)
-                        self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
-                        Horloge.initialiser(id(self), 1, self._dureeMicroDeplacement) #On lance une autre étape
-                        self._pixelsParcourus += self._getProchainNombrePixels()
-                        self._etapeMarche += 1
-                    else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
-                        self._pixelsParcourus, self._etapeMarche = 0,1
-                        Horloge.initialiser(id(self), 1, 1)
-                        if self._regardFait == False: #Si on ne s'est pas encore tourné dans la direction du blocage
-                            self._ajusterPositionSource(False, direction) 
-                            self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
-                            self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
-                            self._regardFait = True
-                        if self._courage is False:
-                            self._listeActions = ["Aucune"]
-                        self._debloquerCollision()
-                else: #Le déplacement est fini, on réinitialise
-                    self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
-                    self._etapeMarche, self._pixelsParcourus = 1,0
-                    Horloge.initialiser(id(self), 1, 0)
-                    self._etapeAction += 1
-            else:
-                nouvelleAnimation = self._determinerAnimation() #On regarde s'il faut une nouvelle animation...
-                if nouvelleAnimation: #Qu'on applique si c'est le cas
+            if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
+                deplacementPossible = False
+                (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._nouvellesCoordonnees(pygame.time.get_ticks(), direction)
+                if self._etapeMarche == 1: #On ne vérifie si on peut se déplacer qu'en étape 1
+                    self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
+                    self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
+                    self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
+                    deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
+                if deplacementPossible is True or self._etapeMarche > 1:
+                    self._regardFait, self._collision = False, False
+                    self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
+                    self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
+                    self._determinerAnimation()
                     self._ajusterPositionSource(self._enMarche.voir(), direction)
-                    self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
+                    self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
+                    self._pixelsParcourus += self._avancee
+                    self._etapeMarche += 1
+                else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
+                    self._pixelsParcourus, self._etapeMarche = 0,1
+                    self._tempsPrecedent = pygame.time.get_ticks()
+                    if self._regardFait == False: #Si on ne s'est pas encore tourné dans la direction du blocage
+                        self._ajusterPositionSource(False, direction) 
+                        self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
+                        self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
+                        self._regardFait = True
+                    if self._courage is False:
+                        self._listeActions = ["Aucune"]
+                    self._debloquerCollision()
+            else: #Le déplacement est fini, on réinitialise
+                self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
+                self._etapeMarche, self._pixelsParcourus = 1,0
+                self._tempsPrecedent = pygame.time.get_ticks()
+                self._etapeAction += 1
         elif direction in ("RHaut","RGauche","RDroite","RBas"): #Regard dans une direction
             self._ajusterPositionSource(False, direction) 
             self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
             self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
+            self._tempsPrecedent = pygame.time.get_ticks()
             self._etapeAction += 1
         elif  "VHaut" in direction or "VBas" in direction or "VGauche" in direction or "VDroite" in direction:
-            if Horloge.sonner(id(self), 1) is True:
+            if Horloge.sonner(id(self),1, arretApresSonnerie=False) is True or self._etapeMarche == 1:
                 if self._etapeMarche == 1:
                     self._dureeSP = int(direction.replace("VHaut",'').replace("VBas",'').replace("VGauche",'').replace("VDroite",''))
                     self._frequenceAnimationSP = math.floor(self._dureeSP / self._dureeAnimationSP) + 1
-                if self._etapeMarche < self._frequenceAnimationSP or self._dureeSP == 0:
+                if (self._etapeMarche < self._frequenceAnimationSP or self._dureeSP == 0) and (Horloge.sonner(id(self), 1) is True or self._etapeMarche == 1):
                     direction = self._determinerDirectionSP(direction)
                     self._determinerAnimation(surPlace=True)
                     self._ajusterPositionSource(self._enMarche.voir(), direction)
@@ -220,4 +213,5 @@ class PNJ(Mobile):
         self._etapeMarche = 1
         Horloge.initialiser(id(self), 1, 1)
         Horloge.initialiser(id(self), 2, 1)
+        self._tempsPrecedent = pygame.time.get_ticks()
         self._etapeAction += 1

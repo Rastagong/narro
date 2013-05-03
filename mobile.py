@@ -9,7 +9,7 @@ from .evenementConcret import *
 class Mobile(EvenementConcret):
     """Classe représentant un évènement mobile, à savoir PNJ ou joueur, qui sont ses classes filles."""
 
-    def __init__(self, jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, dureeDeplacement=DUREE_DEPLACEMENT_MOBILE_PAR_DEFAUT, frequenceAnimation=FREQUENCE_ANIMATION_MOBILE_PAR_DEFAUT, frequenceDeplacement=FREQUENCE_DEPLACEMENT_MOBILE_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
+    def __init__(self, jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
         """Initialise le mobile.
         Paramètres  :
         <jeu> est l'application entière.
@@ -21,24 +21,21 @@ class Mobile(EvenementConcret):
         <couleurTransparente> désigne la couleur transparente du <fichier>. 
         <persoCharset> désigne la partie de l'image correspondant au perso à afficher.
         Paramètres facultatifs :
-        <dureeDeplacement> désigne, en millisecondes, le temps que doit prendre un déplacement d'un tile à un autre. Valeur par défaut dans les constantes.
-        <frequenceAnimation> désigne le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par défaut dans les constantes.
-        <frequenceDeplacement> désigne le nombre de déplacements du mobile au sein d'un tile (sans qu'il y ait forcément animation). Valeur par déf. dans les constantes.
         <directionDepart> désigne la direction que prend le mobile au départ. Valeur par défaut dans les constantes.
+        <vitesseDeplacement> désigne la vitesse de déplacement en pixels par seconde.
+        <dureeAnimation> désigne le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par défaut dans les constantes.
         <dureeAnimationSP> désigne la durée en millisecondes entre deux animations sur place. Valeur par défaut dans les constantes.
         <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
         <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
         EvenementConcret.__init__(self, jeu, gestionnaire)
         self._direction, self._directionRegard = directionDepart, directionDepart
-        self._nom,  self._nomTileset, self._frequenceDeplacement = nom, DOSSIER_RESSOURCES+fichier, frequenceDeplacement
+        self._nom,  self._nomTileset = nom, DOSSIER_RESSOURCES+fichier
         self._positionCarte = Rect(x*32, y*32, longueurSprite, largeurSprite)
         self._positionCarteOld, self._positionCarteFuture = self._positionCarte.copy(), self._positionCarte.copy()
         self._xTilePrecedent, self._yTilePrecedent = self._positionCarte.left/32, self._positionCarte.top/32
         self._xTileSuivant, self._yTileSuivant = self._positionCarte.left/32, self._positionCarte.top/32
         self._c, self._cOld = c, c
-        self._dureeAnimationSP = dureeAnimationSP
-        self._dureeMicroDeplacement = dureeDeplacement / self._frequenceDeplacement
-        self._frequenceAnimation = frequenceAnimation
+        self._vitesseDeplacement, self._dureeAnimationSP, self._dureeAnimation = vitesseDeplacement, dureeAnimationSP, dureeAnimation
         self._couleurTransparente, self._persoCharset = couleurTransparente, persoCharset
         self._pied, self._enMarche = Interrupteur(True), Interrupteur(True)
         self._etapeMarche, self._etapeAnimation, self._sensAnimation, self._pixelsParcourus = 1, 1, 1, 0
@@ -58,19 +55,10 @@ class Mobile(EvenementConcret):
         self._gestionnaire.registerPosition(self._nom, int(self._positionCarte.left / hauteurTile), int(self._positionCarte.top / hauteurTile), self._c, joueur=joueur, appuiJoueur=appuiJoueur, direction=direction)
         self._ajusterPositionSource(False,self._direction)
         self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
+        self._tempsPrecedent, self._deltaTimer = 0, 0
         Horloge.initialiser(id(self), 1, tempsAttente)
         Horloge.initialiser(id(self), 2, 1)
     
-    def _changerDureeDeplacement(self, dureeDeplacement):
-        self._dureeMicroDeplacement = math.floor(dureeDeplacement / self._frequenceDeplacement)
-    
-    def _coordonneesEtapeMarcheSuivante(self, direction):
-        """Retourne les coordonnées qu'aura le PNJ à l'étape de marche suivante"""
-        if direction == "Haut" or direction == "Bas":
-            return (self._positionCarte.left, self._positionCarte.top + self._getProchainNombrePixels(direction))
-        elif direction == "Gauche" or direction == "Droite":
-            return (self._positionCarte.left + self._getProchainNombrePixels(direction), self._positionCarte.top)
-
     def _getPositionCarteSuivante(self, direction):
         """Retourne le positionCarte du mobile qu'il aura une fois son déplacement fini"""
         if direction == "Haut" or direction == "Bas":
@@ -95,7 +83,7 @@ class Mobile(EvenementConcret):
                 self._pied.inverser()
                 self._etapeAnimation, self._sensAnimation = 2, -1
             if surPlace is False:
-                Horloge.initialiser(id(self), 2, self._frequenceAnimation)
+                Horloge.initialiser(id(self), 2, self._dureeAnimation)
             return True
         else:
             return False
@@ -127,17 +115,21 @@ class Mobile(EvenementConcret):
             direction = direction[1:]
         self._directionRegard = str(direction)  
 
-    def _getProchainNombrePixels(self, direction="Aucune"):
-        """Retourne le nombre de pixels à ajouter aux coordonnées du joueur pour l'étape de marche suivante"""
-        signe = -1 if (direction == "Gauche" or direction == "Haut") else 1
-        if self._etapeMarche < self._frequenceDeplacement:
-            pixelsEtape = math.ceil(self._jeu.carteActuelle.hauteurTile / self._frequenceDeplacement)
-            if self._pixelsParcourus + pixelsEtape > 32:
-                return signe * (32 - self._pixelsParcourus)
-            else:
-                return signe * pixelsEtape
-        else:
-            return signe * (32 - self._pixelsParcourus)
+    def _nouvellesCoordonnees(self, tempsActuel, direction):
+        self._deltaTimer = (tempsActuel - self._tempsPrecedent) / 1000
+        self._tempsPrecedent = tempsActuel
+        self._avancee = math.floor(self._vitesseDeplacement * self._deltaTimer)
+        if self._avancee == 0:
+            self._avancee = 1
+        if self._pixelsParcourus + self._avancee > 32:
+            self._avancee = 32 - self._pixelsParcourus
+        self._avanceeOrientee = self._avancee
+        if direction == "Gauche" or direction == "Haut":
+            self._avanceeOrientee *= -1
+        if direction == "Haut" or direction == "Bas":
+            return (self._positionCarte.left, self._positionCarte.top + self._avanceeOrientee)
+        elif direction == "Gauche" or direction == "Droite":
+            return (self._positionCarte.left + self._avanceeOrientee, self._positionCarte.top)
 
     def _getX(self):
         return self._positionCarte.left

@@ -70,26 +70,20 @@ LOG_COORDONNEES_JOUEUR = False
 #Le nom qui identifie l'évènement Joueur par défaut
 NOM_EVENEMENT_JOUEUR_PAR_DEFAUT = "Joueur"
 
-#La durée de déplacement du joueur (d'un tile à un autre) par défaut, exprimée en millisecondes.
-DUREE_DEPLACEMENT_JOUEUR_PAR_DEFAUT = 250#250
+#La vitesse de déplacement par défaut du joueur en pixels par seconde
+VITESSE_DEPLACEMENT_JOUEUR_PAR_DEFAUT = 250
 
-#La durée par défaut, exprimée en millisecondes, d'un déplacement de mobile d'un tile vers un autre.
-DUREE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 200 #250
-
-#Le nombre de déplacements d'un mobile au sein d'un tile, sans qu'il y ait animation pour autant.
-FREQUENCE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 16 #3
-
-#Le nombre de déplacements du joueur au sein d'un tile, sans qu'il y ait animation pour autant.
-FREQUENCE_DEPLACEMENT_JOUEUR_PAR_DEFAUT =  32#16#32 #20
+#La vitesse de déplacement par défaut du mobile en pixels par seconde
+VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 120 
 
 #Le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations.
-FREQUENCE_ANIMATION_MOBILE_PAR_DEFAUT = 200 #3
+DUREE_ANIMATION_MOBILE_PAR_DEFAUT = 200 #3
 
 #Le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations.
-FREQUENCE_ANIMATION_JOUEUR_PAR_DEFAUT = 200 #12
+DUREE_ANIMATION_JOUEUR_PAR_DEFAUT = 200 #12
 
 #Temps (exprimé en millisecondes) entre deux animations sur place.
-DUREE_ANIMATION_SP_PAR_DEFAUT = 125
+DUREE_ANIMATION_SP_PAR_DEFAUT = 100
 
 #La direction de départ par défaut d'un mobile.
 DIRECTION_DEPART_MOBILE_PAR_DEFAUT = "Bas"
