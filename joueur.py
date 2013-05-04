@@ -135,39 +135,42 @@ class Joueur(Mobile, Observable):
         direction = self._direction
         if direction != "Aucune":
             if self._regardDansDirection[direction] == True: #Si on a déjà regardé dans la direction
-                if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
-                    deplacementPossible = False
-                    (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._nouvellesCoordonnees(pygame.time.get_ticks(), direction)
-                    if self._etapeMarche == 1:
-                        self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
-                        self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
-                        self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
-                        deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
-                    if deplacementPossible is True or self._etapeMarche > 1:
+                tempsActuel = pygame.time.get_ticks()
+                avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
+                if avancee >= 1.0:
+                    if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
+                        deplacementPossible = False
+                        (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._majCoordonnees(tempsActuel, direction, deltaTimer, avancee)
                         if self._etapeMarche == 1:
-                            carte.verifierScrollingPossible(self._xDepart, self._yDepart, direction)
-                        self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
-                        self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
-                        carte.gererScrolling(self._avanceeOrientee,direction)
-                        if self._determinerAnimation():
-                            self._ajusterPositionSource(self._enMarche.voir(), direction) #On trouve la position source du PNJ en marche
-                        self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
-                        self._pixelsParcourus += self._avancee
-                        self._etapeMarche += 1
-                    else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
-                        self._pixelsParcourus, self._etapeMarche, self._directionAttente = 0, 1, str(self._direction)
-                        self._tempsPrecedent = pygame.time.get_ticks()
+                            self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
+                            self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
+                            self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
+                            deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
+                        if deplacementPossible is True or self._etapeMarche > 1:
+                            if self._etapeMarche == 1:
+                                carte.verifierScrollingPossible(self._xDepart, self._yDepart, direction)
+                            self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
+                            self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
+                            carte.gererScrolling(self._avanceeOrientee,direction)
+                            if self._determinerAnimation():
+                                self._ajusterPositionSource(self._enMarche.voir(), direction) #On trouve la position source du PNJ en marche
+                            self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
+                            self._pixelsParcourus += self._avancee
+                            self._etapeMarche += 1
+                        else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
+                            self._pixelsParcourus, self._etapeMarche, self._directionAttente = 0, 1, str(self._direction)
+                            self._tempsPrecedent = pygame.time.get_ticks()
+                            self._direction = "Aucune"
+                    else: #Le déplacement est fini, on réinitialise
+                        self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, joueur=True, appuiJoueur=False, direction=self._directionRegard)
+                        self._xDepart, self._yDepart = self._positionCarte.left, self._positionCarte.top
+                        self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
                         self._direction = "Aucune"
-                else: #Le déplacement est fini, on réinitialise
-                    self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, joueur=True, appuiJoueur=False, direction=self._directionRegard)
-                    self._xDepart, self._yDepart = self._positionCarte.left, self._positionCarte.top
-                    self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
-                    self._direction = "Aucune"
-                    self._tempsPrecedent = pygame.time.get_ticks()
-                    if self._positionCarte.left != self._positionCarteOld.left or self._positionCarte.top != self._positionCarteOld.top:
-                        self._mouvement = True
-                    else:
-                        self._mouvement = False
+                        self._tempsPrecedent = pygame.time.get_ticks()
+                        if self._positionCarte.left != self._positionCarteOld.left or self._positionCarte.top != self._positionCarteOld.top:
+                            self._mouvement = True
+                        else:
+                            self._mouvement = False
             else: #Si on n'a pas regardé, on regarde
                 self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
                 self._ajusterPositionSource(False, direction) #On trouve la position source du PNJ en marche

@@ -155,39 +155,42 @@ class PNJ(Mobile):
                 self._etapeMarche = 1
                 self._tempsPrecedent = pygame.time.get_ticks()
         elif direction in ("Haut","Bas","Gauche","Droite"): #Un pas
-            if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
-                deplacementPossible = False
-                (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._nouvellesCoordonnees(pygame.time.get_ticks(), direction)
-                if self._etapeMarche == 1: #On ne vérifie si on peut se déplacer qu'en étape 1
-                    self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
-                    self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
-                    self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
-                    deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
-                if deplacementPossible is True or self._etapeMarche > 1:
-                    self._regardFait, self._collision = False, False
-                    self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
-                    self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
-                    self._determinerAnimation()
-                    self._ajusterPositionSource(self._enMarche.voir(), direction)
-                    self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
-                    self._pixelsParcourus += self._avancee
-                    self._etapeMarche += 1
-                else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
-                    self._pixelsParcourus, self._etapeMarche = 0,1
+            tempsActuel = pygame.time.get_ticks()
+            avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
+            if avancee >= 1:
+                if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
+                    deplacementPossible = False
+                    (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._majCoordonnees(tempsActuel, direction, deltaTimer, avancee)
+                    if self._etapeMarche == 1: #On ne vérifie si on peut se déplacer qu'en étape 1
+                        self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
+                        self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
+                        self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
+                        deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
+                    if deplacementPossible is True or self._etapeMarche > 1:
+                        self._regardFait, self._collision = False, False
+                        self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
+                        self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
+                        self._determinerAnimation()
+                        self._ajusterPositionSource(self._enMarche.voir(), direction)
+                        self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
+                        self._pixelsParcourus += self._avancee
+                        self._etapeMarche += 1
+                    else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
+                        self._pixelsParcourus, self._etapeMarche = 0,1
+                        self._tempsPrecedent = pygame.time.get_ticks()
+                        if self._regardFait == False: #Si on ne s'est pas encore tourné dans la direction du blocage
+                            self._ajusterPositionSource(False, direction) 
+                            self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
+                            self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
+                            self._regardFait = True
+                        if self._courage is False:
+                            self._listeActions = ["Aucune"]
+                        self._debloquerCollision()
+                else: #Le déplacement est fini, on réinitialise
+                    self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
+                    self._etapeMarche, self._pixelsParcourus = 1,0
                     self._tempsPrecedent = pygame.time.get_ticks()
-                    if self._regardFait == False: #Si on ne s'est pas encore tourné dans la direction du blocage
-                        self._ajusterPositionSource(False, direction) 
-                        self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
-                        self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
-                        self._regardFait = True
-                    if self._courage is False:
-                        self._listeActions = ["Aucune"]
-                    self._debloquerCollision()
-            else: #Le déplacement est fini, on réinitialise
-                self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
-                self._etapeMarche, self._pixelsParcourus = 1,0
-                self._tempsPrecedent = pygame.time.get_ticks()
-                self._etapeAction += 1
+                    self._etapeAction += 1
         elif direction in ("RHaut","RGauche","RDroite","RBas"): #Regard dans une direction
             self._ajusterPositionSource(False, direction) 
             self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)

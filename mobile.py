@@ -115,12 +115,13 @@ class Mobile(EvenementConcret):
             direction = direction[1:]
         self._directionRegard = str(direction)  
 
-    def _nouvellesCoordonnees(self, tempsActuel, direction):
-        self._deltaTimer = (tempsActuel - self._tempsPrecedent) / 1000
-        self._tempsPrecedent = tempsActuel
-        self._avancee = math.floor(self._vitesseDeplacement * self._deltaTimer)
-        if self._avancee == 0:
-            self._avancee = 1
+    def _calculerNouvellesCoordonnees(self, tempsActuel, direction):
+        deltaTimer = (tempsActuel - self._tempsPrecedent) / 1000
+        avancee = (self._vitesseDeplacement * deltaTimer)
+        return (avancee, deltaTimer)
+
+    def _majCoordonnees(self, tempsActuel, direction, deltaTimer, avancee):
+        self._tempsPrecedent, self._avancee, self._deltaTimer = tempsActuel, math.floor(avancee), deltaTimer
         if self._pixelsParcourus + self._avancee > 32:
             self._avancee = 32 - self._pixelsParcourus
         self._avanceeOrientee = self._avancee
