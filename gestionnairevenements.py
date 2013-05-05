@@ -13,9 +13,9 @@ class GestionnaireEvenements():
     def __init__(self, jeu):
         """Initialise le gestionnaire
         <jeu> est l'objet de classe <Jeu>, qui contient toute l'application"""
-        self._jeu = jeu
+        self._jeu, self._nomCarte = jeu, None
         self._evenements = dict(concrets=dict(), abstraits=dict())
-        self._nomCarte, self._boiteOutils, self._positionsARegistrer, self._evenementsATuer = None, BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], []
+        self._boiteOutils, self._positionsARegistrer, self._evenementsATuer, self._appuiJoueur = BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], [], False
         self._initialiserEvenements()
         if SESSION_DEBUG:
             self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
@@ -92,7 +92,7 @@ class GestionnaireEvenements():
         if joueur is True: #On prévient les évènements de l'activité du joueur quand il est proche, appuie, etc...
             if LOG_COORDONNEES_JOUEUR is True:
                 print("Joueur", x, y, c)
-            self._xJoueur, self._yJoueur, self._cJoueur, self._appuiValidationJoueur, self._directionJoueur = x, y, c, appuiJoueur, direction
+            self._xJoueur, self._yJoueur, self._cJoueur, self._appuiJoueur, self._directionJoueur = x, y, c, appuiJoueur, direction
             self._positionJoueur = position
             for infosEvenement in self._evenements["concrets"][self._nomCarte].values():
                 evenement, abs, ord, directionActuelle = infosEvenement[0], infosEvenement[1][0], infosEvenement[1][1], infosEvenement[2]
@@ -138,7 +138,7 @@ class GestionnaireEvenements():
     def _getDirectionJoueur(self):
         return self._directionJoueur
     
-    def _getAppuiValidationJoueur(self):
+    def _getAppuiJoueur(self):
         return self._appuiJoueur
 
     def _getNomCarte(self):
@@ -150,5 +150,5 @@ class GestionnaireEvenements():
     yJoueur = property(_getYJoueur)
     cJoueur = property(_getCJoueur)
     directionJoueur = property(_getDirectionJoueur)
-    appuiValidationJoueur = property(_getAppuiValidationJoueur)
+    appuiJoueur = property(_getAppuiJoueur)
     nomCarte = property(_getNomCarte)

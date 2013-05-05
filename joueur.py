@@ -42,7 +42,6 @@ class Joueur(Mobile, Observable):
         Mobile.traiter(self)
         if self._etapeTraitement is 0:
             self._initialiserDeplacement(1, joueur=True, appuiJoueur=False, direction=self._directionRegard)
-            self._xDepart, self._yDepart = self._positionCarte.left, self._positionCarte.top
             self._nomCarte = self._boiteOutils.nomCarte
             hauteurTile = self._jeu.carteActuelle.hauteurTile
             self._tempsPrecedent, self._deltaTimer = 0, 0
@@ -54,8 +53,8 @@ class Joueur(Mobile, Observable):
     def transfertCarte(self, x, y, c, direction):
         """Prépare l'apparition sur une nouvelle carte, en <x><y><c> avec un regard en <direction>."""
         self._cOld, self._c = c, c
-        self._positionCarte.left, self._positionCarte.top = x * self._jeu.carteActuelle.hauteurTile, y * self._jeu.carteActuelle.hauteurTile
-        self._etapeMarche, self._etapeTraitement, self._pixelsParcourus, self._mouvement = 1, 0, 0, False
+        self._positionCarte.left, self._positionCarte.top, self._mouvement = x * self._jeu.carteActuelle.hauteurTile, y * self._jeu.carteActuelle.hauteurTile, False
+        self._etapeMarche, self._etapeTraitement, self._pixelsParcourus = 1, 0, 0
         self._derniereDirection = "Aucune"
         self._regardDansDirection = dict(Haut=False, Bas=False, Droite=False, Gauche=False)
         self._direction, self._directionRegard = direction, direction
@@ -65,7 +64,10 @@ class Joueur(Mobile, Observable):
         event = self._jeu.event
         if event.type is KEYDOWN and self._boiteOutils.joueurLibre.voir() is True:
             if event.key == K_z:
-                self._gestionnaire.registerPosition(self._nom,int(self._xDepart/32),int(self._yDepart/32),self._c, joueur=True, appuiJoueur=True, direction=self._directionRegard)
+                if self._etapeMarche > 1:
+                    self._gestionnaire.registerPosition(self._nom, self._xTilePrecedent, self._yTilePrecedent, self._c, joueur=True, appuiJoueur=True, direction=self._directionRegard)
+                else:
+                    self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, joueur=True, appuiJoueur=True, direction=self._directionRegard)
                 self._appuiValidation = True
             if event.key == K_LEFT or event.key == K_RIGHT or event.key == K_DOWN or event.key == K_LEFT or event.key == K_UP:
                 if event.key == K_LEFT: 
@@ -83,6 +85,10 @@ class Joueur(Mobile, Observable):
         elif event.type is KEYUP:
             if event.key == K_z:
                 self._appuiValidation = False
+                if self._etapeMarche > 1:
+                    self._gestionnaire.registerPosition(self._nom, self._xTilePrecedent, self._yTilePrecedent, self._c, joueur=True, appuiJoueur=False, direction=self._directionRegard)
+                else:
+                    self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, joueur=True, appuiJoueur=False, direction=self._directionRegard)
             if event.key == K_LEFT or event.key == K_RIGHT or event.key == K_DOWN or event.key == K_LEFT or event.key == K_UP:
                 if event.key == K_LEFT: 
                     self._directions["Gauche"] = False
@@ -123,7 +129,6 @@ class Joueur(Mobile, Observable):
         self._positionCarte.left, self._positionCarte.top = xTile*self._jeu.carteActuelle.hauteurTile, yTile*self._jeu.carteActuelle.hauteurTile
         self._boiteOutils.teleporterSurPosition(self._positionCarte, couche, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
         self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, couche, joueur=True, appuiJoueur=False, direction=self._directionRegard)
-        self._xDepart, self._yDepart = self._positionCarte.left, self._positionCarte.top
         Horloge.initialiser(id(self), 1, 1)
         self._jeu.carteActuelle.initialiserScrolling(self._positionCarte.left, self._positionCarte.top)
         self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
@@ -148,7 +153,7 @@ class Joueur(Mobile, Observable):
                             deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
                         if deplacementPossible is True or self._etapeMarche > 1:
                             if self._etapeMarche == 1:
-                                carte.verifierScrollingPossible(self._xDepart, self._yDepart, direction)
+                                carte.verifierScrollingPossible(self._xTilePrecedent*32, self._yTilePrecedent*32, direction)
                             self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
                             self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top
                             carte.gererScrolling(self._avanceeOrientee,direction)
@@ -163,14 +168,10 @@ class Joueur(Mobile, Observable):
                             self._direction = "Aucune"
                     else: #Le déplacement est fini, on réinitialise
                         self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, joueur=True, appuiJoueur=False, direction=self._directionRegard)
-                        self._xDepart, self._yDepart = self._positionCarte.left, self._positionCarte.top
                         self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
+                        self._mouvement = self._positionCarte.left != self._positionCarteOld.left or self._positionCarte.top != self._positionCarteOld.top
                         self._direction = "Aucune"
                         self._tempsPrecedent = pygame.time.get_ticks()
-                        if self._positionCarte.left != self._positionCarteOld.left or self._positionCarte.top != self._positionCarteOld.top:
-                            self._mouvement = True
-                        else:
-                            self._mouvement = False
             else: #Si on n'a pas regardé, on regarde
                 self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
                 self._ajusterPositionSource(False, direction) #On trouve la position source du PNJ en marche

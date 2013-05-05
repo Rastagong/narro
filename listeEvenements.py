@@ -36,6 +36,31 @@ class LanceurPensee(EvenementConcret):
     def onJoueurDessus(self, x, y, c, direction):
         self._joueurDessus = True
 
+class AnimateurToucheAction(Evenement):
+    def __init__(self, jeu, gestionnaire):
+        super().__init__(jeu, gestionnaire)
+        self._xJoueur, self._yJoueur = self._gestionnaire.xJoueur, self._gestionnaire.yJoueur
+        self._xJoueurOld, self._yJoueurOld = self._xJoueur, self._yJoueur
+        self._animation, self._rayon = False, 0
+
+    def traiter(self):
+        if self._animation is False and self._gestionnaire.appuiJoueur is True:
+            self._animation = True
+            self._rayon += 2
+            self._boiteOutils.ajouterTransformation(False, "Action Joueur", rayon=self._rayon)
+            self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
+            Horloge.initialiser(id(self), "Maj rayon", 1)
+        elif self._animation == True and Horloge.sonner(id(self), "Maj rayon") is True:
+            self._rayon += 2
+            self._boiteOutils.ajouterTransformation(False, "Action Joueur", rayon=self._rayon)
+            Horloge.initialiser(id(self), "Maj rayon", 1)
+            if self._rayon == 30:
+                self._animation, self._rayon = False, 0
+        elif self._animation is False and Horloge.sonner(id(self), "Maj rayon") is True:
+            self._boiteOutils.retirerTransformation(False, "Action Joueur")
+
+
+
 class Panneau(EvenementConcret):
     def __init__(self, jeu, gestionnaire, message, *directionsMessage):
         super().__init__(jeu, gestionnaire)

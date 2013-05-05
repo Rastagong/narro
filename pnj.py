@@ -39,21 +39,11 @@ class PNJ(Mobile):
         self._repetitionActions, self._listeActions = repetitionActions, listeActions
         self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage = False, False, intelligence, poseDepart, courage
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet, self._blocsExclusTrajet = None, None, None, []
-        self._xJoueur, self._yJoueur, self._joueurBouge =  [-1, -1], [-1, -1], [True, True]
-        self._xJoueurOld, self._yJoueurOld =  [-1, -1], [-1, -1]
         self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
 
     def onJoueurProche(self, x, y, c, direction):
         super().onJoueurProche(x, y, c, direction)
         self._joueurProche = True
-    
-    def _majInfosJoueur(self, i=0):
-        self._xJoueurOld[i], self._yJoueurOld[i] = self._xJoueur[i], self._yJoueur[i]
-        self._xJoueur[i], self._yJoueur[i] = self._gestionnaire.xJoueur, self._gestionnaire.yJoueur
-        self._joueurProche, self._joueurBouge[i] = False, False
-        self._gestionnaire.majActionsJoueur(self._nom) #On vérifie si le joueur est proche (cf. onJoueurProche)
-        if self._xJoueur[i] != self._xJoueurOld[i] or self._yJoueur[i] != self._yJoueurOld[i]:
-            self._joueurBouge[i] = True
     
     def traiter(self):
         """Traite l'évènement"""

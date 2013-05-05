@@ -189,16 +189,6 @@ class Carte(Observateur):
         self._toutAChanger = True
         self._ajouterSurface( (positionSource.left, positionSource.top, positionSource.width, positionSource.height), nomTileset, couleurTransparente)
     
-    def _transformerPartie(self, surface):
-        """Applique une transformation individuellement à chaque <surface> (mobile, tile...) lors de sa pose."""
-        for nomTransformation in self._transformationsParties:
-            p = self._parametresTransformations[nomTransformation]
-            if nomTransformation == "AlphaFixe":
-                pixels = surfarray.pixels_alpha(surface)
-                positionsNulles = numpy.where(pixels == 0)
-                pixels[:,:] = p["alpha"]
-                pixels[positionsNulles] = 0
-
     def mettreToutAChanger(self):
         self._toutAChanger = True
 
@@ -291,6 +281,19 @@ class Carte(Observateur):
             pygame.display.update(positionZoneEntiere)
         self._besoinAffichageZonePensee, self._blitFrame = False, True
 
+    def _transformerPartie(self, surface, nomPnj, positionCarte, **p):
+        """Applique une transformation individuellement à chaque <surface> (mobile) lors de sa pose."""
+        for nomTransformation in self._transformationsParties:
+            p = self._parametresTransformations[nomTransformation]
+            if nomTransformation == "AlphaFixe":
+                pixels = surfarray.pixels_alpha(surface)
+                positionsNulles = numpy.where(pixels == 0)
+                pixels[:,:] = p["alpha"]
+                pixels[positionsNulles] = 0
+            elif nomTransformation == "Action Joueur" and nomPnj == "Joueur":
+                centre = positionCarte.move(-self._scrollingX, -self._scrollingY).center
+                pygame.draw.circle(self._fenetre, (255,255,255), centre, p["rayon"], 1)
+
     def _appliquerTransformationGlobale(self, nomTransformation, **p):
         """Applique la transformation globale <nomTransformation> avec le dico de paramètres <p>."""
         if nomTransformation == "Rouge":
@@ -345,7 +348,7 @@ class Carte(Observateur):
             positionCollage = pnj.positionCarte.move(-self._scrollingX, -self._scrollingY)
             if len(self._transformationsParties) > 0:
                 surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)].copy()
-                self._transformerPartie(surfaceCollage)
+                self._transformerPartie(surfaceCollage, nomPnj, pnj.positionCarte)
             else:
                 surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)]
             self._fenetre.blit(surfaceCollage, positionCollage)
