@@ -28,9 +28,9 @@ class ZonePensee(Observable):
         Horloge.initialiser(id(self), 1, 0)
         self._policeActuelle, self._couleur, self._tempsLecture = police, couleur, tempsLecture
         self._positionSurface = [0,FENETRE["largeurFenetre"]]
-        surfaceComplete = self._polices[self._policeActuelle].render(self._message, True, self._couleur, COULEUR_FOND_ZONE_PENSEE)
-        self._positionSurface[0] = (FENETRE["longueurFenetre"] - surfaceComplete.get_width() ) / 2
-        self._positionSurface[1] = ( (FENETRE["largeurFenetreReelle"]-FENETRE["largeurFenetre"]-surfaceComplete.get_height() ) / 2)+FENETRE["largeurFenetre"] 
+        self._surfaceComplete = self._polices[self._policeActuelle].render(self._message, True, self._couleur, COULEUR_FOND_ZONE_PENSEE)
+        self._positionSurface[0] = (FENETRE["longueurFenetre"] - self._surfaceComplete.get_width() ) / 2
+        self._positionSurface[1] = ( (FENETRE["largeurFenetreReelle"]-FENETRE["largeurFenetre"]-self._surfaceComplete.get_height() ) / 2)+FENETRE["largeurFenetre"] 
         self.obsOnMiseAJour("_positionSurface", self._positionSurface)
         self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
 
@@ -55,7 +55,9 @@ class ZonePensee(Observable):
             if self._message[self._etapeAffichage] == ' ': #L'espace ne nécessite pas d'étape en soi, donc on affiche le caractère suivant en même temps
                 self._etapeAffichage += 1
             messageActuel = self._message[:self._etapeAffichage+1]
-            self._surface = self._polices[self._policeActuelle].render(messageActuel, True, self._couleur, COULEUR_FOND_ZONE_PENSEE)
+            self._surface = self._surfaceComplete.copy()
+            longueurSurface, largeurSurface = self._polices[self._policeActuelle].size(messageActuel)
+            self._surface.fill((0,0,0), Rect(longueurSurface, 0, self._surface.get_width() - longueurSurface, largeurSurface) )
             self.obsOnMiseAJour("_surface", self._surface)
             self._etapeAffichage += 1
             if self._etapeAffichage < self._nombreEtapes:

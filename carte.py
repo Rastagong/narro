@@ -52,7 +52,7 @@ class Carte(Observateur):
         self._tilesLayers = []
         i = 0
         while i < self._nombreCouches:
-            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA).convert_alpha())
+            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA))
             i += 1
 
         i = 0
@@ -333,8 +333,6 @@ class Carte(Observateur):
             longueurFenetre, largeurFenetre = FENETRE["longueurFenetre"], FENETRE["largeurFenetre"]
             for nomTransformation in self._transformationsGlobales:
                 self._appliquerTransformationGlobale(nomTransformation, **self._parametresTransformations[nomTransformation]) #On applique la transfo
-            if affichageComplet:
-                pygame.display.flip()
                 return True
             else:
                 return False

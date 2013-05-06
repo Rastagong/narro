@@ -84,6 +84,8 @@ class BoiteOutils():
         <nombreEcoutes> désigne le nombre de fois où le son est joué.
         <fixe> est un booléen. 
            Quand il vaut <True>, le son est localisé dans l'espace, càd que son volume décrôit quand le joueur s'en éloigne (position à préciser dans <gérerVolumeSonsFixes>.
+           La position du son peut être désignée soit par <xFixe><yFixe>, soit par le nom d'un évènement <evenementFixe) (un PNJ qui chante par exemple).
+           <evenementFixe> est le nom de l'évènement auquel le son est alors attaché.
         <volume> désigne le volume du son (compris entre 0.0 et 1.0)."""
         if nomSon not in self._sons.keys():
             self._sons[nomSon] = pygame.mixer.Sound(DOSSIER_RESSOURCES + nomSon + ".wav")
@@ -97,7 +99,8 @@ class BoiteOutils():
             self._volumesFixes[instance] = volume
             if duree == 0:
                 duree = self._sons[nomSon].get_length() * 1000
-            Horloge.initialiser(id(self), instance, duree * nombreEcoutes)
+            if nombreEcoutes >= 1:
+                Horloge.initialiser(id(self), instance, duree * nombreEcoutes)
             if xFixe != -1 and yFixe != -1:
                 sourceSon = (xFixe, yFixe)
             else:

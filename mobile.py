@@ -121,7 +121,7 @@ class Mobile(EvenementConcret):
         return (avancee, deltaTimer)
 
     def _majCoordonnees(self, tempsActuel, direction, deltaTimer, avancee):
-        self._tempsPrecedent, self._avancee, self._deltaTimer = tempsActuel, math.floor(avancee), deltaTimer
+        self._tempsPrecedent, self._avancee, self._deltaTimer = tempsActuel, round(avancee), deltaTimer
         if self._pixelsParcourus + self._avancee > 32:
             self._avancee = 32 - self._pixelsParcourus
         self._avanceeOrientee = self._avancee
@@ -146,6 +146,12 @@ class Mobile(EvenementConcret):
 
     def _getYTile(self):
         return int(self._positionCarte.top / 32)
+
+    def _getXTileOld(self):
+        return int(self._positionCarteOld.left / 32)
+
+    def _getYTileOld(self):
+        return int(self._positionCarteOld.top / 32)
 
     def _getXTileSuivant(self):
         return self._xTileSuivant
@@ -186,6 +192,8 @@ class Mobile(EvenementConcret):
     _yTile, yTile = property(_getYTile), property(_getYTile)
     xTilePrecedent = property(_getXTilePrecedent)
     yTilePrecedent = property(_getYTilePrecedent)
+    _xTileOld, xTileOld = property(_getXTileOld), property(_getXTileOld)
+    _yTileOld, yTileOld = property(_getYTileOld), property(_getYTileOld)
     xTileSuivant = property(_getXTileSuivant)
     yTileSuivant = property(_getYTileSuivant)
     _positionTile, positionTile = property(_getPositionTile), property(_getPositionTile)

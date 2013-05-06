@@ -85,19 +85,33 @@ class Narro:
         """Exécute le jeu"""
         self._jeuFini, self._carteAExecuter, self._changementCarte, self._cartes = False, str(NOM_CARTE_LANCEMENT), False, dict()
         self._horlogeFps, self._premiereCarteChargee, self._dicoSurfaces = pygame.time.Clock(), False, dict()
+        self._haut, self._gauche, UNITE = 0, 0, 1
         while self._jeuFini is not True: #Tant que le joueur ne veut pas quitter
             self._changementCarte = False #Si on veut changer de carte, il faut pouvoir rentrer dans la boucle ci-dessous pour la nouvelle carte
             self._chargerCarteAExecuter()
             while self._changementCarte is not True and self._jeuFini is not True: #Tant que le joueur ne veut pas quitter ou changer de carte
                 self._event = pygame.event.poll()
                 self._jeuFini = self._verifierSiLeJeuEstFini()
+                """if self._event.type == KEYDOWN:
+                    if self._event.key == K_LEFT:
+                        self._gauche = -UNITE
+                    if self._event.key == K_RIGHT:
+                        self._gauche = +UNITE
+                    if self._event.key == K_UP:
+                        self._haut = -UNITE
+                    if self._event.key == K_DOWN:
+                        self._haut = +UNITE
+                elif self._event.type == KEYUP:
+                    if self._event.key == K_LEFT or self._event.key == K_RIGHT:
+                        self._gauche = 0
+                    if self._event.key == K_UP or self._event.key == K_DOWN:
+                        self._haut = 0
+                self._carteActuelle._ecranVisible.move_ip(self._gauche, self._haut)"""
                 self._gestionnaireEvenements.gererEvenements(self._carteActuelle.nom)
                 self._gestionnaireEvenements.traiterPositions()
                 self._gestionnaireEvenements.actualiserSonsFixes()
                 self._zonePensee.gererSurfacePensee()
                 self._carteActuelle.afficher()
-            #print("###########################################################################")
-            #objgraph.show_growth()
         pygame.mixer.quit()
         pygame.quit()
 
