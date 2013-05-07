@@ -217,28 +217,23 @@ class Carte(Observateur):
             scrollingPossibleY = self._coordonneeScrollingPossible(y, abs=False)
             if (direction == "Haut" or direction == "Bas") and scrollingPossibleY is True:
                 self._scrollingPossible, self._directionScrolling = True, direction
-                Horloge.initialiser(id(self), 1, 1, comptageTempsPasse=True)
             elif (direction == "Gauche" or direction == "Droite") and scrollingPossibleX is True:
                 self._scrollingPossible, self._directionScrolling = True, direction
-                Horloge.initialiser(id(self), 1, 1, comptageTempsPasse=True)
     
     def gererScrolling(self, changement, direction):
         """Gère le scrolling"""
-        #if Horloge.sonner(id(self), 1) is True:
-        if True:
-            #direction, changement, attente  = self._directionScrolling, 2, 250/16
-            if (direction == "Droite" or direction == "Gauche") and self._scrollingPossible is True:
-                self._scrollingX += changement
-                self.mettreToutAChanger()
-                self._ecranVisible.move_ip(changement, 0)
-                return True
-            elif (direction == "Bas" or direction == "Haut") and self._scrollingPossible is True:
-                self._scrollingY += changement
-                self.mettreToutAChanger()
-                self._ecranVisible.move_ip(0, changement)
-                return True
-            else:
-                return False
+        if (direction == "Droite" or direction == "Gauche") and self._scrollingPossible is True:
+            self._scrollingX += changement
+            self.mettreToutAChanger()
+            self._ecranVisible.move_ip(changement, 0)
+            return True
+        elif (direction == "Bas" or direction == "Haut") and self._scrollingPossible is True:
+            self._scrollingY += changement
+            self.mettreToutAChanger()
+            self._ecranVisible.move_ip(0, changement)
+            return True
+        else:
+            return False
 
     def initialiserScrolling(self, x, y):
         """Après la création de la carte, initialise le scrolling à la position du joueur si nécessaire.
@@ -269,17 +264,6 @@ class Carte(Observateur):
             self._surfaceZonePensee, self._besoinAffichageZonePensee = info.copy(), True
         elif isinstance(instance, ZonePensee) is True and nomAttribut == "_positionSurface":
             self._positionZonePensee = list(info)
-    
-    def _afficherZonePensee(self, affichageComplet=False):
-        """S'il y a quelque chose à afficher, réaffiche la zone de pensée. 
-        <affichageComplet> est un booléen qui vaut <True> lorsque pygame.display.flip est appelée à la suite de l'appel de la fonction."""
-        positionZoneEntiere = (0, FENETRE["largeurFenetre"], FENETRE["longueurFenetre"], FENETRE["largeurFenetreReelle"] - FENETRE["largeurFenetre"])
-        self._fenetre.fill(COULEUR_FOND_ZONE_PENSEE,rect=positionZoneEntiere)
-        if self._surfaceZonePensee is not None:
-            self._fenetre.blit(self._surfaceZonePensee, self._positionZonePensee)
-        if affichageComplet is False:
-            pygame.display.update(positionZoneEntiere)
-        self._besoinAffichageZonePensee, self._blitFrame = False, True
 
     def _transformerPartie(self, surface, nomPnj, positionCarte, **p):
         """Applique une transformation individuellement à chaque <surface> (mobile) lors de sa pose."""
@@ -339,6 +323,17 @@ class Carte(Observateur):
         else:
             return False
 
+    def _afficherZonePensee(self, affichageComplet=False):
+        """S'il y a quelque chose à afficher, réaffiche la zone de pensée. 
+        <affichageComplet> est un booléen qui vaut <True> lorsque pygame.display.flip est appelée à la suite de l'appel de la fonction."""
+        positionZoneEntiere = (0, FENETRE["largeurFenetre"], FENETRE["longueurFenetre"], FENETRE["largeurFenetreReelle"] - FENETRE["largeurFenetre"])
+        self._fenetre.fill(COULEUR_FOND_ZONE_PENSEE,rect=positionZoneEntiere)
+        if self._surfaceZonePensee is not None:
+            self._fenetre.blit(self._surfaceZonePensee, self._positionZonePensee)
+        if affichageComplet is False:
+            pygame.display.update(positionZoneEntiere)
+        self._besoinAffichageZonePensee = False
+
     def _afficherBlocPnj(self, c, nomPnj):
         """Affiche un PNJ sur un bloc"""
         pnj = self._pnj[c][nomPnj]
@@ -358,17 +353,30 @@ class Carte(Observateur):
             coucheActuelle = 0
             while coucheActuelle < self._nombreCouches: 
                 self._fenetre.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
+                """x,xmax = int(self._scrollingX/32), int(self._scrollingX/32) + int(FENETRE["longueurFenetre"]/32)
+                while x < xmax + 1 and x < self._longueur:
+                    y,ymax = int(self._scrollingY/32), int(self._scrollingY/32) + int(FENETRE["longueurFenetre"]/32)
+                    while y < ymax + 1 and y < self._largeur:
+                        tile = self._tiles[x][y].bloc[coucheActuelle]
+                        if not tile.vide:
+                            self._fenetre.blit(self._dicoSurfaces[tile.nomTileset][tile.positionSource], (x*32 - self._scrollingX, y*32 - self._scrollingY))
+                        y += 1
+                    x += 1"""
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
                 #Tri des PNJs selon leur ordonnée (de manière croissante) : on affiche ceux en haut de l'écran avant ceux en bas, pour avoir une superposition
                 for nomPnj in nomsPnjs: 
                     self._afficherBlocPnj(coucheActuelle, nomPnj)
                 coucheActuelle += 1
             self._transformerSurfaceGlobalement()
-            self._afficherZonePensee(affichageComplet=True)
             self._blitFrame = True
 
+        if self._besoinAffichageZonePensee:
+            self._afficherZonePensee(affichageComplet=self._blitFrame)
         if self._blitFrame is True:
-            self._jeu.horlogeFps.tick(NOMBRE_MAX_DE_FPS)
+            if LIMITER_FPS:
+                self._jeu.horlogeFps.tick(NOMBRE_MAX_DE_FPS)
+            else:
+                self._jeu.horlogeFps.tick()
             pygame.display.flip()
 
     def _getNombreCouches(self):

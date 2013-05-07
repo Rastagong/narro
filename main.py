@@ -85,7 +85,7 @@ class Narro:
         """Exécute le jeu"""
         self._jeuFini, self._carteAExecuter, self._changementCarte, self._cartes = False, str(NOM_CARTE_LANCEMENT), False, dict()
         self._horlogeFps, self._premiereCarteChargee, self._dicoSurfaces = pygame.time.Clock(), False, dict()
-        self._haut, self._gauche, UNITE = 0, 0, 1
+        self._haut, self._gauche, UNITE = 0, 0, 2
         while self._jeuFini is not True: #Tant que le joueur ne veut pas quitter
             self._changementCarte = False #Si on veut changer de carte, il faut pouvoir rentrer dans la boucle ci-dessous pour la nouvelle carte
             self._chargerCarteAExecuter()
