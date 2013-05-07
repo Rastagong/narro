@@ -146,6 +146,9 @@ LISTE_DIRECTIONS = ["Haut", "Bas", "Gauche", "Droite", "Aucune"]
 #Le nombre maximal de frames par seconde
 NOMBRE_MAX_DE_FPS = 120#2000
 
+#<True> si la limite doit être appliquée
+LIMITER_FPS = True
+
 #Volume par défaut (compris entre 0 et 1
 VOLUME_MUSIQUE = 0.7 #0.0007
 

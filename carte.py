@@ -79,6 +79,18 @@ class Carte(Observateur):
         self._fenetre, self._blitFrame = self._jeu.fenetre, False
         self._transformationsGlobales, self._transformationsParties, self._parametresTransformations = list(), list(), dict()
 
+    def _ajouterSurface(self, positionSource, nomTileset,couleurTransparente):
+        """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà."""
+        if nomTileset not in self._dicoSurfaces:
+            self._dicoSurfaces[nomTileset] = dict()
+            try:
+                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(nomTileset)
+            except pygame.error as erreur:
+                print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(nomTileset), str(erreur) )
+        if positionSource not in self._dicoSurfaces[nomTileset].keys():
+            self._dicoSurfaces[nomTileset][positionSource] = pygame.Surface((positionSource[2],positionSource[3]), flags=SRCALPHA).convert_alpha()
+            self._dicoSurfaces[nomTileset][positionSource].blit(self._dicoSurfaces[nomTileset]["Source"], (0,0), area=positionSource)
+
     def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, vide=False):
         if self.tileExistant(x,y) is True and c < self.nombreCouches:
             bloc, jeu = self._tiles[x][y].bloc[c], self._jeu
@@ -118,20 +130,6 @@ class Carte(Observateur):
         else:
             return False
 
-    def _ajouterSurface(self, positionSource, nomTileset,couleurTransparente):
-        """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà."""
-        if nomTileset not in self._dicoSurfaces:
-            self._dicoSurfaces[nomTileset] = dict()
-            try:
-                """surface = pygame.image.load(nomTileset).convert_alpha()
-                self._dicoSurfaces[nomTileset]["Source"] = pygame.Surface((surface.get_width(), surface.get_height()), flags=HWSURFACE|SRCALPHA)
-                self._dicoSurfaces[nomTileset]["Source"].blit(surface, (0,0))"""
-                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(nomTileset).convert_alpha()
-            except pygame.error as erreur:
-                print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(nomTileset), str(erreur) )
-        if positionSource not in self._dicoSurfaces[nomTileset].keys():
-            self._dicoSurfaces[nomTileset][positionSource] = self._dicoSurfaces[nomTileset]["Source"].subsurface(pygame.Rect(positionSource))
-    
     def _determinerPresenceSurTiles(self, x, y, longueur, largeur):
         abscisses, ordonnees, x, y, longueur, largeur, i = [], [], (x / 32), (y/32), int(longueur/32), int(largeur/32), 0
         abscisses = list(range(math.floor(x), math.ceil(x) + longueur))
@@ -351,6 +349,7 @@ class Carte(Observateur):
         self._blitFrame = False
         if self._toutAChanger is True:
             coucheActuelle = 0
+            self._fenetre.fill((0,0,0))
             while coucheActuelle < self._nombreCouches: 
                 self._fenetre.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
@@ -358,11 +357,10 @@ class Carte(Observateur):
                 for nomPnj in nomsPnjs: 
                     self._afficherBlocPnj(coucheActuelle, nomPnj)
                 coucheActuelle += 1
+            self._afficherZonePensee(affichageComplet=True)
             self._transformerSurfaceGlobalement()
             self._blitFrame = True
 
-        if self._besoinAffichageZonePensee:
-            self._afficherZonePensee(affichageComplet=self._blitFrame)
         if self._blitFrame is True:
             if LIMITER_FPS:
                 self._jeu.horlogeFps.tick(NOMBRE_MAX_DE_FPS)
