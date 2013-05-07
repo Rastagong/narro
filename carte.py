@@ -353,15 +353,6 @@ class Carte(Observateur):
             coucheActuelle = 0
             while coucheActuelle < self._nombreCouches: 
                 self._fenetre.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
-                """x,xmax = int(self._scrollingX/32), int(self._scrollingX/32) + int(FENETRE["longueurFenetre"]/32)
-                while x < xmax + 1 and x < self._longueur:
-                    y,ymax = int(self._scrollingY/32), int(self._scrollingY/32) + int(FENETRE["longueurFenetre"]/32)
-                    while y < ymax + 1 and y < self._largeur:
-                        tile = self._tiles[x][y].bloc[coucheActuelle]
-                        if not tile.vide:
-                            self._fenetre.blit(self._dicoSurfaces[tile.nomTileset][tile.positionSource], (x*32 - self._scrollingX, y*32 - self._scrollingY))
-                        y += 1
-                    x += 1"""
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
                 #Tri des PNJs selon leur ordonnée (de manière croissante) : on affiche ceux en haut de l'écran avant ceux en bas, pour avoir une superposition
                 for nomPnj in nomsPnjs: 
