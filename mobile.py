@@ -29,7 +29,7 @@ class Mobile(EvenementConcret):
         <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
         EvenementConcret.__init__(self, jeu, gestionnaire)
         self._direction, self._directionRegard = directionDepart, directionDepart
-        self._nom,  self._nomTileset = nom, DOSSIER_RESSOURCES+fichier
+        self._nom,  self._nomTileset = nom, fichier
         self._positionCarte = Rect(x*32, y*32, longueurSprite, largeurSprite)
         self._positionCarteOld, self._positionCarteFuture = self._positionCarte.copy(), self._positionCarte.copy()
         self._xTilePrecedent, self._yTilePrecedent = self._positionCarte.left/32, self._positionCarte.top/32

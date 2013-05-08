@@ -61,7 +61,7 @@ class Narro:
             self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
             del self._carteActuelle
         ###
-        cheminFichierCarte = DOSSIER_RESSOURCES + self._carteAExecuter + EXTENSION_FICHIER_CARTE
+        cheminFichierCarte = os.path.join(DOSSIER_RESSOURCES, self._carteAExecuter + EXTENSION_FICHIER_CARTE)
         config = configparser.ConfigParser()
         config.read(cheminFichierCarte)
         self._carteActuelle = Carte(config, self._carteAExecuter, self)

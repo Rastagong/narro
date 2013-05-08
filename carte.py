@@ -33,76 +33,72 @@ class Carte(Observateur):
         self._jeu, self._toutAChanger = jeu, True
         self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, i = self._jeu.dicoSurfaces, list(), dict(), dict(), 0
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
-        while i < self._nombreCouches:
-            self._pnj[i] = dict()
-            i += 1
-        i = 0
         self._scrollingPossible, self._etapeScrolling = False, 0
         self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee = None, None, False
         self._emplacementScrollingX, self._emplacementScrollingY = int(int(FENETRE["longueurFenetre"]/2) / 32)*32, int(int(FENETRE["largeurFenetre"]/2)/32)*32
         self._ecranVisible = Rect(0, 0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
         self._positionsDepart = dict()
-        gPos = lambda u,a: config.getint( "Bloc ref" + str(u) + "." + "Position source", str(a) )
-        gTranspa = lambda u,a: config.getint( "Bloc ref" + str(u) + "." + "Couleur transparente", str(a) )
-        self._nombreRefs = config.getint("Generalites","Nombre ref")
-        while i < nombreRefs:
-            if i > 0:
-                cheminTileset = config.get("Bloc ref"+str(i),"Chemin image")
-                praticabilite = config.getboolean("Bloc ref"+str(i),"Praticabilite")
-                positionSource = (gPos(i,0), gPos(i,1), gPos(i,2), gPos(i,3))
-                couleurTransparente = (gTranspa(i,0), gTranspa(i,1), gTranspa(i,2))
-                self._blocsRef[i] = Bloc(jeu, nomTileset=cheminTileset, praticabilite=praticabilite, couleurTransparente=couleurTransparente, positionSource=positionSource, toutDonne=True)
-            else: #Bloc vide
-                self._blocsRef[i] = Bloc(jeu, vide=True)
-            i += 1
-        for tileset in self._carteTiled.tile_sets:
-            for image in tileset.images:
-                self._ajouterSurface(-1, image.source, -1)
-            
-        self._tilesLayers = []
-        i = 0
-        while i < self._nombreCouches:
-            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA))
-            i += 1
-
-        i = 0
-        while i < self._longueur:
-            self._tiles.append(list())
-            a = 0
-            while a < self._largeur:
-                self._tiles[i].append(Tile(i, a, config, self._blocsRef, self._nombreCouches, self._jeu, self._hauteurTile))
-                coucheActuelle = 0
-                while coucheActuelle < self._nombreCouches:
-                    if self._tiles[i][a].bloc[coucheActuelle].vide == False:
-                        nomTilesetActuel = self._tiles[i][a].bloc[coucheActuelle].nomTileset
-                        positionSource = self._tiles[i][a].bloc[coucheActuelle].positionSource
-                        self._ajouterSurface(positionSource, nomTilesetActuel, self._tiles[i][a].bloc[coucheActuelle].couleurTransparente)
-                        self._tilesLayers[coucheActuelle].blit(self._dicoSurfaces[nomTilesetActuel][positionSource], (i*32, a*32) )
-                    elif coucheActuelle == 0:
-                        self._tilesLayers[coucheActuelle].fill( (0,0,0), (i*32, a*32, 32, 32))
-                    coucheActuelle += 1
-                a += 1
-            i += 1
-
-        i = 0
-
         self._fenetre, self._blitFrame = self._jeu.fenetre, False
         self._transformationsGlobales, self._transformationsParties, self._parametresTransformations = list(), list(), dict()
 
+        self._dicoGid = dict()
+        for tileset in self._carteTiled.tile_sets:
+            for image in tileset.images:
+                self._ajouterSurface(False, image.source, False, tileset=tileset)
+            
+        self._tilesLayers = []
+        i, x, y = 0, 0, 0
+        while i < self._nombreCouches:
+            x = 0
+            self._tilesLayers.append(pygame.Surface((self._longueur * 32, self._largeur * 32), flags=SRCALPHA))
+            self._pnj[i] = dict()
+            while x < self._longueur:
+                y = 0
+                self._tiles.append(list())
+                while y < self._largeur:
+                    self._tiles[x].append(Tile(self._nombreCouches))
+                    gid = self._carteTiled.layers[i].content2D[x][y]
+                    if gid != 0: #Bloc plein
+                        self._tiles[x][y].bloc.append(Bloc(infos=self._dicoGid[gid]))
+                        surfaceTileset, positionSource = self._dicoSurfaces[self._dicoGid[gid][0]]["Source"], self._dicoGid[gid][2]
+                        self._tilesLayers[i].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
+                    else: #Bloc vide
+                        self._tiles[x][y].bloc.append(Bloc(vide=True))
+                        if i == 0: #Sur la couche 0, il faut mettre du noir pour les blocs vides
+                            self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
+                    if i == self._nombreCouches - 1:
+                        self._tiles[x][y].recalculerPraticabilites()
+                    y += 1
+                x += 1
+            i += 1
+        del self._dicoGid
+
+    def _completerDicoGids(self, nomTileset, tileset, longueur, largeur):
+        """Lors du chargement d'un tileset dans _ajouterSurface (quand une carte est créée), cette fonction se charge de faire correspondre à chaque tile du tileset les infos
+        qui lui correspondent. 1 Tile dans le tileset = 1 GID = 1 position source, 1 praticabilité, 1 nom de tileset"""
+        gid, idTileset, x, y, tileWidth, tileHeight = int(tileset.firstgid), 0, 0, 0, int(tileset.tilewidth), int(tileset.tileheight)
+        while y < largeur:
+            x = 0
+            while x < longueur:
+                praticabilite = tileset.tiles[idTileset].properties.get("Praticabilite", False) == "True"
+                self._dicoGid[gid] = nomTileset, praticabilite, (x, y, tileWidth, tileHeight)
+                gid, idTileset, x = gid + 1, idTileset + 1, x + tileWidth #increments
+            y += tileHeight
+
     def _ajouterSurface(self, positionSource, nomTileset,couleurTransparente, tileset=False):
-        """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà."""
+        """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà. 
+        Pour les tilesets, on ajoute la surface entière seulement. Pour les mobiles, on enregistre aussi la partie du tileset qui nous intéresse.
+        Pour les tilesets, on complète le dico de GIDs (lors de la création de la carte)."""
         if nomTileset not in self._dicoSurfaces:
+            nomTileset = os.path.basename(nomTileset)
             self._dicoSurfaces[nomTileset] = dict()
             try:
                 self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES,nomTileset))
                 if tileset is not False:
-                    dataTileset = self._dicoSurfaces[nomTileset]
-                    dataTileset["longueurTileset"] = int(dataTileset["Source"].get_width()/tileset.tilewidth)
-                    dataTileset["largeurTileset"] = int(dataTileset["Source"].get_height()/tileset.tileheight)
-                    dataTileset["firstGid"] = tileset.firstgid
+                    self._completerDicoGids(nomTileset, tileset, self._dicoSurfaces[nomTileset]["Source"].get_width(), self._dicoSurfaces[nomTileset]["Source"].get_height())
             except pygame.error as erreur:
                 print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(nomTileset), str(erreur) )
-        if positionSource not in self._dicoSurfaces[nomTileset].keys() and positionSource != False:
+        if positionSource not in self._dicoSurfaces[nomTileset].keys() and positionSource is not False:
             self._dicoSurfaces[nomTileset][positionSource] = pygame.Surface((positionSource[2],positionSource[3]), flags=SRCALPHA).convert_alpha()
             self._dicoSurfaces[nomTileset][positionSource].blit(self._dicoSurfaces[nomTileset]["Source"], (0,0), area=positionSource)
 

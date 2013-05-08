@@ -147,7 +147,7 @@ class PNJ(Mobile):
         elif direction in ("Haut","Bas","Gauche","Droite"): #Un pas
             tempsActuel = pygame.time.get_ticks()
             avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
-            if avancee >= 1:
+            if avancee >= 1.0:
                 if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
                     deplacementPossible = False
                     (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._majCoordonnees(tempsActuel, direction, deltaTimer, avancee)

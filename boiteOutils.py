@@ -42,14 +42,9 @@ class BoiteOutils():
         """Change le tile d'un bloc."""
         self._jeu.carteActuelle.changerBloc(x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv)
 
-    def changerSpriteMobile(self, nom, nomTileset, persoCharset):
-        mobile = self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte][nom][0]
-        mobile.nomTileset, mobile.persoCharset = DOSSIER_RESSOURCES+nomTileset, persoCharset
-        self.mettreToutAChanger()
-
     def determinerPresenceTilesSurCarte(self, c, nomTileset, positionSource):
         """Retourne les coordonnées de tous les tiles de la couche <c> présents sur la carte qui viennent du tileset <nomTileset> en <positionSource>, sous forme d'une liste."""
-        tilesTrouves, carte, x, y, nomTileset = [], self._jeu.carteActuelle, 0, 0, DOSSIER_RESSOURCES + nomTileset
+        tilesTrouves, carte, x, y, nomTileset = [], self._jeu.carteActuelle, 0, 0, nomTileset
         while x < carte.longueur:
             y = 0
             while y < carte.largeur:
@@ -88,7 +83,7 @@ class BoiteOutils():
            <evenementFixe> est le nom de l'évènement auquel le son est alors attaché.
         <volume> désigne le volume du son (compris entre 0.0 et 1.0)."""
         if nomSon not in self._sons.keys():
-            self._sons[nomSon] = pygame.mixer.Sound(DOSSIER_RESSOURCES + nomSon + ".wav")
+            self._sons[nomSon] = pygame.mixer.Sound(os.path.join(DOSSIER_RESSOURCES, nomSon + ".wav"))
         self._canauxSons[instance] = pygame.mixer.find_channel()
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
         self._canauxSons[instance].set_volume(volume)
