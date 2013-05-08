@@ -1,5 +1,5 @@
 # -*-coding:utf-8 -*
-import pygame, configparser, math, narro.directions, numpy
+import pygame, configparser, math, narro.directions, numpy, os, sys
 from pygame.locals import *
 from narro import *
 import pygame.surfarray as surfarray
@@ -12,23 +12,29 @@ from .zonePensee import *
 if SESSION_DEBUG:
     import pdb
 
+dossierNarro = os.path.dirname(__file__)
+sys.path.append(dossierNarro)
+sys.path.append(os.path.join(dossierNarro, "tiledtmxloader"))
+import tiledtmxloader
+
+
 class Carte(Observateur):
     """Classe représentant une carte au niveau des données"""
-    def __init__(self, config, jeu): 
+    def __init__(self, config, nomCarte, jeu): 
         """Initialise la carte à exécuter  <carte> à partir des données issues de son fichier SQMAP.
         Cette méthode se charge surtout du transfert du format de carte .narromap à celui du Narro Engine (purement mémoriel)."""
         Observateur.__init__(self)
-        self._longueur, self._largeur = config.getint("Generalites","Longueur"), config.getint("Generalites","Largeur")
-        self._hauteurTile = 32
-        self._nombreCouches = config.getint("Generalites","Couches")
-        self._nom, self._description = config.get("Generalites","Nom"), config.get("Generalites","Description")
-        self._musique, nombreRefs = config.get("Generalites","Musique"), config.getint("Generalites","Nombre ref")
+        self._carteTiled = tiledtmxloader.tmxreader.TileMapParser().parse_decode(os.path.join(DOSSIER_RESSOURCES, nomCarte + ".tmx"))
+        self._nom, self._description = self._carteTiled.properties.get("nom", nomCarte), self._carteTiled.properties.get("description", "")
+        self._musique = self._carteTiled.properties.get("musique", "")
+        self._longueur, self._largeur = self._carteTiled.width, self._carteTiled.height
+        self._nombreCouches, self._hauteurTile = len(self._carteTiled.layers), self._carteTiled.tilewidth
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
-        self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, self._tilesReserves, i = self._jeu.dicoSurfaces, list(), dict(), dict(), dict(), 0
+        self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, i = self._jeu.dicoSurfaces, list(), dict(), dict(), 0
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
         while i < self._nombreCouches:
-            self._pnj[i], self._tilesReserves[i]  = dict(), dict()
+            self._pnj[i] = dict()
             i += 1
         i = 0
         self._scrollingPossible, self._etapeScrolling = False, 0
@@ -38,6 +44,7 @@ class Carte(Observateur):
         self._positionsDepart = dict()
         gPos = lambda u,a: config.getint( "Bloc ref" + str(u) + "." + "Position source", str(a) )
         gTranspa = lambda u,a: config.getint( "Bloc ref" + str(u) + "." + "Couleur transparente", str(a) )
+        self._nombreRefs = config.getint("Generalites","Nombre ref")
         while i < nombreRefs:
             if i > 0:
                 cheminTileset = config.get("Bloc ref"+str(i),"Chemin image")
@@ -48,7 +55,10 @@ class Carte(Observateur):
             else: #Bloc vide
                 self._blocsRef[i] = Bloc(jeu, vide=True)
             i += 1
-
+        for tileset in self._carteTiled.tile_sets:
+            for image in tileset.images:
+                self._ajouterSurface(-1, image.source, -1)
+            
         self._tilesLayers = []
         i = 0
         while i < self._nombreCouches:
@@ -79,15 +89,20 @@ class Carte(Observateur):
         self._fenetre, self._blitFrame = self._jeu.fenetre, False
         self._transformationsGlobales, self._transformationsParties, self._parametresTransformations = list(), list(), dict()
 
-    def _ajouterSurface(self, positionSource, nomTileset,couleurTransparente):
+    def _ajouterSurface(self, positionSource, nomTileset,couleurTransparente, tileset=False):
         """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà."""
         if nomTileset not in self._dicoSurfaces:
             self._dicoSurfaces[nomTileset] = dict()
             try:
-                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(nomTileset)
+                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES,nomTileset))
+                if tileset is not False:
+                    dataTileset = self._dicoSurfaces[nomTileset]
+                    dataTileset["longueurTileset"] = int(dataTileset["Source"].get_width()/tileset.tilewidth)
+                    dataTileset["largeurTileset"] = int(dataTileset["Source"].get_height()/tileset.tileheight)
+                    dataTileset["firstGid"] = tileset.firstgid
             except pygame.error as erreur:
                 print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(nomTileset), str(erreur) )
-        if positionSource not in self._dicoSurfaces[nomTileset].keys():
+        if positionSource not in self._dicoSurfaces[nomTileset].keys() and positionSource != False:
             self._dicoSurfaces[nomTileset][positionSource] = pygame.Surface((positionSource[2],positionSource[3]), flags=SRCALPHA).convert_alpha()
             self._dicoSurfaces[nomTileset][positionSource].blit(self._dicoSurfaces[nomTileset]["Source"], (0,0), area=positionSource)
 

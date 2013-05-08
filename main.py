@@ -64,7 +64,7 @@ class Narro:
         cheminFichierCarte = DOSSIER_RESSOURCES + self._carteAExecuter + EXTENSION_FICHIER_CARTE
         config = configparser.ConfigParser()
         config.read(cheminFichierCarte)
-        self._carteActuelle = Carte(config, self)
+        self._carteActuelle = Carte(config, self._carteAExecuter, self)
         #objgraph.show_backrefs([self._carteActuelle], filename="t.png")
         ###
         self._premiereCarteChargee = True
