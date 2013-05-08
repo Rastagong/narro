@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -28,8 +27,8 @@ It loads the \*.tmx files produced by Tiled.
 #     * 1.2.3.0 instead of 1.2-r (commercial distribution)
 #     * 1.2.3.5 instead of 1.2-r5 (commercial distribution with many bug fixes)
 
-__revision__ = "$Rev: 114 $"
-__version__ = "3.0.3." + __revision__[6:-2]
+__revision__ = "$Rev: 115 $"
+__version__ = "3.1.0." + __revision__[6:-2]
 __author__ = 'DR0ID @ 2009-2011'
 
 # import logging
@@ -46,7 +45,11 @@ __author__ = 'DR0ID @ 2009-2011'
 
 import sys
 from xml.dom import minidom, Node
-from io import StringIO
+try:
+    import StringIO
+    from StringIO import StringIO
+except:
+    from io import StringIO
 import os.path
 import struct
 import array
@@ -517,7 +520,7 @@ def decode_base64(in_str):
     :returns: decoded string
     """
     import base64
-    return base64.decodestring(in_str)
+    return base64.decodestring(in_str.encode('latin-1'))
 
 #  -----------------------------------------------------------------------------
 def decompress_gzip(in_str):
@@ -531,8 +534,13 @@ def decompress_gzip(in_str):
     :returns: uncompressed string
     """
     import gzip
-    # gzip can only handle file object therefore using StringIO
-    copmressed_stream = StringIO.StringIO(in_str)
+    
+    if sys.version_info > (2, ):
+        from io import BytesIO
+        copmressed_stream = BytesIO(in_str)
+    else:
+        # gzip can only handle file object therefore using StringIO
+        copmressed_stream = StringIO(in_str.decode("latin-1"))
     gzipper = gzip.GzipFile(fileobj=copmressed_stream)
     content = gzipper.read()
     gzipper.close()
@@ -558,7 +566,7 @@ def printer(obj, ident=''):
     Helper function, prints a hirarchy of objects.
     """
     import inspect
-    print((ident + obj.__class__.__name__.upper()))
+    print(ident + obj.__class__.__name__.upper())
     ident += '    '
     lists = []
     for name in dir(obj):
@@ -568,10 +576,10 @@ def printer(obj, ident=''):
         elif not inspect.ismethod(elem):
             if not name.startswith('__'):
                 if name == 'data' and elem:
-                    print((ident + 'data = '))
+                    print(ident + 'data = ')
                     printer(elem, ident + '    ')
                 else:
-                    print((ident + '%s\t= %s' % (name, getattr(obj, name))))
+                    print(ident + '%s\t= %s' % (name, getattr(obj, name)))
     for objt_list in lists:
         for _obj in objt_list:
             printer(_obj, ident + '    ')
@@ -895,7 +903,7 @@ class AbstractResourceLoader(object):
                 img_str = decode_base64(a_tile_image.content)
             else:
                 raise Exception('unknown image encoding %s' % a_tile_image.encoding)
-        sio = StringIO.StringIO(img_str)
+        sio = StringIO(img_str)
         new_image = self._load_image_file_like(sio, a_tile_image.trans)
         return new_image
 

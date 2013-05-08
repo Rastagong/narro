@@ -80,20 +80,23 @@ class Carte(Observateur):
         while y < largeur:
             x = 0
             while x < longueur:
-                praticabilite = tileset.tiles[idTileset].properties.get("Praticabilite", False) == "True"
+                if len(tileset.tiles) > 0:
+                    praticabilite = tileset.tiles[idTileset].properties.get("Praticabilite", False) == "True"
+                else: #Tileset importé d'ailleurs, les praticabilités n'ont pas été indiquées
+                    praticabilite = True
                 self._dicoGid[gid] = nomTileset, praticabilite, (x, y, tileWidth, tileHeight)
                 gid, idTileset, x = gid + 1, idTileset + 1, x + tileWidth #increments
             y += tileHeight
 
-    def _ajouterSurface(self, positionSource, nomTileset,couleurTransparente, tileset=False):
+    def _ajouterSurface(self, positionSource, cheminVersTileset,couleurTransparente, tileset=False):
         """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà. 
         Pour les tilesets, on ajoute la surface entière seulement. Pour les mobiles, on enregistre aussi la partie du tileset qui nous intéresse.
         Pour les tilesets, on complète le dico de GIDs (lors de la création de la carte)."""
+        nomTileset = os.path.basename(cheminVersTileset)
         if nomTileset not in self._dicoSurfaces:
-            nomTileset = os.path.basename(nomTileset)
             self._dicoSurfaces[nomTileset] = dict()
             try:
-                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES,nomTileset))
+                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES,cheminVersTileset))
                 if tileset is not False:
                     self._completerDicoGids(nomTileset, tileset, self._dicoSurfaces[nomTileset]["Source"].get_width(), self._dicoSurfaces[nomTileset]["Source"].get_height())
             except pygame.error as erreur:

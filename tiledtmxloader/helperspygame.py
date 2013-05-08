@@ -32,7 +32,7 @@ module there is a pygame specific loader and renderer.
 #     * 1.2.3.5 instead of 1.2-r5 (commercial distribution with many bug fixes)
 
 
-__revision__ = "$Rev: 107 $"
+__revision__ = "$Rev: 115 $"
 __version__ = "3.0.0." + __revision__[6:-2]
 __author__ = 'DR0ID @ 2009-2011'
 
@@ -271,8 +271,8 @@ class SpriteLayer(object):
                     self.content2D[ypos_new][xpos_new] = sprite
         self.bottom_margin = self._bottom_margin
         if __debug__:
-            print(( '%s: Sprite Cache hits: %d' % \
-                                (self.__class__.__name__, _img_cache["hits"])))
+            print('%s: Sprite Cache hits: %d' % \
+                                (self.__class__.__name__, _img_cache["hits"]))
         del _img_cache
 
     def get_collapse_level(self):
@@ -500,7 +500,7 @@ class SpriteLayer(object):
         new_layer._level = layer._level * 2
 
         if __debug__ and level > 1:
-            print(( '%s: Sprite Cache hits: %d' % ("collapse", _img_cache["hits"])))
+            print('%s: Sprite Cache hits: %d' % ("collapse", _img_cache["hits"]))
         return new_layer
 
     @staticmethod
