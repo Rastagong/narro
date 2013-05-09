@@ -48,7 +48,7 @@ class PNJ(Mobile):
     def traiter(self):
         """Traite l'évènement"""
         super().traiter()
-        if self._etapeTraitement is 0 and self._poseDepart is True:
+        if self._etapeTraitement == 0 and self._poseDepart is True:
             self._initialiserDeplacement(1, direction=self._directionRegard)
             self._etapeTraitement += 1
         else:

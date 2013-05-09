@@ -44,7 +44,7 @@ class Carte(Observateur):
         self._dicoGid = dict()
         for tileset in self._carteTiled.tile_sets:
             for image in tileset.images:
-                self._ajouterSurface(False, image.source, False, tileset=tileset)
+                self._ajouterSurface(False, image.source, False, tileset=tileset, mobile=False)
             
         self._tilesLayers = []
         i, x, y = 0, 0, 0
@@ -88,7 +88,7 @@ class Carte(Observateur):
                 gid, idTileset, x = gid + 1, idTileset + 1, x + tileWidth #increments
             y += tileHeight
 
-    def _ajouterSurface(self, positionSource, cheminVersTileset,couleurTransparente, tileset=False):
+    def _ajouterSurface(self, positionSource, cheminVersTileset,couleurTransparente, tileset=False, mobile=True):
         """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà. 
         Pour les tilesets, on ajoute la surface entière seulement. Pour les mobiles, on enregistre aussi la partie du tileset qui nous intéresse.
         Pour les tilesets, on complète le dico de GIDs (lors de la création de la carte)."""
@@ -101,18 +101,20 @@ class Carte(Observateur):
                     self._completerDicoGids(nomTileset, tileset, self._dicoSurfaces[nomTileset]["Source"].get_width(), self._dicoSurfaces[nomTileset]["Source"].get_height())
             except pygame.error as erreur:
                 print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(nomTileset), str(erreur) )
-        if positionSource not in self._dicoSurfaces[nomTileset].keys() and positionSource is not False:
+        if mobile is True and positionSource not in self._dicoSurfaces[nomTileset].keys():  #On ne conserve les sous-surfaces que des mobiles
             self._dicoSurfaces[nomTileset][positionSource] = pygame.Surface((positionSource[2],positionSource[3]), flags=SRCALPHA).convert_alpha()
             self._dicoSurfaces[nomTileset][positionSource].blit(self._dicoSurfaces[nomTileset]["Source"], (0,0), area=positionSource)
+        elif mobile is False and positionSource is not False: #pour changerBloc : on retourne la sous-surface pour la blitter sur les tiles layers
+            return self._dicoSurfaces[nomTileset]["Source"].subsurface(positionSource)
 
     def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, vide=False):
         if self.tileExistant(x,y) is True and c < self.nombreCouches:
             bloc, jeu = self._tiles[x][y].bloc[c], self._jeu
             if vide is False:
-                bloc = Bloc(jeu,pnj=False,toutDonne=True, nomTileset=nomTileset, positionSource=positionSource, couleurTransparente=couleurTransparente, praticabilite=praticabilite)
+                bloc = Bloc(nomTileset=nomTileset, positionSource=positionSource, couleurTransparente=couleurTransparente, praticabilite=praticabilite)
                 self._tiles[x][y].bloc[c] = bloc
-                self._ajouterSurface(positionSource, DOSSIER_RESSOURCES+nomTileset, couleurTransparente)
-                self._tilesLayers[c].blit(self._dicoSurfaces[DOSSIER_RESSOURCES + nomTileset][positionSource], (x*self._hauteurTile, y*self._hauteurTile) )
+                surfaceBloc = self._ajouterSurface(positionSource, nomTileset, couleurTransparente, tileset=False, mobile=False)
+                self._tilesLayers[c].blit(surfaceBloc, (x*self._hauteurTile, y*self._hauteurTile) )
             else:
                 bloc, praticabilite = Bloc(jeu, vide=True), True
                 self._tiles[x][y].bloc[c] = bloc
@@ -313,7 +315,7 @@ class Carte(Observateur):
             surfaceTexte = self._jeu.zonePensee.polices["splashText"].render(p["texte"], p["antialias"], p["couleurTexte"], couleurFond)
             self._fenetre.blit(surfaceTexte, p["position"])
         elif nomTransformation == "Nuit":
-            self._fenetre.fill((0,0,0))
+            self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
             c = 0
             while c < self._nombreCouches: 
                 for nomPnj in self._pnj[c]: 
@@ -374,7 +376,7 @@ class Carte(Observateur):
             self._afficherZonePensee(affichageComplet=True)
             self._transformerSurfaceGlobalement()
             self._blitFrame = True
-
+        
         if self._blitFrame is True:
             if LIMITER_FPS:
                 self._jeu.horlogeFps.tick(NOMBRE_MAX_DE_FPS)

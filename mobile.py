@@ -50,8 +50,6 @@ class Mobile(EvenementConcret):
     def _initialiserDeplacement(self, tempsAttente, joueur=False, appuiJoueur=False, direction="Aucune"):
         """Initialise un déplacement"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile
-        """self._x, self._xOld = (self._x * hauteurTile), (self._x * hauteurTile)
-        self._y, self._yOld = (self._y * hauteurTile), (self._y * hauteurTile)"""
         self._gestionnaire.registerPosition(self._nom, int(self._positionCarte.left / hauteurTile), int(self._positionCarte.top / hauteurTile), self._c, joueur=joueur, appuiJoueur=appuiJoueur, direction=direction)
         self._ajusterPositionSource(False,self._direction)
         self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)

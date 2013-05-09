@@ -1,5 +1,5 @@
 # -*-coding:iso-8859-1 -*
-import pygame, queue, os
+import pygame, queue, os, collections
 from pygame.locals import *
 from .constantes import *
 from .horloge import *
@@ -19,9 +19,10 @@ class ZonePensee(Observable):
         self._etapeAffichage, self._penseeAGerer, self._auMoinsUnePenseeGeree = 0, Interrupteur(False), False
         self._nombreEtapes, self._surface, self._positionSurface, self._policeActuelle = -1, None, None, "parDefaut"
         self._couleur, self._tempsLecture = COULEUR_ECRITURE_PENSEE, 0
+        self._compteurMots = collections.Counter(self._messageActuel)
 
-    def _majPenseeActuelle(self, message, vitesse, police, couleur, tempsLecture):
-        self._message, self._vitesse = message, vitesse
+    def _majPenseeActuelle(self, message, vitesse, police, couleur, tempsLecture , nom):
+        self._message, self._vitesse, self._nomPensee = message, vitesse, nom
         self._etapeAffichage, self._auMoinsUnePenseeGeree = 0, True
         self._penseeAGerer.activer()
         self._nombreEtapes = len(self._message) #Autant d'étapes que de caractères
@@ -34,20 +35,27 @@ class ZonePensee(Observable):
         self.obsOnMiseAJour("_positionSurface", self._positionSurface)
         self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
 
+    def getMotActuel(self):
+        """Retourne le no du mot actuel de la pensée courante"""
+        return len(self._message[:self._etapeAffichage])
+
+    def getNomPensee(self):
+        return self._nomPensee
+
     def redonnerPositionSurface(self):
         """Fonction appelée lors d'un changement de carte qui redonne la position de la surface."""
         self.obsOnMiseAJour("_positionSurface", self._positionSurface)
 
-    def ajouterPensee(self, message, vitesse=VITESSE_PENSEE_PAR_DEFAUT, police="parDefaut", couleur=COULEUR_ECRITURE_PENSEE, tempsLecture=TEMPS_LECTURE_PENSEE):
+    def ajouterPensee(self, message, vitesse=VITESSE_PENSEE_PAR_DEFAUT, police="parDefaut", couleur=COULEUR_ECRITURE_PENSEE, tempsLecture=TEMPS_LECTURE_PENSEE, nom=False):
         """Ajoute une pensée à afficher. Elle devient un <message> affiché à la <vitesse> exprimée en millisecondes.
         La police <police> fait référence à un nom dans le dico des polices. Le <tempsLecture> est le temps en millisecondes nécessaire à la lecture :
         il sert de référence à de nombreux évènements, et permet d'afficher la pensée suivante après un certain temps seulement.
         Cette pensée n'est affichée immédiatement que si aucune autre pensée n'est actuellement gérée (en train de s'afficher, ou en train d'être lue).
         Si une autre pensée est déjà gérée, on ajoute cette nouvelle pensée à la queue."""
         if self._penseeAGerer.voir() is False:
-            self._majPenseeActuelle(message, vitesse, police, couleur, tempsLecture)
+            self._majPenseeActuelle(message, vitesse, police, couleur, tempsLecture, nom)
         else:
-            self._queuePensees.put_nowait(dict(message=message, vitesse=vitesse, police=police, couleur=couleur, tempsLecture=tempsLecture))
+            self._queuePensees.put_nowait(dict(message=message, vitesse=vitesse, police=police, couleur=couleur, tempsLecture=tempsLecture, nom=nom))
     
     def _gererPenseeActuelle(self):
         """S'il y a une pensée à gérer, gère son affichage. Sinon, gère la queue (pour prendre la pensée suivante)."""
@@ -79,7 +87,7 @@ class ZonePensee(Observable):
             self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
         else: #S'il y a encore des pensées dans la queue, on charge la prochaine pensée, on dit qu'elle est à gérer
             penseeCourante = self._queuePensees.get()
-            self._majPenseeActuelle(penseeCourante["message"], penseeCourante["vitesse"], penseeCourante["police"], penseeCourante["couleur"], penseeCourante["tempsLecture"])
+            self._majPenseeActuelle(penseeCourante["message"], penseeCourante["vitesse"], penseeCourante["police"], penseeCourante["couleur"], penseeCourante["tempsLecture"], penseeCourante["nom"])
 
     def gererSurfacePensee(self):
         self._gererPenseeActuelle()

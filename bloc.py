@@ -11,8 +11,11 @@ class Bloc:
         """__init__(positionSource, carte, bloc)
         Initialise un bloc dont le tile est à <positionSource> dans un tileset nommé <nomTileset>. <pnj> vaut True si c'est un PNJ. """
         self._vide = False
-        if pnj is False and vide is False and infos is not False:
-            self._nomTileset, self._praticabilite, self._positionSource = infos[0], infos[1], infos[2]
+        if pnj is False and vide is False: #Un bloc plein sur la carte
+            if infos: #Lors de la création de la carte
+                self._nomTileset, self._praticabilite, self._positionSource = infos[0], infos[1], infos[2]
+            else:  #Méthode changerBloc
+                self._positionSource, self._nomTileset, self._couleurTransparente = positionSource, nomTileset, couleurTransparente
             self._couleurTransparente, self._vide = (0,0,0), False
         elif vide is True:
             self._vide, self._praticabilite = True, True

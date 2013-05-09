@@ -26,6 +26,12 @@ class BoiteOutils():
         Horloge.initialiser(id(self), "DEBUG", 1000)
         self._gestionnaire = self._jeu.gestionnaireEvenements
 
+    def getMotPenseeActuelle(self):
+        return self._jeu.zonePensee.getMotActuel()
+
+    def getNomPensee(self):
+        return self._jeu.zonePensee.getNomPensee()
+
     def ajouterPensee(self, message, **parametres):
         """Actualise le message de la zone de pensée"""
         self._jeu.zonePensee.ajouterPensee(message, **parametres)
