@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
 """
@@ -28,8 +27,8 @@ It loads the \*.tmx files produced by Tiled.
 #     * 1.2.3.0 instead of 1.2-r (commercial distribution)
 #     * 1.2.3.5 instead of 1.2-r5 (commercial distribution with many bug fixes)
 
-__revision__ = "$Rev: 114 $"
-__version__ = "3.0.3." + __revision__[6:-2]
+__revision__ = "$Rev: 115 $"
+__version__ = "3.1.0." + __revision__[6:-2]
 __author__ = 'DR0ID @ 2009-2011'
 
 # import logging
@@ -46,7 +45,11 @@ __author__ = 'DR0ID @ 2009-2011'
 
 import sys
 from xml.dom import minidom, Node
-from io import StringIO
+try:
+    import StringIO
+    from StringIO import StringIO
+except:
+    from io import StringIO
 import os.path
 import struct
 import array
@@ -339,8 +342,8 @@ class TileLayer(object):
                     list_of_lines = content.split()
                     for line in list_of_lines:
                         self.decoded_content.extend(line.split(','))
-                    self.decoded_content = map(int, \
-                                [val for val in self.decoded_content if val])
+                    self.decoded_content = list(map(int, \
+                                [val for val in self.decoded_content if val]))
                     content = ""
                 else:
                     raise Exception('unknown data encoding %s' % \
@@ -348,7 +351,7 @@ class TileLayer(object):
             else:
                 # in the case of xml the encoded_content already contains a 
                 # list of integers
-                self.decoded_content = map(int, self.encoded_content)
+                self.decoded_content = list(map(int, self.encoded_content))
                 content = ""
             if self.compression:
                 if self.compression == 'gzip':
@@ -364,7 +367,7 @@ class TileLayer(object):
         struc = struct.Struct("<" + "I" * self.width)
         struc_unpack_from = struc.unpack_from
         self_decoded_content_extend = self.decoded_content.extend
-        for idx in xrange(0, len(content), 4 * self.width):
+        for idx in range(0, len(content), 4 * self.width):
             val = struc_unpack_from(content, idx)
             self_decoded_content_extend(val)
 
@@ -380,9 +383,9 @@ class TileLayer(object):
         self.content2D = []
 
         # generate the needed lists and fill them
-        for xpos in xrange(self.width):
+        for xpos in range(self.width):
             self.content2D.append(array.array('I'))
-            for ypos in xrange(self.height):
+            for ypos in range(self.height):
                 self.content2D[xpos].append( \
                                 self.decoded_content[xpos + ypos * self.width])
 
@@ -517,7 +520,7 @@ def decode_base64(in_str):
     :returns: decoded string
     """
     import base64
-    return base64.decodestring(in_str)
+    return base64.decodestring(in_str.encode('latin-1'))
 
 #  -----------------------------------------------------------------------------
 def decompress_gzip(in_str):
@@ -531,8 +534,13 @@ def decompress_gzip(in_str):
     :returns: uncompressed string
     """
     import gzip
-    # gzip can only handle file object therefore using StringIO
-    copmressed_stream = StringIO.StringIO(in_str)
+    
+    if sys.version_info > (2, ):
+        from io import BytesIO
+        copmressed_stream = BytesIO(in_str)
+    else:
+        # gzip can only handle file object therefore using StringIO
+        copmressed_stream = StringIO(in_str.decode("latin-1"))
     gzipper = gzip.GzipFile(fileobj=copmressed_stream)
     content = gzipper.read()
     gzipper.close()
@@ -709,7 +717,7 @@ class TileMapParser(object):
 
     def _set_attributes(self, node, obj):
         attrs = node.attributes
-        for attr_name in attrs.keys():
+        for attr_name in list(attrs.keys()):
             setattr(obj, attr_name, attrs.get(attr_name).nodeValue)
         self._get_properties(node, obj)
 
@@ -895,7 +903,7 @@ class AbstractResourceLoader(object):
                 img_str = decode_base64(a_tile_image.content)
             else:
                 raise Exception('unknown image encoding %s' % a_tile_image.encoding)
-        sio = StringIO.StringIO(img_str)
+        sio = StringIO(img_str)
         new_image = self._load_image_file_like(sio, a_tile_image.trans)
         return new_image
 
