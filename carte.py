@@ -1,5 +1,5 @@
 # -*-coding:utf-8 -*
-import pygame, configparser, math, narro.directions, numpy, os, sys
+import pygame, math, narro.directions, numpy, os, sys
 from pygame.locals import *
 from narro import *
 import pygame.surfarray as surfarray
@@ -20,7 +20,7 @@ import tiledtmxloader
 
 class Carte(Observateur):
     """Classe représentant une carte au niveau des données"""
-    def __init__(self, config, nomCarte, jeu): 
+    def __init__(self, nomCarte, jeu): 
         """Initialise la carte à exécuter  <carte> à partir des données issues de son fichier SQMAP.
         Cette méthode se charge surtout du transfert du format de carte .narromap à celui du Narro Engine (purement mémoriel)."""
         Observateur.__init__(self)
@@ -31,7 +31,7 @@ class Carte(Observateur):
         self._nombreCouches, self._hauteurTile = len(self._carteTiled.layers), self._carteTiled.tilewidth
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
-        self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, i = self._jeu.dicoSurfaces, list(), dict(), dict(), 0
+        self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, i = dict(), list(), dict(), dict(), 0
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
         self._scrollingPossible, self._etapeScrolling = False, 0
         self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee = None, None, False
@@ -306,7 +306,7 @@ class Carte(Observateur):
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
             pixels[:] = (0,0,0)
         elif nomTransformation == "RemplirNoir":
-            self._fenetre.fill((0,0,0))
+            self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
         elif "SplashText" in nomTransformation:
             if "couleurFond" in p.keys():
                 couleurFond=p["couleurFond"]
@@ -331,11 +331,6 @@ class Carte(Observateur):
             longueurFenetre, largeurFenetre = FENETRE["longueurFenetre"], FENETRE["largeurFenetre"]
             for nomTransformation in self._transformationsGlobales:
                 self._appliquerTransformationGlobale(nomTransformation, **self._parametresTransformations[nomTransformation]) #On applique la transfo
-                return True
-            else:
-                return False
-        else:
-            return False
 
     def _afficherZonePensee(self, affichageComplet=False):
         """S'il y a quelque chose à afficher, réaffiche la zone de pensée. 

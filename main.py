@@ -1,5 +1,5 @@
 # -*-coding:iso-8859-1 -*
-import pygame, configparser, os, sys
+import pygame, os, sys
 from pygame.locals import *
 from .constantes import *
 from .zonePensee import *
@@ -20,7 +20,7 @@ class Narro:
 
     def inclureGestionnaire(self, gestionnaireEvenements):
         self._gestionnaireEvenements = gestionnaireEvenements
-        self._gestionnaireEvenements.initialiserBoiteOutils()
+        self._boiteOutils = self._gestionnaireEvenements.initialiserBoiteOutils()
 
     def _initialiserAffichage(self, messageErreurInitialisationPygame, messageErreurInitialisationFenetre, longueurFenetre, largeurFenetre, largeurFenetreReelle, couleurFenetre, titreFenetre, flagsFenetre=0, forceDirectX=False):
         """Initialise Pygame et la fenêtre"""
@@ -59,16 +59,10 @@ class Narro:
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_surface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
             self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
+            self._boiteOutils.viderSonsFixes(self._carteActuelle.nom)
             del self._carteActuelle
-        ###
-        cheminFichierCarte = os.path.join(DOSSIER_RESSOURCES, self._carteAExecuter + EXTENSION_FICHIER_CARTE)
-        config = configparser.ConfigParser()
-        config.read(cheminFichierCarte)
-        self._carteActuelle = Carte(config, self._carteAExecuter, self)
-        #objgraph.show_backrefs([self._carteActuelle], filename="t.png")
-        ###
+        self._carteActuelle = Carte(self._carteAExecuter, self)
         self._premiereCarteChargee = True
-        #self._carteActuelle = self._cartes[self._carteAExecuter]
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface")
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_positionSurface")
@@ -84,7 +78,7 @@ class Narro:
     def executer(self):
         """Exécute le jeu"""
         self._jeuFini, self._carteAExecuter, self._changementCarte, self._cartes = False, str(NOM_CARTE_LANCEMENT), False, dict()
-        self._horlogeFps, self._premiereCarteChargee, self._dicoSurfaces = pygame.time.Clock(), False, dict()
+        self._horlogeFps, self._premiereCarteChargee = pygame.time.Clock(), False
         self._haut, self._gauche, UNITE = 0, 0, 2
         while self._jeuFini is not True: #Tant que le joueur ne veut pas quitter
             self._changementCarte = False #Si on veut changer de carte, il faut pouvoir rentrer dans la boucle ci-dessous pour la nouvelle carte
@@ -149,12 +143,6 @@ class Narro:
     def _setJoueur(self, nouveauJoueur):
         self._joueur = nouveauJoueur
 
-    def _getDicoSurfaces(self):
-        return self._dicoSurfaces
-
-    def _setDicoSurfaces(self, val):
-        self._dicoSurfaces = val
-
     def _getHorlogeFps(self):
         return self._horlogeFps
 
@@ -182,6 +170,5 @@ class Narro:
     carteActuelle = property(_getCarteActuelle)
     zonePensee = property(_getZonePensee)
     joueur = property(fget=_getJoueur, fset=_setJoueur)
-    dicoSurfaces = property(_getDicoSurfaces, _setDicoSurfaces)
     horlogeFps = property(fget=_getHorlogeFps)
     gestionnaireEvenements = property(_getGestionnaireEvenements)

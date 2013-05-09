@@ -36,6 +36,7 @@ class GestionnaireEvenements():
 
     def initialiserBoiteOutils(self):
         self._boiteOutils.initialiser()
+        return self._boiteOutils
     
     def gererEvenements(self, nomCarteActuelle):
         """Gère tous les évènements"""

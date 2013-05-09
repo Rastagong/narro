@@ -53,12 +53,13 @@ class AnimateurToucheAction(Evenement):
         elif self._animation == True and Horloge.sonner(id(self), "Maj rayon") is True:
             self._rayon += 2
             self._boiteOutils.ajouterTransformation(False, "Action Joueur", rayon=self._rayon)
-            Horloge.initialiser(id(self), "Maj rayon", 1)
+            tempsActuel = pygame.time.get_ticks()
+            Horloge.initialiser(id(self), "Maj rayon", 10)
+            self._tempsPrecedent = tempsActuel
             if self._rayon == 30:
                 self._animation, self._rayon = False, 0
         elif self._animation is False and Horloge.sonner(id(self), "Maj rayon") is True:
             self._boiteOutils.retirerTransformation(False, "Action Joueur")
-
 
 
 class Panneau(EvenementConcret):
