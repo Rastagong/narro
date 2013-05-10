@@ -1,7 +1,8 @@
 Narro Engine 0.2
 ================
 Written by Rastagong (http://rastagong.net)
-License: MIT license (see License file)
+License: MIT license (see the License.txt file)
+Attributions: the tmxreader module comes from pytmxloader, a package written by Dr0id (https://code.google.com/p/pytmxloader/)
 The Narro Engine is a cross-platform RPG engine made with love, dedication, Pygame and Python 3
 
 Compiling instructions

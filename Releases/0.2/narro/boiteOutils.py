@@ -111,10 +111,11 @@ class BoiteOutils():
     
     def viderSonsFixes(self, nomCarte):
         """Quand on change de cartes, on vide les sons fixes"""
-        for instance in self._sonsFixes[nomCarte]:
-            self._canauxSons[instance].fadeout(3000)
-            Horloge.arreterSonnerie(id(self), instance)
-        self._sonsFixes.pop(nomCarte)
+        if nomCarte in self._sonsFixes.keys():
+            for instance in self._sonsFixes[nomCarte]:
+                self._canauxSons[instance].fadeout(3000)
+                Horloge.arreterSonnerie(id(self), instance)
+            self._sonsFixes.pop(nomCarte)
 
     def actualiserSonsFixes(self):
         """Fonction exécutée à chaque boucle du jeu. Maintient la liste des sons fixes à jour."""

@@ -33,7 +33,7 @@ if REDIRECTION_FICHIER_ERREURS is True:
 MESSAGE_PAUSE_PAR_DEFAUT = "Veuillez appuyer sur la touche « Entrée » pour continuer..." 
 
 #Chemin relatif vers le dossier des ressources
-DOSSIER_RESSOURCES = "../Ressources/"
+DOSSIER_RESSOURCES = "Ressources"
 
 #Si cette constante vaut<True>, une répétition de l'évènement KEYDOWN aura lieu quand une touche est appuyée. Voir la constante suivante pour l'intervalle.
 REPETITION_TOUCHES = False
@@ -161,6 +161,10 @@ FREQUENCE_PAUSE_BALADE = 2
 #Le fait d'être en session de debug. Si <True>, un Debugger/Memory profiler sera initialisé (Pympler). 
 SESSION_DEBUG = False
 
+#Le fichier qui doit servir d'icône, à placer dans le dossier de ressources. 
+#S'il n'y en a aucun (<False>), Pygame tentera de mettre l'icône par défaut, mais cela ne fonctionne pas sur tous les systèmes/avec cx_Freeze (du moins on dirait).
+FICHIER_ICONE = False
+
 ##Messages d'erreurs
 ##
 ##
@@ -182,5 +186,5 @@ MESSAGE_ERREUR_MUTATION_DIRECTION2 = "La direction doit faire partie de la liste
 #
 MESSAGE_ERREUR_UTILISATION_INTERRUPTEUR_INVERSE = "Il est impossible d'activer, désactiver, inverser ou changer l'état d'un interrupteur inversé : son état est indexé sur celui de l'interrupteur source."
 MESSAGE_ERREUR_TILES_NON_ADJACENTS = "Les tiles {0} et {1} doivent être adjacents, et ce horizontalement ou verticalement uniquement (pas en diagonale)."
-INITIAL = 0
+MESSAGE_ERREUR_INITIALISATION_ICONE = "L'icône {0} n'a pas pu être chargée. Pygame tentera d'utiliser l'icône par défaut."
 from constantes import * #Import des constantes du projet, pour écraser celles du Narro Engine en cas de redéfinition

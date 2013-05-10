@@ -37,8 +37,14 @@ class Narro:
             print(messageErreurInitialisationFenetre)
             pygame.quit()
             raise SystemExit
-        self._fenetre.fill(couleurFenetre)
         pygame.display.set_caption(titreFenetre)
+        if FICHIER_ICONE is not False:
+            try:
+                surfaceIcone = pygame.image.load(os.path.join(DOSSIER_RESSOURCES, FICHIER_ICONE)).convert_alpha()
+                pygame.display.set_icon(surfaceIcone)
+            except Exception as e:
+                print(MESSAGE_ERREUR_INITIALISATION_ICONE.format(FICHIER_ICONE), e)
+        self._fenetre.fill(couleurFenetre)
         if REPETITION_TOUCHES is True:
             pygame.key.set_repeat(1,INTERVALLE_REPETITION_TOUCHES)
         pygame.event.set_allowed(None)
