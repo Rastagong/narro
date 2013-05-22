@@ -1,4 +1,4 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame,pdb,math
 from pygame.locals import *
 from .constantes import *
@@ -9,7 +9,7 @@ from .interrupteur import *
 
 
 class BoiteOutils():
-    """Classe permettant aux évènements d'accéder à des méthodes diverses pour réaliser des actions."""
+    """Classe permettant aux Ã©vÃ¨nements d'accÃ©der Ã  des mÃ©thodes diverses pour rÃ©aliser des actions."""
 
     def __init__(self, jeu, INTERRUPTEURS, VARIABLES):
         self._jeu, self._interrupteurs, self._variables = jeu, dict(), dict()
@@ -33,15 +33,15 @@ class BoiteOutils():
         return self._jeu.zonePensee.getNomPensee()
 
     def ajouterPensee(self, message, **parametres):
-        """Actualise le message de la zone de pensée"""
+        """Actualise le message de la zone de pensÃ©e"""
         self._jeu.zonePensee.ajouterPensee(message, **parametres)
 
     def mettreToutAChanger(self):
-        """Prévient la carte que tout est à changer."""
+        """PrÃ©vient la carte que tout est Ã  changer."""
         self._jeu.carteActuelle.mettreToutAChanger()
 
     def changerPraticabilite(self, x, y, c, nouvellePraticabilite):
-        """Change la praticabilité d'un bloc"""
+        """Change la praticabilitÃ© d'un bloc"""
         self._jeu.carteActuelle.tiles[x][y].modifierPraticabilite(c, nouvellePraticabilite)
 
     def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv):
@@ -49,7 +49,7 @@ class BoiteOutils():
         self._jeu.carteActuelle.changerBloc(x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv)
 
     def determinerPresenceTilesSurCarte(self, c, nomTileset, positionSource):
-        """Retourne les coordonnées de tous les tiles de la couche <c> présents sur la carte qui viennent du tileset <nomTileset> en <positionSource>, sous forme d'une liste."""
+        """Retourne les coordonnÃ©es de tous les tiles de la couche <c> prÃ©sents sur la carte qui viennent du tileset <nomTileset> en <positionSource>, sous forme d'une liste."""
         tilesTrouves, carte, x, y, nomTileset = [], self._jeu.carteActuelle, 0, 0, nomTileset
         while x < carte.longueur:
             y = 0
@@ -62,7 +62,7 @@ class BoiteOutils():
         return tilesTrouves
 
     def ajouterTransformation(self, globalite, nomTransformation, **parametres):
-        """Ordonne à la carte d'appliquer, à chaque frame, la transformation <nomTransformation> avec les <parametres> (un dictionnaire).
+        """Ordonne Ã  la carte d'appliquer, Ã  chaque frame, la transformation <nomTransformation> avec les <parametres> (un dictionnaire).
         Si <globalite> vaut <True>, il s'agit d'une transformation globale."""
         if globalite is True and nomTransformation not in self._jeu.carteActuelle.transformationsGlobales:
             self._jeu.carteActuelle.transformationsGlobales.append(nomTransformation)
@@ -71,7 +71,7 @@ class BoiteOutils():
         self._jeu.carteActuelle.parametresTransformations[nomTransformation] = parametres
 
     def retirerTransformation(self, globalite, nomTransformation):
-        """Ordonne à la carte de ne plus appliquer la transformation <nomTransformation>, globale si <globalite> vaut <True>."""
+        """Ordonne Ã  la carte de ne plus appliquer la transformation <nomTransformation>, globale si <globalite> vaut <True>."""
         if globalite is True and nomTransformation in self._jeu.carteActuelle.transformationsGlobales:
             self._jeu.carteActuelle.transformationsGlobales.remove(nomTransformation)
         if globalite is False and nomTransformation in self._jeu.carteActuelle.transformationsParties:
@@ -80,14 +80,14 @@ class BoiteOutils():
             self._jeu.carteActuelle.parametresTransformations[nomTransformation] = dict()
 
     def jouerSon(self, nomSon, instance, duree=0, nombreEcoutes=1, fixe=False, xFixe=-1, yFixe=-1, evenementFixe=-1, volume=VOLUME_MUSIQUE):
-        """Joue le son nommé <nomSon> en une instance nommée <instance>. 
-        Le son peut s'arrêter au bout d'un certain temps <duree> (en millisecondes).
-        <nombreEcoutes> désigne le nombre de fois où le son est joué.
-        <fixe> est un booléen. 
-           Quand il vaut <True>, le son est localisé dans l'espace, càd que son volume décrôit quand le joueur s'en éloigne (position à préciser dans <gérerVolumeSonsFixes>.
-           La position du son peut être désignée soit par <xFixe><yFixe>, soit par le nom d'un évènement <evenementFixe) (un PNJ qui chante par exemple).
-           <evenementFixe> est le nom de l'évènement auquel le son est alors attaché.
-        <volume> désigne le volume du son (compris entre 0.0 et 1.0)."""
+        """Joue le son nommÃ© <nomSon> en une instance nommÃ©e <instance>. 
+        Le son peut s'arrÃªter au bout d'un certain temps <duree> (en millisecondes).
+        <nombreEcoutes> dÃ©signe le nombre de fois oÃ¹ le son est jouÃ©.
+        <fixe> est un boolÃ©en. 
+           Quand il vaut <True>, le son est localisÃ© dans l'espace, cÃ d que son volume dÃ©crÃ´it quand le joueur s'en Ã©loigne (position Ã  prÃ©ciser dans <gÃ©rerVolumeSonsFixes>.
+           La position du son peut Ãªtre dÃ©signÃ©e soit par <xFixe><yFixe>, soit par le nom d'un Ã©vÃ¨nement <evenementFixe) (un PNJ qui chante par exemple).
+           <evenementFixe> est le nom de l'Ã©vÃ¨nement auquel le son est alors attachÃ©.
+        <volume> dÃ©signe le volume du son (compris entre 0.0 et 1.0)."""
         if nomSon not in self._sons.keys():
             self._sons[nomSon] = pygame.mixer.Sound(os.path.join(DOSSIER_RESSOURCES, nomSon + ".wav"))
         self._canauxSons[instance] = pygame.mixer.find_channel()
@@ -118,7 +118,7 @@ class BoiteOutils():
             self._sonsFixes.pop(nomCarte)
 
     def actualiserSonsFixes(self):
-        """Fonction exécutée à chaque boucle du jeu. Maintient la liste des sons fixes à jour."""
+        """Fonction exÃ©cutÃ©e Ã  chaque boucle du jeu. Maintient la liste des sons fixes Ã  jour."""
         if self._jeu.carteAExecuter in self._sonsFixes.keys():
             nouveauxSonsFixes = list(self._sonsFixes[self._jeu.carteAExecuter])
             for instance in self._sonsFixes[self._jeu.carteAExecuter]:
@@ -127,16 +127,16 @@ class BoiteOutils():
             self._sonsFixes[self._jeu.carteAExecuter] = nouveauxSonsFixes
     
     def gererVolumeSonsFixes(self, xJoueur, yJoueur):
-        """Fonction appelée par l'évènement abstrait modulateur de musique dès que le joueur a bougé. 
-        Sert à mettre à jour le volume des sons fixes en fonction de sa position."""
+        """Fonction appelÃ©e par l'Ã©vÃ¨nement abstrait modulateur de musique dÃ¨s que le joueur a bougÃ©. 
+        Sert Ã  mettre Ã  jour le volume des sons fixes en fonction de sa position."""
         if self._jeu.carteAExecuter in self._sonsFixes.keys():
             for instance in self._sonsFixes[self._jeu.carteAExecuter]:
-                if isinstance(self._sourcesSonsFixes[instance], str): #Si la source du son fixe est un évènement (désigné par une chaîne)
+                if isinstance(self._sourcesSonsFixes[instance], str): #Si la source du son fixe est un Ã©vÃ¨nement (dÃ©signÃ© par une chaÃ®ne)
                     (xFixe, yFixe) = self.getCoordonneesEvenement(self._sourcesSonsFixes[instance])
-                else: #Sinon, la source donne directement les coordonnées
+                else: #Sinon, la source donne directement les coordonnÃ©es
                     (xFixe, yFixe) = self._sourcesSonsFixes[instance]
-                estimationEloignement = abs(xJoueur - xFixe) + abs(yJoueur - yFixe) - 1 #On soustrait 1 car le joueur ne peut pas être SUR la source
-                nouveauVolume = self._volumesFixes[instance] - (estimationEloignement / 50) #Plus on est éloigné, plus le volume est diminué. 1 bloc d'éloignement = 0,02 ua en moins sur le volume
+                estimationEloignement = abs(xJoueur - xFixe) + abs(yJoueur - yFixe) - 1 #On soustrait 1 car le joueur ne peut pas Ãªtre SUR la source
+                nouveauVolume = self._volumesFixes[instance] - (estimationEloignement / 50) #Plus on est Ã©loignÃ©, plus le volume est diminuÃ©. 1 bloc d'Ã©loignement = 0,02 ua en moins sur le volume
                 if nouveauVolume < 0:
                     nouveauVolume = 0
                 self._canauxSons[instance].set_volume(nouveauVolume)
@@ -145,7 +145,7 @@ class BoiteOutils():
         self._jeu.carteActuelle.supprimerPNJ(nomPNJ, couche)
 
     def teleporterSurPosition(self, positionCarte, c, positionSource, nomTileset, couleurTransparente, nomPNJ):
-        """Téléporte un mobile à une autre position de la carte actuelle.""" 
+        """TÃ©lÃ©porte un mobile Ã  une autre position de la carte actuelle.""" 
         deplacementPossible = self._jeu.carteActuelle.deplacementPossible(positionCarte, c, nomPNJ) 
         if deplacementPossible is True:
             self._jeu.carteActuelle.poserPNJ(positionCarte, c, positionSource, nomTileset, couleurTransparente, nomPNJ)
@@ -154,10 +154,10 @@ class BoiteOutils():
         self._jeu.joueur.teleporterSurPosition(xTile, yTile, direction, couche=couche)
 
     def teleporterSurCarte(self, nomCarte, x, y, c, direction):
-        """Téléporte le joueur sur la carte <nomCarte> en <x>,<y>,<c> avec un regard en <direction>."""
+        """TÃ©lÃ©porte le joueur sur la carte <nomCarte> en <x>,<y>,<c> avec un regard en <direction>."""
         jeu = self._jeu
         jeu.carteAExecuter, jeu.changementCarte = nomCarte, True
-        self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
+        self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].pop("Joueur") #Le joueur ne doit plus Ãªtre traitÃ© sur l'ancienne carte
         self._gestionnaire.evenements["concrets"][nomCarte]["Joueur"] = [jeu.joueur, (x,y), direction]
         self._gestionnaire.evenements["concrets"][nomCarte].move_to_end("Joueur", last=False)
         jeu.joueur.transfertCarte(x, y, c, direction)
@@ -166,7 +166,7 @@ class BoiteOutils():
         return self._jeu.joueur.mouvement
 
     def positionProcheEvenement(self, x, y, nomEvenement):
-        """Retourne <True> si <x><y> est à une case de l'évènement nommé <nomEvenement>."""
+        """Retourne <True> si <x><y> est Ã  une case de l'Ã©vÃ¨nement nommÃ© <nomEvenement>."""
         (xEvenement,yEvenement) = self.getCoordonneesEvenement(nomEvenement)
         if (x == xEvenement + 1 or x == xEvenement - 1 or x == xEvenement) and (y == yEvenement + 1 or y == yEvenement - 1 or y == yEvenement) and not (x == xEvenement and y == yEvenement):
             return True
@@ -174,7 +174,7 @@ class BoiteOutils():
             return False
 
     def _positionsAdjacentes(self, position, positionArrivee, blocsExclus, typeTile, c):
-        """Retourne les positions adjacentes (pas en diagonale) à <position>."""
+        """Retourne les positions adjacentes (pas en diagonale) Ã  <position>."""
         positionsAdjacentes = [ (position[0]+1, position[1]), (position[0]-1, position[1]), (position[0], position[1]+1), (position[0], position[1]-1) ]
         positionsCorrectes, i = list(), 0
         if blocsExclus is None:
@@ -185,24 +185,24 @@ class BoiteOutils():
             if self._jeu.carteActuelle.tileExistant(x, y) is True and ((self._jeu.carteActuelle.tilePraticable(x, y, c) is True) or (positionAdjacente == positionArrivee)) and ((x,y) not in blocsExclus or positionAdjacente == positionArrivee):
                 if typeTile is False:
                     positionsCorrectes.append(positionAdjacente)
-                else: #Vérification du type de tile : on n'ajoute aux positions correctes que ceux faisant partie de la liste fournie
+                else: #VÃ©rification du type de tile : on n'ajoute aux positions correctes que ceux faisant partie de la liste fournie
                     bloc = self._jeu.carteActuelle.tiles[x][y].bloc[c]
                     while bloc.vide == True and c > 0:
                         c -= 1
                         bloc = self._jeu.carteActuelle.tiles[x][y].bloc[c]
-                    if (bloc.nomTileset, bloc.positionSource) in typeTile: #La liste fournie est composée de tuples (<nomTileset>,<positionSource>) des tiles autorisés
+                    if (bloc.nomTileset, bloc.positionSource) in typeTile: #La liste fournie est composÃ©e de tuples (<nomTileset>,<positionSource>) des tiles autorisÃ©s
                         positionsCorrectes.append(positionAdjacente)
             i += 1
         return positionsCorrectes
 
     def _estimationDistanceRestante(self, positionActuelle, destination):
-        """Donne, en utilisant la méthode de Manhattan, une estimation heuristique entre <positionActuelle> et <destination>. 
-        Cette estimation donne, avec le nombre de positions déjà parcourues, un coût <score> à chaque position.
-        La position ayant le moindre côut est analysée prioritairement à chaque fois (algorithme A*)."""
+        """Donne, en utilisant la mÃ©thode de Manhattan, une estimation heuristique entre <positionActuelle> et <destination>. 
+        Cette estimation donne, avec le nombre de positions dÃ©jÃ  parcourues, un coÃ»t <score> Ã  chaque position.
+        La position ayant le moindre cÃ´ut est analysÃ©e prioritairement Ã  chaque fois (algorithme A*)."""
         return abs(destination[0]-positionActuelle[0]) + abs(destination[1]-positionActuelle[0])
 
     def _determinerChemin(self, parents, position, positionDepart, chemin):
-        """Détermine le chemin pour un mobile à partir de <position>, l'arrivée, et de la chaîne de parents <parents>. Le chemin est la liste de positions <chemin>."""
+        """DÃ©termine le chemin pour un mobile Ã  partir de <position>, l'arrivÃ©e, et de la chaÃ®ne de parents <parents>. Le chemin est la liste de positions <chemin>."""
         if parents[position] != positionDepart:
             chemin.append(parents[position])
             self._determinerChemin(parents, parents[position], positionDepart, chemin)
@@ -210,7 +210,7 @@ class BoiteOutils():
             chemin.append(positionDepart)
 
     def _determinerDirectionDeplacement(self, positionDepart, positionArrivee):
-        """Détermine la direction correspondant au déplacement entre <positionDepart> et <positionArrivee>, qui sont deux tiles adjacents (pas en diagonale)."""
+        """DÃ©termine la direction correspondant au dÃ©placement entre <positionDepart> et <positionArrivee>, qui sont deux tiles adjacents (pas en diagonale)."""
         x1, y1, x2, y2 = positionDepart[0], positionDepart[1], positionArrivee[0], positionArrivee[1]
         if x2 == x1 + 1:
             return "Droite"
@@ -235,25 +235,25 @@ class BoiteOutils():
 
     def cheminVersJoueur(self, x, y, c, blocsExclus=None):
         """Retourne un chemin (une liste de directions) pour un mobile en <x><y><c> vers le joueur ne passant par aucun bloc de <blocsExclus>.
-        Le chemin fait se tourner le mobile vers le joueur une fois à proximité (par une direction de regard)."""
+        Le chemin fait se tourner le mobile vers le joueur une fois Ã  proximitÃ© (par une direction de regard)."""
         (xJoueur, yJoueur) = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
         return self.cheminVersPosition(x, y, c, xJoueur, yJoueur, arretAvant=True, regardAvant=True, blocsExclus=blocsExclus)
 
     def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE, typeTile=False):
         """Retourne un chemin (une liste de directions) pour un mobile en <x><y><c> vers <xArrivee><yArrivee> ne passant par aucun bloc de <blocsExclus>.
-        Si <arretAvant> vaut <True>, le chemin s'arrêt une case avant la destination. 
-        Si <regardAvant> vaut <True>, le PNJ regarde la position d'arrivée à la fin.
-        Si <regardFinal> est fourni, le PNJ regarde dans la direction en question à l'arrivée.
-        Si <typeTile> est fourni, le PNJ n'empruntera que les tiles définis dans cette liste de tuples (<nomTileset>,<positionSource>)."""
+        Si <arretAvant> vaut <True>, le chemin s'arrÃªt une case avant la destination. 
+        Si <regardAvant> vaut <True>, le PNJ regarde la position d'arrivÃ©e Ã  la fin.
+        Si <regardFinal> est fourni, le PNJ regarde dans la direction en question Ã  l'arrivÃ©e.
+        Si <typeTile> est fourni, le PNJ n'empruntera que les tiles dÃ©finis dans cette liste de tuples (<nomTileset>,<positionSource>)."""
         positionArrivee, positionDepart = (xArrivee, yArrivee), (int(x), int(y))
         positionsVues, positionsLibres = list(), [positionDepart]
         if positionArrivee == positionDepart:
             return ["Aucune"]
         scores, scoresPositions, parents = {positionDepart:self._estimationDistanceRestante(positionDepart, positionArrivee)}, {positionDepart:0}, {positionDepart:positionDepart}
-        positionsLibres = sorted(positionsLibres, key=lambda position: scores[position]) #Positions à examiner
+        positionsLibres = sorted(positionsLibres, key=lambda position: scores[position]) #Positions Ã  examiner
         if blocsExclus is not None:
             for (xExclu,yExclu) in blocsExclus:
-                if xArrivee == xExclu and yArrivee == yExclu: #Si le bloc d'arrivée a été exclu
+                if xArrivee == xExclu and yArrivee == yExclu: #Si le bloc d'arrivÃ©e a Ã©tÃ© exclu
                     blocsExclus.remove((xExclu,yExclu))
         while len(positionsLibres) > 0:
             position = positionsLibres[0]
@@ -263,8 +263,8 @@ class BoiteOutils():
                 chemin = [position]
                 self._determinerChemin(parents, position, positionDepart, chemin)
                 chemin = self._transformerPositionsCheminEnDirections(chemin)
-                if arretAvant and regardAvant: #S'il faut regarder la position de fin à l'arrivée...
-                    chemin[len(chemin)-1] = "R" + chemin[len(chemin)-1] #On rajoute R à la direction pour qu'il y ait un regard
+                if arretAvant and regardAvant: #S'il faut regarder la position de fin Ã  l'arrivÃ©e...
+                    chemin[len(chemin)-1] = "R" + chemin[len(chemin)-1] #On rajoute R Ã  la direction pour qu'il y ait un regard
                 elif arretAvant:
                     del chemin[len(chemin)-1]
                 if regardFinal is not False:
@@ -279,37 +279,37 @@ class BoiteOutils():
             i = 0
             while i < len(voisins):
                 voisin = voisins[i]
-                if positionsVues.count(voisin) == 0: #Si la position n'est pas définitivement vérifiée
+                if positionsVues.count(voisin) == 0: #Si la position n'est pas dÃ©finitivement vÃ©rifiÃ©e
                     score = scoresPositions[parents[position]] + 1 + self._estimationDistanceRestante(voisin, positionArrivee) 
-                    if positionsLibres.count(voisin) == 0: #Si on ne l'a même pas examinée
+                    if positionsLibres.count(voisin) == 0: #Si on ne l'a mÃªme pas examinÃ©e
                         positionsLibres.append(voisin)
                         meilleurChemin = True
                         parents[voisin] = position
-                    elif score < scores[voisin]: #Si on l'a déjà examinée mais qu'elle permet d'arriver plus vite
+                    elif score < scores[voisin]: #Si on l'a dÃ©jÃ  examinÃ©e mais qu'elle permet d'arriver plus vite
                         meilleurChemin = True
                     else:
                         meilleurChemin = False
-                    if meilleurChemin: #Si, en définitive, le score est meilleur (ou nouveau) -> Màj du score et du parent
+                    if meilleurChemin: #Si, en dÃ©finitive, le score est meilleur (ou nouveau) -> MÃ j du score et du parent
                         scores[voisin] = score
                         scoresPositions[voisin] = scoresPositions[parents[voisin]] + 1
                         parents[voisin] = position
                 i += 1
-            positionsLibres = sorted(positionsLibres, key=lambda position: scores[position]) #On trie les positions à examiner pour avoir la meilleure en premier
+            positionsLibres = sorted(positionsLibres, key=lambda position: scores[position]) #On trie les positions Ã  examiner pour avoir la meilleure en premier
         return ["RelanceEtoile"]
 
     def getCoordonneesJoueur(self):
-        """Retourne un tuple contenant les coordonnées du joueur."""
+        """Retourne un tuple contenant les coordonnÃ©es du joueur."""
         return (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
 
     def getCoordonneesEvenement(self, nomEvenement):
-        """Retourne les coordonnées de l'évènement nommé <nomEvenement> sur la carte actuelle. S'il n'existe pas, retourne <False>."""
+        """Retourne les coordonnÃ©es de l'Ã©vÃ¨nement nommÃ© <nomEvenement> sur la carte actuelle. S'il n'existe pas, retourne <False>."""
         if nomEvenement in self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].keys():
             return self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte][nomEvenement][1]
         else:
             return False
     
     def deplacementVersPnj(self, nomEvenement, x, y):
-        """Retourne une instruction de déplacement vers le PNJ nommé <nomEvenement> situé à côté."""
+        """Retourne une instruction de dÃ©placement vers le PNJ nommÃ© <nomEvenement> situÃ© Ã  cÃ´tÃ©."""
         if nomEvenement in self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].keys():
             (xEvenement, yEvenement) = self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte][nomEvenement][1]
             if xEvenement == x - 1:
@@ -326,7 +326,7 @@ class BoiteOutils():
             return False
 
     def regardVersPnj(self, nomEvenement, x, y):
-        """Retourne une instruction de regard vers le PNJ nommé <nomEvenement> situé à côté."""
+        """Retourne une instruction de regard vers le PNJ nommÃ© <nomEvenement> situÃ© Ã  cÃ´tÃ©."""
         direction = self.deplacementVersPnj(nomEvenement, x, y) 
         if direction is not False:
             return ["R" + direction[0]]
@@ -334,7 +334,7 @@ class BoiteOutils():
             return False
 
     def deplacementSPVersPnj(self, nomEvenement, tempsDeplacement, x, y):
-        """Retourne une instruction de déplacement sur place en direction du PNJ nommé <nomEvenement> situé à côté."""
+        """Retourne une instruction de dÃ©placement sur place en direction du PNJ nommÃ© <nomEvenement> situÃ© Ã  cÃ´tÃ©."""
         direction = self.deplacementVersPnj(nomEvenement, x, y) 
         if direction is not False:
             return ["V" + direction[0] + str(tempsDeplacement)]

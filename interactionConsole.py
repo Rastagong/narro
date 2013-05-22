@@ -1,10 +1,10 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import os,sys
 
 
 
 class Interacteur:
-	"""Cette classe gère l'interaction avec l'utilisateur en mode console."""
+	"""Cette classe gÃ¨re l'interaction avec l'utilisateur en mode console."""
 	def __init__(self,messagePauseParDefaut=""):
 		self.messagePauseParDefaut = messagePauseParDefaut
 
@@ -26,7 +26,7 @@ class Interacteur:
 		try:
 			message = str(message)
 		except ValueError:
-			print("Une erreur s'est produite car vous devez entrer une chaîne de caractères à afficher. Le programme va se fermer.")
+			print("Une erreur s'est produite car vous devez entrer une chaÃ®ne de caractÃ¨res Ã  afficher. Le programme va se fermer.")
 			raise SystemExit
 		else:
 			print(message)
@@ -47,16 +47,16 @@ class Interacteur:
 				mettreEnPause()
 			else:
 				if choix in choixPossibles:
-					print("Très bien !")
+					print("TrÃ¨s bien !")
 					choixBienFait = True
 				else:
-					print("Le chiffre que vous avez entré ne correspond à aucun choix.")
+					print("Le chiffre que vous avez entrÃ© ne correspond Ã  aucun choix.")
 					mettreEnPause()
 		return choix
 
 	def recupererNombre(self, message):
 		"""recupererNombre(message) -> int
-		Après avoir affiché message à l'écran, demande à l'utilisateur de rentrer un entier et le retourne retourne."""
+		AprÃ¨s avoir affichÃ© message Ã  l'Ã©cran, demande Ã  l'utilisateur de rentrer un entier et le retourne retourne."""
 		nombreBienEntre = False
 		while nombreBienEntre is not True:
 			print(message)
@@ -64,7 +64,7 @@ class Interacteur:
 			try:
 				nombre = int(nombre)
 			except:
-				print("Vous n'avez pas entré de nombre.")
+				print("Vous n'avez pas entrÃ© de nombre.")
 				nombre = 0
 			else:
 				nombreBienEntre = True
@@ -72,7 +72,7 @@ class Interacteur:
 
 	def recupererChaine(self, message):
 		"""recupererChaine(message) -> str
-		Après avoir affiché message à l'écran, demande à l'utilisateur de rentrer une chaîne de caractères et la retourne."""
+		AprÃ¨s avoir affichÃ© message Ã  l'Ã©cran, demande Ã  l'utilisateur de rentrer une chaÃ®ne de caractÃ¨res et la retourne."""
 		chaineBienEntree = False
 		while chaineBienEntree is not True:
 			print(message)
@@ -80,7 +80,7 @@ class Interacteur:
 			try:
 				chaine = str(chaine)
 			except:
-				print("Vous n'avez pas entré de texte.")
+				print("Vous n'avez pas entrÃ© de texte.")
 				chaine = ""
 			else:
 				chaineBienEntree = True
@@ -88,7 +88,7 @@ class Interacteur:
 
 	def listerNombres(self, min=1, max=100):
 		""" listerNombres(intMin,intMax) -> list
-		Retourne une liste de nombres allant de intMin à intMax
+		Retourne une liste de nombres allant de intMin Ã  intMax
 		Remarque : intMin < intMax """
 		if min > max:
 			min, max = max, min #Maintenant min <= max
@@ -100,7 +100,7 @@ class Interacteur:
 
 	def demanderInfosCarte(self,listeMessages, tileset, couleurTransparente, messageErreurChargementTileset, positionSourceBlocVide, positionSourceBlocRempli, nombreCouches):
 		"""demanderInfosCarte(listeMessages) -> dict
-		Demande à l'utilisateur les infos nécessaires pour la création d'une carte et les retourne dans un dictionnaire. 
+		Demande Ã  l'utilisateur les infos nÃ©cessaires pour la crÃ©ation d'une carte et les retourne dans un dictionnaire. 
 		Lors de la demande, affiche pour chaque info le message correspondant contenu dans listeMessages."""
 		infosCarte = dict()
 		infosCarte["nom"] = self.recupererChaine(listeMessages[0])
@@ -116,8 +116,8 @@ class Interacteur:
 		infosCarte["nombreCouches"] = nombreCouches
 		return infosCarte
 
-if __name__ == "__main__": #Simple test de fonctionnement ; ne réalise rien pour le programme
-	interacteur = Interacteur("Appuyez sur Entrée") 
+if __name__ == "__main__": #Simple test de fonctionnement ; ne rÃ©alise rien pour le programme
+	interacteur = Interacteur("Appuyez sur EntrÃ©e") 
 	menuDeMidi = interacteur.recupererChoixDuJoueur((1,2),"Que voulez-vous manger aujourd'hui ? \n1.Poulet frites\n2.Lapin aux pruneaux")
 	interacteur.mettreEnPause()
 	if menuDeMidi is 1:

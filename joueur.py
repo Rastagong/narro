@@ -1,4 +1,4 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame,pdb,math
 from pygame.locals import *
 from .constantes import *
@@ -10,25 +10,25 @@ from .observable import *
 
 
 class Joueur(Mobile, Observable):
-    """Classe représentant le joueur"""
+    """Classe reprÃ©sentant le joueur"""
 
     def __init__(self, jeu, gestionnaire, x, y, c, fichier=FICHIER_JOUEUR_PAR_DEFAUT, persoCharset=CHARSET_JOUEUR_PAR_DEFAUT, couleurTransparente=COULEUR_TRANSPARENTE_FICHIER_JOUEUR_PAR_DEFAUT, vitesseDeplacement=VITESSE_DEPLACEMENT_JOUEUR_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_JOUEUR_PAR_DEFAUT, nom=NOM_EVENEMENT_JOUEUR_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
         """Initialise le joueur
-        Paramètres obligatoires :
-        <jeu> est l'application entière.
-        <gestionnaire> est une instance du gestionnaire d'évènements.
+        ParamÃ¨tres obligatoires :
+        <jeu> est l'application entiÃ¨re.
+        <gestionnaire> est une instance du gestionnaire d'Ã©vÃ¨nements.
         <x><y> est la position initiale du mobile en indices de tiles.
-        <c> est l'indice de la couche sur laquelle est posé le joueur.
-        Paramètres facultatifs :
-        <fichier> est le nom de l'image située dans le dossier des ressources qui représente le mobile. Valeur par défaut dans les constantes.
-        <persoCharset> désigne la partie du <fichier> correspondant au joueur. Valeur par défaut dans les constantes.
-        <couleurTransparente> désigne la couleur transparente du <fichier>. Valeur par défaut dans les constantes.
-        <vitesseDeplacement> désigne la vitesse de déplacement en pixels par seconde.
-        <dureeAnimation> désigne le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par défaut dans les constantes.
-        <nom> désigne le <str> identifiant l'évènement Joueur. Valeur par défaut dans les constantes.
-        <directionDepart> désigne la direction que prend le joueur au départ. Valeur par défaut dans les constantes.
-        <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
-        <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
+        <c> est l'indice de la couche sur laquelle est posÃ© le joueur.
+        ParamÃ¨tres facultatifs :
+        <fichier> est le nom de l'image situÃ©e dans le dossier des ressources qui reprÃ©sente le mobile. Valeur par dÃ©faut dans les constantes.
+        <persoCharset> dÃ©signe la partie du <fichier> correspondant au joueur. Valeur par dÃ©faut dans les constantes.
+        <couleurTransparente> dÃ©signe la couleur transparente du <fichier>. Valeur par dÃ©faut dans les constantes.
+        <vitesseDeplacement> dÃ©signe la vitesse de dÃ©placement en pixels par seconde.
+        <dureeAnimation> dÃ©signe le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par dÃ©faut dans les constantes.
+        <nom> dÃ©signe le <str> identifiant l'Ã©vÃ¨nement Joueur. Valeur par dÃ©faut dans les constantes.
+        <directionDepart> dÃ©signe la direction que prend le joueur au dÃ©part. Valeur par dÃ©faut dans les constantes.
+        <largeurSprite> est la largeur du sprite. Valeur par dÃ©faut dans les constantes.
+        <longueurSprite> est la longueur du sprite. Valeur par dÃ©faut dans les constantes."""
         Observable.__init__(self, "_positionCarte.left", "_positionCarte.top", "_c")
         Mobile.__init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,vitesseDeplacement=vitesseDeplacement,dureeAnimation=dureeAnimation, directionDepart=directionDepart)
         self._directions = dict(Haut=False,Bas=False,Gauche=False,Droite=False)
@@ -51,7 +51,7 @@ class Joueur(Mobile, Observable):
             self._deplacement()
             
     def transfertCarte(self, x, y, c, direction):
-        """Prépare l'apparition sur une nouvelle carte, en <x><y><c> avec un regard en <direction>."""
+        """PrÃ©pare l'apparition sur une nouvelle carte, en <x><y><c> avec un regard en <direction>."""
         self._cOld, self._c = c, c
         self._positionCarte.left, self._positionCarte.top, self._mouvement = x * self._jeu.carteActuelle.hauteurTile, y * self._jeu.carteActuelle.hauteurTile, False
         self._etapeMarche, self._etapeTraitement, self._pixelsParcourus = 1, 0, 0
@@ -60,7 +60,7 @@ class Joueur(Mobile, Observable):
         self._direction, self._directionRegard = direction, direction
 
     def _analyserAction(self):
-        """Analyse la touche fléchée sur laquelle a appuyé le joueur et ajuste la direction du prochain déplacement en conséquence"""
+        """Analyse la touche flÃ©chÃ©e sur laquelle a appuyÃ© le joueur et ajuste la direction du prochain dÃ©placement en consÃ©quence"""
         event = self._jeu.event
         if event.type is KEYDOWN and self._boiteOutils.joueurLibre.voir() is True:
             if event.key == K_z:
@@ -110,12 +110,12 @@ class Joueur(Mobile, Observable):
             elif nombreAppuis == 1: #Quand il y a un seul appui, la direction est celle de l'unique appui
                 self._majRegards()
                 self._direction = str(directionChoisie)
-            elif nombreAppuis > 1: #Quand il y a plusieurs appuis, on prend le plus récent
+            elif nombreAppuis > 1: #Quand il y a plusieurs appuis, on prend le plus rÃ©cent
                 self._direction = str(self._derniereDirection)
                 self._majRegards()
     
     def _majRegards(self):
-        """Indique que le joueur doit, avant de se déplacer, regarder dans la direction de déplacement sauf dans celle qu'il emprunte déjà"""
+        """Indique que le joueur doit, avant de se dÃ©placer, regarder dans la direction de dÃ©placement sauf dans celle qu'il emprunte dÃ©jÃ """
         for directionActuelle,regard in self._regardDansDirection.items():
             if directionActuelle != self._direction and self._direction != "Aucune":
                 self._regardDansDirection[directionActuelle] = False
@@ -134,16 +134,16 @@ class Joueur(Mobile, Observable):
         self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
 
     def _deplacement(self):
-        """Gère le déplacement"""
+        """GÃ¨re le dÃ©placement"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile
         carte = self._jeu.carteActuelle
         direction = self._direction
         if direction != "Aucune":
-            if self._regardDansDirection[direction] == True: #Si on a déjà regardé dans la direction
+            if self._regardDansDirection[direction] == True: #Si on a dÃ©jÃ  regardÃ© dans la direction
                 tempsActuel = pygame.time.get_ticks()
                 avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
                 if avancee >= 1.0:
-                    if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
+                    if self._pixelsParcourus < hauteurTile: #Si le dÃ©placement n'est pas fini
                         deplacementPossible = False
                         (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._majCoordonnees(tempsActuel, direction, deltaTimer, avancee)
                         if self._etapeMarche == 1:
@@ -162,17 +162,17 @@ class Joueur(Mobile, Observable):
                             self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom, positionCarteSuivante=self._positionCarteSuivante)
                             self._pixelsParcourus += self._avancee
                             self._etapeMarche += 1
-                        else: #Il y a collision, on ne peut pas quitter le tile, donc on réinitialise
+                        else: #Il y a collision, on ne peut pas quitter le tile, donc on rÃ©initialise
                             self._pixelsParcourus, self._etapeMarche, self._directionAttente = 0, 1, str(self._direction)
                             self._tempsPrecedent = pygame.time.get_ticks()
                             self._direction = "Aucune"
-                    else: #Le déplacement est fini, on réinitialise
+                    else: #Le dÃ©placement est fini, on rÃ©initialise
                         self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, joueur=True, appuiJoueur=False, direction=self._directionRegard)
                         self._etapeMarche, self._pixelsParcourus, self._regardAttente, self._directionAttente = 1,0, False, str(self._direction)
                         self._mouvement = self._positionCarte.left != self._positionCarteOld.left or self._positionCarte.top != self._positionCarteOld.top
                         self._direction = "Aucune"
                         self._tempsPrecedent = pygame.time.get_ticks()
-            else: #Si on n'a pas regardé, on regarde
+            else: #Si on n'a pas regardÃ©, on regarde
                 self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
                 self._ajusterPositionSource(False, direction) #On trouve la position source du PNJ en marche
                 self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)

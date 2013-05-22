@@ -1,20 +1,20 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame
 from pygame.locals import *
 from .constantes import *
 
 
 class Bloc:
-    """Classe représentant un bloc, c'est-à-dire une image sur une couche donnée d'un tile """
+    """Classe reprÃ©sentant un bloc, c'est-Ã -dire une image sur une couche donnÃ©e d'un tile """
 
     def __init__(self, infos=False, nomTileset=None, praticabilite=None, couleurTransparente=None, positionSource=None, positionCarte=None, positionCarteSuivante=None, nomPNJ=None, pnj=False, vide=False, enMouvement=False):
         """__init__(positionSource, carte, bloc)
-        Initialise un bloc dont le tile est à <positionSource> dans un tileset nommé <nomTileset>. <pnj> vaut True si c'est un PNJ. """
+        Initialise un bloc dont le tile est Ã  <positionSource> dans un tileset nommÃ© <nomTileset>. <pnj> vaut True si c'est un PNJ. """
         self._vide = False
         if pnj is False and vide is False: #Un bloc plein sur la carte
-            if infos: #Lors de la création de la carte
+            if infos: #Lors de la crÃ©ation de la carte
                 self._nomTileset, self._praticabilite, self._positionSource = infos[0], infos[1], infos[2]
-            else:  #Méthode changerBloc
+            else:  #MÃ©thode changerBloc
                 self._positionSource, self._nomTileset, self._couleurTransparente = positionSource, nomTileset, couleurTransparente
             self._couleurTransparente, self._vide = (0,0,0), False
         elif vide is True:

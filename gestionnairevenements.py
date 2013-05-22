@@ -1,4 +1,4 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame, narro.directions
 from narro import *
 from collections import OrderedDict
@@ -21,17 +21,17 @@ class GestionnaireEvenements():
             self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
 
     def _getInterrupteurs(self):
-        """Fonction à redéfinir au sein de chaque projet"""
+        """Fonction Ã  redÃ©finir au sein de chaque projet"""
 
     def _getVariables(self):
-        """Fonction à redéfinir au sein de chaque projet"""
+        """Fonction Ã  redÃ©finir au sein de chaque projet"""
 
     def _initialiserEvenements(self):
-        """Fonction à redéfinir au sein de chaque projet"""
+        """Fonction Ã  redÃ©finir au sein de chaque projet"""
         pass
 
     def chargerEvenements(self, nomCarte):
-        """Fonction à redéfinir au sein de chaque projet"""
+        """Fonction Ã  redÃ©finir au sein de chaque projet"""
         pass
 
     def initialiserBoiteOutils(self):
@@ -39,7 +39,7 @@ class GestionnaireEvenements():
         return self._boiteOutils
     
     def gererEvenements(self, nomCarteActuelle):
-        """Gère tous les évènements"""
+        """GÃ¨re tous les Ã©vÃ¨nements"""
         self._nomCarte = nomCarteActuelle
         for categorieEvenements in self._evenements["abstraits"].values():
             for evenement in categorieEvenements.values():
@@ -50,25 +50,25 @@ class GestionnaireEvenements():
         self._tuerEvenementsATuer()
 
     def ajouterEvenementATuer(self, typeEvenement, categorieEvenement, nomEvenement):
-        """Ajoute un évènement à tuer à la fin du traitement des évènements. 
-        On ne peut pas le faire pendant le traitement des évènements car ça changerait la taille du dico pendant l'itération."""
+        """Ajoute un Ã©vÃ¨nement Ã  tuer Ã  la fin du traitement des Ã©vÃ¨nements. 
+        On ne peut pas le faire pendant le traitement des Ã©vÃ¨nements car Ã§a changerait la taille du dico pendant l'itÃ©ration."""
         self._evenementsATuer.append((typeEvenement, categorieEvenement, nomEvenement))
 
     def _tuerEvenementsATuer(self):
-        """A la fin du traitement des évènements, tue tous les évènements à tuer."""
+        """A la fin du traitement des Ã©vÃ¨nements, tue tous les Ã©vÃ¨nements Ã  tuer."""
         for (typeEvenement, categorieEvenement, nomEvenement) in self._evenementsATuer:
             self._evenements[typeEvenement][categorieEvenement].pop(nomEvenement)
         del self._evenementsATuer[:]
 
     def registerPosition(self, nom, x, y, c, joueur=False, appuiJoueur=False, direction="Aucune"):
-        """Enregistre la position d'un évènement nommé <nom> à la position <x><y><c> sur la carte. Elle est exprimée en indices de tiles.
-        Elle n'est pas traitée dans cette fonction : elle est seulement ajoutée à une liste, traitée dans traiterPositions. 
-        De cette manière, les notifs de position aux évènements ont toutes lieu APRES les traitements des évènements.
-        Cet ordre permet de gérer plus précisément des algorithmes.""" 
+        """Enregistre la position d'un Ã©vÃ¨nement nommÃ© <nom> Ã  la position <x><y><c> sur la carte. Elle est exprimÃ©e en indices de tiles.
+        Elle n'est pas traitÃ©e dans cette fonction : elle est seulement ajoutÃ©e Ã  une liste, traitÃ©e dans traiterPositions. 
+        De cette maniÃ¨re, les notifs de position aux Ã©vÃ¨nements ont toutes lieu APRES les traitements des Ã©vÃ¨nements.
+        Cet ordre permet de gÃ©rer plus prÃ©cisÃ©ment des algorithmes.""" 
         self._positionsARegistrer.append( (nom, x, y, c, joueur, appuiJoueur, direction) )
 
     def traiterPositions(self):
-        """Parcoure les positions enregistrées et les traite : enregistrement dans le dico des évènements, notifs de position."""
+        """Parcoure les positions enregistrÃ©es et les traite : enregistrement dans le dico des Ã©vÃ¨nements, notifs de position."""
         for position in self._positionsARegistrer:
             self._traiterPosition(position)
         self._positionsARegistrer[:] = []
@@ -77,7 +77,7 @@ class GestionnaireEvenements():
        self._boiteOutils.actualiserSonsFixes()
 
     def majActionsJoueur(self, nomEvenement):
-        """Prévient l'évènement nommée <nomEvenement> des actions du joueur."""
+        """PrÃ©vient l'Ã©vÃ¨nement nommÃ©e <nomEvenement> des actions du joueur."""
         infosEvenement, position = self._evenements["concrets"][self._nomCarte][nomEvenement], self._positionJoueur
         evenement, abs, ord, directionEvenement = infosEvenement[0], infosEvenement[1][0], infosEvenement[1][1], infosEvenement[2]
         nom, x, y, c, joueur, appui, directionJoueur = position[0], position[1], position[2], position[3], position[4], position[5], position[6]
@@ -86,22 +86,22 @@ class GestionnaireEvenements():
     def _traiterPosition(self, position):
         """Traite une position <position>."""
         nom, x, y, c, joueur, appuiJoueur, direction = position[0], position[1], position[2], position[3], position[4], position[5], position[6]
-        for cle in self._evenements["concrets"][self._nomCarte].keys(): #On met à jour les infos de l'évènement
+        for cle in self._evenements["concrets"][self._nomCarte].keys(): #On met Ã  jour les infos de l'Ã©vÃ¨nement
             if cle == nom:
                 self._evenements["concrets"][self._nomCarte][cle][1] = (x,y)
                 self._evenements["concrets"][self._nomCarte][cle][2] = direction
-        if joueur is True: #On prévient les évènements de l'activité du joueur quand il est proche, appuie, etc...
+        if joueur is True: #On prÃ©vient les Ã©vÃ¨nements de l'activitÃ© du joueur quand il est proche, appuie, etc...
             if LOG_COORDONNEES_JOUEUR is True:
                 print("Joueur", x, y, c)
             self._xJoueur, self._yJoueur, self._cJoueur, self._appuiJoueur, self._directionJoueur = x, y, c, appuiJoueur, direction
             self._positionJoueur = position
             for infosEvenement in self._evenements["concrets"][self._nomCarte].values():
                 evenement, abs, ord, directionActuelle = infosEvenement[0], infosEvenement[1][0], infosEvenement[1][1], infosEvenement[2]
-                if isinstance(evenement,Joueur) is False: #On ne prévient pas le joueur de ses propres actions ! :D
+                if isinstance(evenement,Joueur) is False: #On ne prÃ©vient pas le joueur de ses propres actions ! :D
                     self._prevenirEvenementActionJoueur(evenement, x, y, c, appuiJoueur, direction, abs, ord, directionActuelle)
 
     def _prevenirEvenementActionJoueur(self, evenement, x, y, c, appui, directionJoueur, abs, ord, directionEvenement):
-        """Prévient un évènement <evenement> des actions du joueur."""
+        """PrÃ©vient un Ã©vÃ¨nement <evenement> des actions du joueur."""
         if ( (abs == x+1 or abs == x-1) and ord == y) or ( (ord == y+1 or ord == y-1) and abs == x):
             evenement.onJoueurProche(x, y, c, directionJoueur)
             if appui is True:

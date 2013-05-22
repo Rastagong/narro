@@ -1,17 +1,17 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 from constantes import *
 
 class Observateur:
-	"""Interface représentant l'Observateur du design pattern du même nom."""
+	"""Interface reprÃ©sentant l'Observateur du design pattern du mÃªme nom."""
 
 	def __init__(self):
 		pass
 
 	def obsOnNouvelleObservation(self, instance, nomAttribut, info):
-		"""Fonction appelée quand un <Observable> est mis à jour.
-		<instance> désigne l'instance de l'observable mais doit seulement servir à déterminer la classe d'appartenance.
-		Cela permet à un observateur de surveiller plusieurs observables tout en les traitant de manière différenciée.
-		<nomAttribut> est une chaîne qui désigne l'attribut qui a été mis à jour. Il s'agit de son nom. Les attributs censés être privés,
-		c'est-à-dire ceux avec deux tirets du bas ne peuvent pas être surveillés. L'utilisation de cette chaîne permet à un observateur 
-		de surveiller plusieurs attributs d'un observateur tout en les traitant de manière différenciée.
-		<info> est l'attribut mis à jour en lui-même."""
+		"""Fonction appelÃ©e quand un <Observable> est mis Ã  jour.
+		<instance> dÃ©signe l'instance de l'observable mais doit seulement servir Ã  dÃ©terminer la classe d'appartenance.
+		Cela permet Ã  un observateur de surveiller plusieurs observables tout en les traitant de maniÃ¨re diffÃ©renciÃ©e.
+		<nomAttribut> est une chaÃ®ne qui dÃ©signe l'attribut qui a Ã©tÃ© mis Ã  jour. Il s'agit de son nom. Les attributs censÃ©s Ãªtre privÃ©s,
+		c'est-Ã -dire ceux avec deux tirets du bas ne peuvent pas Ãªtre surveillÃ©s. L'utilisation de cette chaÃ®ne permet Ã  un observateur 
+		de surveiller plusieurs attributs d'un observateur tout en les traitant de maniÃ¨re diffÃ©renciÃ©e.
+		<info> est l'attribut mis Ã  jour en lui-mÃªme."""

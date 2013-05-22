@@ -1,9 +1,9 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame
 from pygame.locals import *
 
 class Horloge:
-    """Classe qui permet de gérer le temps."""
+    """Classe qui permet de gÃ©rer le temps."""
 
     _heureAlarme, _sonnerieActivee, _heureDepartAlarme = dict(), dict(), dict()
     
@@ -17,9 +17,9 @@ class Horloge:
         Horloge._sonnerieActivee[numeroAlarme] = True
 
     def sonner(idInstance, numeroAlarme, arretApresSonnerie=True):
-        """Retourne <True> si l'alarme <numeroAlarme> de l'horloge a sonné.
-        Si <arretApresSonnerie> vaut False et que l'alarme a sonné, elle n'est pas arrêtée pour autant."""
-        if Horloge.alarmeExiste(idInstance, numeroAlarme) is True: #Si l'alarme indiquée existe
+        """Retourne <True> si l'alarme <numeroAlarme> de l'horloge a sonnÃ©.
+        Si <arretApresSonnerie> vaut False et que l'alarme a sonnÃ©, elle n'est pas arrÃªtÃ©e pour autant."""
+        if Horloge.alarmeExiste(idInstance, numeroAlarme) is True: #Si l'alarme indiquÃ©e existe
             numeroAlarme = str(idInstance) + "+" + str(numeroAlarme)
             if Horloge._heureAlarme[numeroAlarme] <= pygame.time.get_ticks() and Horloge._sonnerieActivee[numeroAlarme] is True:
                 if arretApresSonnerie is True:
@@ -41,7 +41,7 @@ class Horloge:
         return Horloge._heureAlarme[numeroAlarme] - pygame.time.get_ticks()
 
     def tempsPasse(idInstance, numeroAlarme):
-        """Retourne le temps passe depuis que l'alarme <numeroAlarme> a été initialisée."""
+        """Retourne le temps passe depuis que l'alarme <numeroAlarme> a Ã©tÃ© initialisÃ©e."""
         numeroAlarme = str(idInstance) + "+" + str(numeroAlarme)
         if numeroAlarme in Horloge._heureDepartAlarme.keys():
             return pygame.time.get_ticks() - Horloge._heureDepartAlarme[numeroAlarme]
@@ -49,9 +49,9 @@ class Horloge:
             return False
 
     def arreterSonnerie(idInstance, numeroAlarme):
-        """Arrête l'alarme <numeroAlarme>.
-        Retourne <True> si l'alarme a été trouvée et arrêtée,
-        et <False> si l'alarme n'a pas été trouvée."""
+        """ArrÃªte l'alarme <numeroAlarme>.
+        Retourne <True> si l'alarme a Ã©tÃ© trouvÃ©e et arrÃªtÃ©e,
+        et <False> si l'alarme n'a pas Ã©tÃ© trouvÃ©e."""
         if Horloge.alarmeExiste(idInstance, numeroAlarme):
             numeroAlarme = str(idInstance) + "+" + str(numeroAlarme)
             Horloge._sonnerieActivee[numeroAlarme] = False

@@ -1,79 +1,79 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame
 from sys import stderr
 from pygame.locals import *
 
 #Contient toutes les constantes de l'application
 #
-#Les constantes de l'application sont des variables utilisées tout au long du programme, et qui ne doivent pas pouvoir être modifiées par la suite.
-#Elles sont regroupées ici pour pouvoir être modifiées facilement.
+#Les constantes de l'application sont des variables utilisÃ©es tout au long du programme, et qui ne doivent pas pouvoir Ãªtre modifiÃ©es par la suite.
+#Elles sont regroupÃ©es ici pour pouvoir Ãªtre modifiÃ©es facilement.
 
 
-#Données d'odre général
+#DonnÃ©es d'odre gÃ©nÃ©ral
 
-#Fichier vers lequel sont redirigées les erreurs, mais seulement si cette option est activée (à REDIRECTION_FICHIER_ERREURS)
-#Dans ce fichier seront écrites toutes les erreurs d'exécution si REDIRECTION_FICHIER_ERREURS est activée. 
-#Le mode d'écriture dans le fichier doit être précisé à MODE_FICHIER_ERREURS
+#Fichier vers lequel sont redirigÃ©es les erreurs, mais seulement si cette option est activÃ©e (Ã  REDIRECTION_FICHIER_ERREURS)
+#Dans ce fichier seront Ã©crites toutes les erreurs d'exÃ©cution si REDIRECTION_FICHIER_ERREURS est activÃ©e. 
+#Le mode d'Ã©criture dans le fichier doit Ãªtre prÃ©cisÃ© Ã  MODE_FICHIER_ERREURS
 FICHIER_ERREURS = "Erreurs.txt" 
 
-#Mode d'écriture du fichier d'erreurs
+#Mode d'Ã©criture du fichier d'erreurs
 #Il y en a plusieurs.
-#« w » : Efface les erreurs précedéntes avant d'écrire les nouvelles
-#« a » : Ajoute les nouvelles erreurs aux précédentes
+#Â« w Â» : Efface les erreurs prÃ©cedÃ©ntes avant d'Ã©crire les nouvelles
+#Â« a Â» : Ajoute les nouvelles erreurs aux prÃ©cÃ©dentes
 MODE_FICHIER_ERREURS ="w" 
 
 #Redirection vers un fichier d'erreurs
-#Si True, les erreurs sont redirigées dans un fichier
-#Si False, les erreurs sont simplement affichées à l'écran.
+#Si True, les erreurs sont redirigÃ©es dans un fichier
+#Si False, les erreurs sont simplement affichÃ©es Ã  l'Ã©cran.
 REDIRECTION_FICHIER_ERREURS = False 
 if REDIRECTION_FICHIER_ERREURS is True:
 	sys.stderr = open(FICHIER_ERREURS, MODE_FICHIER_ERREURS)
 
-#Message affiché lorsqu'il y a une pause (terminal)
-MESSAGE_PAUSE_PAR_DEFAUT = "Veuillez appuyer sur la touche « Entrée » pour continuer..." 
+#Message affichÃ© lorsqu'il y a une pause (terminal)
+MESSAGE_PAUSE_PAR_DEFAUT = "Veuillez appuyer sur la touche Â« EntrÃ©e Â» pour continuer..." 
 
 #Chemin relatif vers le dossier des ressources
 DOSSIER_RESSOURCES = "Ressources"
 
-#Si cette constante vaut<True>, une répétition de l'évènement KEYDOWN aura lieu quand une touche est appuyée. Voir la constante suivante pour l'intervalle.
+#Si cette constante vaut<True>, une rÃ©pÃ©tition de l'Ã©vÃ¨nement KEYDOWN aura lieu quand une touche est appuyÃ©e. Voir la constante suivante pour l'intervalle.
 REPETITION_TOUCHES = False
 
-#Intervalle en millisecondes entre deux répétitions de l'évènement KEYDOWN (si et seulement si REPETITION_TOUCHES vaut <True>)
+#Intervalle en millisecondes entre deux rÃ©pÃ©titions de l'Ã©vÃ¨nement KEYDOWN (si et seulement si REPETITION_TOUCHES vaut <True>)
 INTERVALLE_REPETITION_TOUCHES = 100
 
-#Liste des évènements utilisateur que le jeu peut capter.
+#Liste des Ã©vÃ¨nements utilisateur que le jeu peut capter.
 LISTE_EVENTS_AUTORISES = [QUIT, KEYDOWN, KEYUP]
 
-#Le nom de la carte sur laquelle on démarre
+#Le nom de la carte sur laquelle on dÃ©marre
 NOM_CARTE_LANCEMENT = "LD26-Fin"
 
 #L'extension des fichiers carte
 EXTENSION_FICHIER_CARTE = ".narromap"
 
-#Le volume des musiques en boucle, à mettre à 0.0 pour pas se soûler
+#Le volume des musiques en boucle, Ã  mettre Ã  0.0 pour pas se soÃ»ler
 VOLUME_LONGUE_MUSIQUE = 0.0
 
 ##Mobile, PNJ, Joueur
 #
-#Fichier d'image par défaut du joueur, qui doit être situé dans le dossier des ressources
+#Fichier d'image par dÃ©faut du joueur, qui doit Ãªtre situÃ© dans le dossier des ressources
 FICHIER_JOUEUR_PAR_DEFAUT = "Actor1.png"
 
-#La couleur transparente de l'image du joueur par défaut.
+#La couleur transparente de l'image du joueur par dÃ©faut.
 COULEUR_TRANSPARENTE_FICHIER_JOUEUR_PAR_DEFAUT = (255,255,255)
 
 #La partie de l'image du joueur lui correspondant.
 CHARSET_JOUEUR_PAR_DEFAUT = (0,0)
 
-#Affiche les coordonnées du joueur si <True>
+#Affiche les coordonnÃ©es du joueur si <True>
 LOG_COORDONNEES_JOUEUR = False
 
-#Le nom qui identifie l'évènement Joueur par défaut
+#Le nom qui identifie l'Ã©vÃ¨nement Joueur par dÃ©faut
 NOM_EVENEMENT_JOUEUR_PAR_DEFAUT = "Joueur"
 
-#La vitesse de déplacement par défaut du joueur en pixels par seconde
+#La vitesse de dÃ©placement par dÃ©faut du joueur en pixels par seconde
 VITESSE_DEPLACEMENT_JOUEUR_PAR_DEFAUT = 250
 
-#La vitesse de déplacement par défaut du mobile en pixels par seconde
+#La vitesse de dÃ©placement par dÃ©faut du mobile en pixels par seconde
 VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT = 120 
 
 #Le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations.
@@ -82,57 +82,57 @@ DUREE_ANIMATION_MOBILE_PAR_DEFAUT = 200 #3
 #Le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations.
 DUREE_ANIMATION_JOUEUR_PAR_DEFAUT = 200 #12
 
-#Temps (exprimé en millisecondes) entre deux animations sur place.
+#Temps (exprimÃ© en millisecondes) entre deux animations sur place.
 DUREE_ANIMATION_SP_PAR_DEFAUT = 100
 
-#La direction de départ par défaut d'un mobile.
+#La direction de dÃ©part par dÃ©faut d'un mobile.
 DIRECTION_DEPART_MOBILE_PAR_DEFAUT = "Bas"
 
-#L'intelligence par défaut d'un PNJ. Quand elle vaut <True>, le PNJ débloque lui-même une situation de collision, car il est en A*. 
-#Cette variable n'a donc rien de fixe, elle dépend purement du trajet.
-#La valeur par défaut devrait toujours être <False>, sauf quand le PNJ débute par A* (ce qui est rare).
+#L'intelligence par dÃ©faut d'un PNJ. Quand elle vaut <True>, le PNJ dÃ©bloque lui-mÃªme une situation de collision, car il est en A*. 
+#Cette variable n'a donc rien de fixe, elle dÃ©pend purement du trajet.
+#La valeur par dÃ©faut devrait toujours Ãªtre <False>, sauf quand le PNJ dÃ©bute par A* (ce qui est rare).
 INTELLIGENCE_PAR_DEFAUT = False
 
-#Le courage par défaut d'un PNJ. Quand il vaut <False>, le PNJ abandonne tout déplacement en cas de collision.
+#Le courage par dÃ©faut d'un PNJ. Quand il vaut <False>, le PNJ abandonne tout dÃ©placement en cas de collision.
 COURAGE_PAR_DEFAUT = True
 
-#Longueur d'un sprite de mobilepar défaut
+#Longueur d'un sprite de mobilepar dÃ©faut
 LONGUEUR_SPRITE_PAR_DEFAUT = 32
 
-#Largeur d'un sprite de mobile par défaut
+#Largeur d'un sprite de mobile par dÃ©faut
 LARGEUR_SPRITE_PAR_DEFAUT = 32
 
 
-##Zone de pensée
-#Des infos relatives à la zone de pensée de bas d'écran
-#Le nom du fichier de police par défaut (qui doit être situé dans le dossier des ressources)
+##Zone de pensÃ©e
+#Des infos relatives Ã  la zone de pensÃ©e de bas d'Ã©cran
+#Le nom du fichier de police par dÃ©faut (qui doit Ãªtre situÃ© dans le dossier des ressources)
 NOM_FICHIER_POLICE_PAR_DEFAUT = "BookAntiqua.ttf"
 
-#La taille de la police par défaut
+#La taille de la police par dÃ©faut
 TAILLE_POLICE_PAR_DEFAUT = 15
 
-#La vitesse d'affichage d'une pensée par défaut : c'est le temps d'affichage entre deux pensées (en millisecondes)
+#La vitesse d'affichage d'une pensÃ©e par dÃ©faut : c'est le temps d'affichage entre deux pensÃ©es (en millisecondes)
 VITESSE_PENSEE_PAR_DEFAUT = 50
 
-#Le temps par défaut, en millisecondes, que met une pensée avant d'être considérée comme lue
+#Le temps par dÃ©faut, en millisecondes, que met une pensÃ©e avant d'Ãªtre considÃ©rÃ©e comme lue
 TEMPS_LECTURE_PENSEE = 2000
 
-#La couleur de fond de la zone de pensée
+#La couleur de fond de la zone de pensÃ©e
 COULEUR_FOND_ZONE_PENSEE = (0,0,0)
 
-#La couleur par défaut dans laquelle sont écrites les pensées
+#La couleur par dÃ©faut dans laquelle sont Ã©crites les pensÃ©es
 COULEUR_ECRITURE_PENSEE = (255,255,255)
 
 
-##Fenêtre
-#Données utilisées lors de l'initialisation de la fenêtre
+##FenÃªtre
+#DonnÃ©es utilisÃ©es lors de l'initialisation de la fenÃªtre
 FENETRE = dict()
 FENETRE["messageErreurInitialisationPygame"]="Une erreur s'est produite durant l'initialisation de Pygame, le programme doit donc se fermer." 
-FENETRE["messageErreurInitialisationFenetre"]="Une erreur s'est produite durant l'initialisation de la fenêtre, le programme doit donc se fermer." 
+FENETRE["messageErreurInitialisationFenetre"]="Une erreur s'est produite durant l'initialisation de la fenÃªtre, le programme doit donc se fermer." 
 FENETRE["longueurFenetre"] = 512
 FENETRE["largeurFenetre"] = 384
 FENETRE["largeurFenetreReelle"] = 416
-FENETRE["couleurFenetre"] = (0,0,0) ##Couleur de fond de la fenêtre (hors zones spéciales comme tileset, outils...)
+FENETRE["couleurFenetre"] = (0,0,0) ##Couleur de fond de la fenÃªtre (hors zones spÃ©ciales comme tileset, outils...)
 FENETRE["titreFenetre"] = "Narro Engine"
 FENETRE["flagsFenetre"] = DOUBLEBUF#|FULLSCREEN|HWSURFACE
 FENETRE["forceDirectX"] = False
@@ -140,51 +140,51 @@ FENETRE["forceDirectX"] = False
 #La taille de la police en splashscreen
 TAILLE_POLICE_SPLASH_SCREEN = int(FENETRE["largeurFenetre"] / 4)
 
-#L'intégralité des directions possibles
+#L'intÃ©gralitÃ© des directions possibles
 LISTE_DIRECTIONS = ["Haut", "Bas", "Gauche", "Droite", "Aucune"]
 
 #Le nombre maximal de frames par seconde
 NOMBRE_MAX_DE_FPS = 120#2000
 
-#<True> si la limite doit être appliquée
+#<True> si la limite doit Ãªtre appliquÃ©e
 LIMITER_FPS = True
 
-#Volume par défaut (compris entre 0 et 1
+#Volume par dÃ©faut (compris entre 0 et 1
 VOLUME_MUSIQUE = 0.7 #0.0007
 
-#La durée d'une pause lors d'une balade (un trajet aléatoire) exprimée en millisecondes
+#La durÃ©e d'une pause lors d'une balade (un trajet alÃ©atoire) exprimÃ©e en millisecondes
 DUREE_PAUSE_BALADE = 300
 
 #Le nombre de blocs entre deux pauses lors d'une balade
 FREQUENCE_PAUSE_BALADE = 2
 
-#Le fait d'être en session de debug. Si <True>, un Debugger/Memory profiler sera initialisé (Pympler). 
+#Le fait d'Ãªtre en session de debug. Si <True>, un Debugger/Memory profiler sera initialisÃ© (Pympler). 
 SESSION_DEBUG = False
 
-#Le fichier qui doit servir d'icône, à placer dans le dossier de ressources. 
-#S'il n'y en a aucun (<False>), Pygame tentera de mettre l'icône par défaut, mais cela ne fonctionne pas sur tous les systèmes/avec cx_Freeze (du moins on dirait).
+#Le fichier qui doit servir d'icÃ´ne, Ã  placer dans le dossier de ressources. 
+#S'il n'y en a aucun (<False>), Pygame tentera de mettre l'icÃ´ne par dÃ©faut, mais cela ne fonctionne pas sur tous les systÃ¨mes/avec cx_Freeze (du moins on dirait).
 FICHIER_ICONE = False
 
 ##Messages d'erreurs
 ##
 ##
 
-#Messages d'erreur de mutation ou d'accès
+#Messages d'erreur de mutation ou d'accÃ¨s
 #
-MESSAGE_ERREUR_MUTATION_CHANGEMENT_CARTE = "<jeu.changementCarte> doit être un booléen."
-MESSAGE_ERREUR_MUTATION_EN_MARCHE = "<Bloc.enMarche> doit être un booléen."
-MESSAGE_ERREUR_MUTATION_CARTE_A_EXECUTER = "<jeu.carteAExecuter> doit être un <str>."
-MESSAGE_ERREUR_CHARGEMENT_TILESET = "Le fichier {0}, qui doit servir de tileset, n'a pas pu être chargé : "
+MESSAGE_ERREUR_MUTATION_CHANGEMENT_CARTE = "<jeu.changementCarte> doit Ãªtre un boolÃ©en."
+MESSAGE_ERREUR_MUTATION_EN_MARCHE = "<Bloc.enMarche> doit Ãªtre un boolÃ©en."
+MESSAGE_ERREUR_MUTATION_CARTE_A_EXECUTER = "<jeu.carteAExecuter> doit Ãªtre un <str>."
+MESSAGE_ERREUR_CHARGEMENT_TILESET = "Le fichier {0}, qui doit servir de tileset, n'a pas pu Ãªtre chargÃ© : "
 MESSAGE_ERREUR_ACCES_CONSTANTE = "La constante d'indice {0} n'existe pas."
-MESSAGE_ERREUR_MUTATION_POSITION_SOURCE = "La nouvelle <positionSource> doit être un tuple de quatre entiers naturels."
+MESSAGE_ERREUR_MUTATION_POSITION_SOURCE = "La nouvelle <positionSource> doit Ãªtre un tuple de quatre entiers naturels."
 MESSAGE_ERREUR_MUTATION_COULEUR_TRANSPARENTE = "La couleur {0} n'est pas valide."
-MESSAGE_ERREUR_TILE_INEXISTANT = "Le tile aux coordonnées {0},{1} n'existe pas."
-MESSAGE_ERREUR_MUTATION_DIRECTION1 = "La direction {0} doit être un <str>."
+MESSAGE_ERREUR_TILE_INEXISTANT = "Le tile aux coordonnÃ©es {0},{1} n'existe pas."
+MESSAGE_ERREUR_MUTATION_DIRECTION1 = "La direction {0} doit Ãªtre un <str>."
 MESSAGE_ERREUR_MUTATION_DIRECTION2 = "La direction doit faire partie de la liste des directions possibles."
 
 #Messages d'erreur divers
 #
-MESSAGE_ERREUR_UTILISATION_INTERRUPTEUR_INVERSE = "Il est impossible d'activer, désactiver, inverser ou changer l'état d'un interrupteur inversé : son état est indexé sur celui de l'interrupteur source."
-MESSAGE_ERREUR_TILES_NON_ADJACENTS = "Les tiles {0} et {1} doivent être adjacents, et ce horizontalement ou verticalement uniquement (pas en diagonale)."
-MESSAGE_ERREUR_INITIALISATION_ICONE = "L'icône {0} n'a pas pu être chargée. Pygame tentera d'utiliser l'icône par défaut."
-from constantes import * #Import des constantes du projet, pour écraser celles du Narro Engine en cas de redéfinition
+MESSAGE_ERREUR_UTILISATION_INTERRUPTEUR_INVERSE = "Il est impossible d'activer, dÃ©sactiver, inverser ou changer l'Ã©tat d'un interrupteur inversÃ© : son Ã©tat est indexÃ© sur celui de l'interrupteur source."
+MESSAGE_ERREUR_TILES_NON_ADJACENTS = "Les tiles {0} et {1} doivent Ãªtre adjacents, et ce horizontalement ou verticalement uniquement (pas en diagonale)."
+MESSAGE_ERREUR_INITIALISATION_ICONE = "L'icÃ´ne {0} n'a pas pu Ãªtre chargÃ©e. Pygame tentera d'utiliser l'icÃ´ne par dÃ©faut."
+from constantes import * #Import des constantes du projet, pour Ã©craser celles du Narro Engine en cas de redÃ©finition

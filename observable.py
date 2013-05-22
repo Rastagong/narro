@@ -1,24 +1,24 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 from .constantes import *
 from .observateur import *
 
 class Observable:
-	"""Interface représentant un objet observable dans le design pattern Observateur."""
+	"""Interface reprÃ©sentant un objet observable dans le design pattern Observateur."""
 
 	def __init__(self, *nomsAttributs):
-		"""Créé le dictionnaire des observateurs à partir des chaînes fournies. Il s'agit des noms des attributs qui peuvent être surveillés."""
+		"""CrÃ©Ã© le dictionnaire des observateurs Ã  partir des chaÃ®nes fournies. Il s'agit des noms des attributs qui peuvent Ãªtre surveillÃ©s."""
 		self._obsObservateurs = dict()
 		for nomAttribut in nomsAttributs:
 			self._obsObservateurs[nomAttribut] = list()
 
 	def obsAjouterObservateur(self, observateur, nomAttribut):
-		"""Ajoute <observateur> à la liste des observateurs.
-		<nomAttribut> est une chaîne qui désigne l'attribut qui est surveillé. Il s'agit de son nom. Les attributs censés être privés,
-		c'est-à-dire ceux avec deux tirets du bas ne peuvent pas être surveillés. L'utilisation de cette chaîne permet à un observateur 
-		de surveiller plusieurs attributs d'un observateur tout en les traitant de manière différenciée.
-		<False> est retourné lorsque : 
-			<observateur> n'implémente pas l'interface <Observateur>,
-			<nomAttribut> n'est pas le nom d'un attribut qui peut être surveillé"""
+		"""Ajoute <observateur> Ã  la liste des observateurs.
+		<nomAttribut> est une chaÃ®ne qui dÃ©signe l'attribut qui est surveillÃ©. Il s'agit de son nom. Les attributs censÃ©s Ãªtre privÃ©s,
+		c'est-Ã -dire ceux avec deux tirets du bas ne peuvent pas Ãªtre surveillÃ©s. L'utilisation de cette chaÃ®ne permet Ã  un observateur 
+		de surveiller plusieurs attributs d'un observateur tout en les traitant de maniÃ¨re diffÃ©renciÃ©e.
+		<False> est retournÃ© lorsque : 
+			<observateur> n'implÃ©mente pas l'interface <Observateur>,
+			<nomAttribut> n'est pas le nom d'un attribut qui peut Ãªtre surveillÃ©"""
 		if isinstance(observateur, Observateur) is True and nomAttribut in self._obsObservateurs.keys():
 			self._obsObservateurs[nomAttribut].append(observateur)
 			return True
@@ -27,13 +27,13 @@ class Observable:
 
 	def obsSupprimerObservateur(self, observateur, nomAttribut):
 		"""Supprime <observateur> de la liste des observateurs.
-		<nomAttribut> est une chaîne qui désigne l'attribut qui est surveillé. Il s'agit de son nom. Les attributs censés être privés,
-		c'est-à-dire ceux avec deux tirets du bas ne peuvent pas être surveillés. L'utilisation de cette chaîne permet à un observateur 
-		de surveiller plusieurs attributs d'un observateur tout en les traitant de manière différenciée.
-		<False> est retourné lorsque : 
-			<observateur> n'implémente pas l'interface <Observateur>,
-			<nomAttribut> n'est pas le nom d'un attribut qui peut être surveillé,
-			<observateur> n'est pas répertorié comme un observateur de <nomAttribut>"""
+		<nomAttribut> est une chaÃ®ne qui dÃ©signe l'attribut qui est surveillÃ©. Il s'agit de son nom. Les attributs censÃ©s Ãªtre privÃ©s,
+		c'est-Ã -dire ceux avec deux tirets du bas ne peuvent pas Ãªtre surveillÃ©s. L'utilisation de cette chaÃ®ne permet Ã  un observateur 
+		de surveiller plusieurs attributs d'un observateur tout en les traitant de maniÃ¨re diffÃ©renciÃ©e.
+		<False> est retournÃ© lorsque : 
+			<observateur> n'implÃ©mente pas l'interface <Observateur>,
+			<nomAttribut> n'est pas le nom d'un attribut qui peut Ãªtre surveillÃ©,
+			<observateur> n'est pas rÃ©pertoriÃ© comme un observateur de <nomAttribut>"""
 		if isinstance(observateur, Observateur) is True and nomAttribut in self._obsObservateurs.keys():
 			if observateur in self._obsObservateurs[nomAttribut]:
 				self._obsObservateurs[nomAttribut].remove(observateur)
@@ -43,8 +43,8 @@ class Observable:
 			return False
 
 	def obsOnMiseAJour(self, nomAttribut, valeur):
-		"""Lors d'une mise à jour d'un attribut surveillé <nomAttribut> avec <valeur> pour nouvelle valeur, prévient tous les observateurs
-		cet attribut du changement. <False> est retourné lorsque <nomAttribut> n'est pas le nom d'un attribut qui peut être surveillé."""
+		"""Lors d'une mise Ã  jour d'un attribut surveillÃ© <nomAttribut> avec <valeur> pour nouvelle valeur, prÃ©vient tous les observateurs
+		cet attribut du changement. <False> est retournÃ© lorsque <nomAttribut> n'est pas le nom d'un attribut qui peut Ãªtre surveillÃ©."""
 		if nomAttribut in self._obsObservateurs.keys():
 			for observateur in self._obsObservateurs[nomAttribut]:
 				observateur.obsOnNouvelleObservation(self, nomAttribut, valeur)

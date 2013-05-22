@@ -1,15 +1,15 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 from .constantes import *
 
 class Interrupteur:
-	"""Classe représentant un interrupteur"""
+	"""Classe reprÃ©sentant un interrupteur"""
 
 	def __init__(self, etat, inverser=False):
-		"""Initialise un interrupteur d'état <etat>. Si <inverser> vaut <True>, prend l'état inverse."""
+		"""Initialise un interrupteur d'Ã©tat <etat>. Si <inverser> vaut <True>, prend l'Ã©tat inverse."""
 		self.majSelonBooleen(etat, inverser=inverser, initialisation=True)
 
 	def _etatInverse(self, etatAInverser):
-		"""Retourne l'inverse du booléen <etatAInverser>. Retourne -1 en cas d'erreur (l'état n'est pas un booléen)."""
+		"""Retourne l'inverse du boolÃ©en <etatAInverser>. Retourne -1 en cas d'erreur (l'Ã©tat n'est pas un boolÃ©en)."""
 		if isinstance(etatAInverser, bool) is True:
 			if etatAInverser is False:
 				return True
@@ -19,10 +19,10 @@ class Interrupteur:
 			return -1
 
 	def majSelonBooleen(self, booleen, inverser=False, initialisation=False):
-		"""Prend l'état du booléen <booleen> et retourne <True> si l'opération a réussi. 
-		Si <inverser> vaut <True>, l'interrupteur prend l'état inverse.
-		<initialisation> vaut <True> quand la fonction est appelée lors de l'initialisation."""
-		if isinstance(booleen, bool) is True and inverser is False: #Si l'état est bien un booléen et qu'on associe sans inverser
+		"""Prend l'Ã©tat du boolÃ©en <booleen> et retourne <True> si l'opÃ©ration a rÃ©ussi. 
+		Si <inverser> vaut <True>, l'interrupteur prend l'Ã©tat inverse.
+		<initialisation> vaut <True> quand la fonction est appelÃ©e lors de l'initialisation."""
+		if isinstance(booleen, bool) is True and inverser is False: #Si l'Ã©tat est bien un boolÃ©en et qu'on associe sans inverser
 			self._etat = booleen
 			return True
 		elif isinstance(booleen, bool) is True and inverser is True:
@@ -36,15 +36,15 @@ class Interrupteur:
 		self._etat = True
 	
 	def desactiver(self):
-		"""Désactive l'interrupteur"""
+		"""DÃ©sactive l'interrupteur"""
 		self._etat = False
 	
 	def inverser(self):
-		"""Inverse l'état de l'interrupteur"""
+		"""Inverse l'Ã©tat de l'interrupteur"""
 		self._etat = self._etatInverse(self._etat)
 	
 	def voir(self, inverser=False):
-		"""Retourne l'état de l'interrupteur, inversé si <inverser> vaut <True>."""
+		"""Retourne l'Ã©tat de l'interrupteur, inversÃ© si <inverser> vaut <True>."""
 		etatRetour = self._etat
 		if inverser is True:
 			etatRetour = self._etatInverse(etatRetour)

@@ -1,4 +1,4 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame
 from pygame.locals import *
 from .constantes import *
@@ -8,15 +8,15 @@ from .interrupteur import *
 
 
 class Evenement:
-    """Classe mère représentant un évènement"""
+    """Classe mÃ¨re reprÃ©sentant un Ã©vÃ¨nement"""
 
     def __init__(self, jeu, gestionnaireEvenements):
-        """Initialise l'évènement
+        """Initialise l'Ã©vÃ¨nement
         <jeu> est l'objet de classe <Jeu>, qui contient toute l'application"""
         self._jeu = jeu
         self._etapeTraitement, self._gestionnaire = 0, gestionnaireEvenements
         self._boiteOutils = self._gestionnaire.boiteOutils
 
     def traiter(self):
-        """Traite l'événement"""
+        """Traite l'Ã©vÃ©nement"""
 

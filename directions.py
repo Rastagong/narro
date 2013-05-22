@@ -1,8 +1,8 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 from .constantes import *
 
 def ajusterCoordonneesLorsDeplacement(coor, direction, enTile=False):
-	"""Selon la direction, donne les coordonnées au tile suivant. Si <enTile> est vrai, les coordonnées seront exprimées non pas en valeurs de pixels,
+	"""Selon la direction, donne les coordonnÃ©es au tile suivant. Si <enTile> est vrai, les coordonnÃ©es seront exprimÃ©es non pas en valeurs de pixels,
 	mais en indices de tiles."""
 	if enTile is True:
 		coor = coor * 32

@@ -1,10 +1,10 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 from .bloc import *
 import pygame, configparser
 from pygame.locals import *
 
 class Tile:
-    """Classe représentant un tile, cad une case de la carte"""
+    """Classe reprÃ©sentant un tile, cad une case de la carte"""
     def __init__(self, nombreCouches):
         self._bloc, self._praticabilite, self._nombreCouches = list(), [False]*nombreCouches, nombreCouches
 

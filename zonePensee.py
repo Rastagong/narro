@@ -1,4 +1,4 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame, queue, os, collections
 from pygame.locals import *
 from .constantes import *
@@ -7,7 +7,7 @@ from .observable import *
 from .interrupteur import *
 
 class ZonePensee(Observable):
-    """Classe gérant la zone de pensée en bas de l'écran."""
+    """Classe gÃ©rant la zone de pensÃ©e en bas de l'Ã©cran."""
 
     def __init__(self, jeu):
         Observable.__init__(self, "_surface", "_positionSurface", "_penseeAGerer")
@@ -25,7 +25,7 @@ class ZonePensee(Observable):
         self._message, self._vitesse, self._nomPensee = message, vitesse, nom
         self._etapeAffichage, self._auMoinsUnePenseeGeree = 0, True
         self._penseeAGerer.activer()
-        self._nombreEtapes = len(self._message) #Autant d'étapes que de caractères
+        self._nombreEtapes = len(self._message) #Autant d'Ã©tapes que de caractÃ¨res
         Horloge.initialiser(id(self), 1, 0)
         self._policeActuelle, self._couleur, self._tempsLecture = police, couleur, tempsLecture
         self._positionSurface = [0,FENETRE["largeurFenetre"]]
@@ -36,31 +36,31 @@ class ZonePensee(Observable):
         self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
 
     def getMotActuel(self):
-        """Retourne le no du mot actuel de la pensée courante"""
+        """Retourne le no du mot actuel de la pensÃ©e courante"""
         return len(self._message[:self._etapeAffichage])
 
     def getNomPensee(self):
         return self._nomPensee
 
     def redonnerPositionSurface(self):
-        """Fonction appelée lors d'un changement de carte qui redonne la position de la surface."""
+        """Fonction appelÃ©e lors d'un changement de carte qui redonne la position de la surface."""
         self.obsOnMiseAJour("_positionSurface", self._positionSurface)
 
     def ajouterPensee(self, message, vitesse=VITESSE_PENSEE_PAR_DEFAUT, police="parDefaut", couleur=COULEUR_ECRITURE_PENSEE, tempsLecture=TEMPS_LECTURE_PENSEE, nom=False):
-        """Ajoute une pensée à afficher. Elle devient un <message> affiché à la <vitesse> exprimée en millisecondes.
-        La police <police> fait référence à un nom dans le dico des polices. Le <tempsLecture> est le temps en millisecondes nécessaire à la lecture :
-        il sert de référence à de nombreux évènements, et permet d'afficher la pensée suivante après un certain temps seulement.
-        Cette pensée n'est affichée immédiatement que si aucune autre pensée n'est actuellement gérée (en train de s'afficher, ou en train d'être lue).
-        Si une autre pensée est déjà gérée, on ajoute cette nouvelle pensée à la queue."""
+        """Ajoute une pensÃ©e Ã  afficher. Elle devient un <message> affichÃ© Ã  la <vitesse> exprimÃ©e en millisecondes.
+        La police <police> fait rÃ©fÃ©rence Ã  un nom dans le dico des polices. Le <tempsLecture> est le temps en millisecondes nÃ©cessaire Ã  la lecture :
+        il sert de rÃ©fÃ©rence Ã  de nombreux Ã©vÃ¨nements, et permet d'afficher la pensÃ©e suivante aprÃ¨s un certain temps seulement.
+        Cette pensÃ©e n'est affichÃ©e immÃ©diatement que si aucune autre pensÃ©e n'est actuellement gÃ©rÃ©e (en train de s'afficher, ou en train d'Ãªtre lue).
+        Si une autre pensÃ©e est dÃ©jÃ  gÃ©rÃ©e, on ajoute cette nouvelle pensÃ©e Ã  la queue."""
         if self._penseeAGerer.voir() is False:
             self._majPenseeActuelle(message, vitesse, police, couleur, tempsLecture, nom)
         else:
             self._queuePensees.put_nowait(dict(message=message, vitesse=vitesse, police=police, couleur=couleur, tempsLecture=tempsLecture, nom=nom))
     
     def _gererPenseeActuelle(self):
-        """S'il y a une pensée à gérer, gère son affichage. Sinon, gère la queue (pour prendre la pensée suivante)."""
+        """S'il y a une pensÃ©e Ã  gÃ©rer, gÃ¨re son affichage. Sinon, gÃ¨re la queue (pour prendre la pensÃ©e suivante)."""
         if self._etapeAffichage < self._nombreEtapes and Horloge.sonner(id(self), 1) is True:
-            if self._message[self._etapeAffichage] == ' ': #L'espace ne nécessite pas d'étape en soi, donc on affiche le caractère suivant en même temps
+            if self._message[self._etapeAffichage] == ' ': #L'espace ne nÃ©cessite pas d'Ã©tape en soi, donc on affiche le caractÃ¨re suivant en mÃªme temps
                 self._etapeAffichage += 1
             messageActuel = self._message[:self._etapeAffichage+1]
             self._surface = self._surfaceComplete.copy()
@@ -80,12 +80,12 @@ class ZonePensee(Observable):
             self._gererQueuePensees()
     
     def _gererQueuePensees(self):
-        """Fonction appelée quand une pensée a été traitée (et lue si nécessaire). Elle se charge de prendre la prochaine pensée dans la queue  s'il y en a.
-        S'il n'y a rien dans la queue, on dit que plus aucune pensée n'est à gérer."""
-        if self._queuePensees.empty() is True: #S'il n'y aucune pensée dans la queue, il n'y a rien à gérer, on le dit
+        """Fonction appelÃ©e quand une pensÃ©e a Ã©tÃ© traitÃ©e (et lue si nÃ©cessaire). Elle se charge de prendre la prochaine pensÃ©e dans la queue  s'il y en a.
+        S'il n'y a rien dans la queue, on dit que plus aucune pensÃ©e n'est Ã  gÃ©rer."""
+        if self._queuePensees.empty() is True: #S'il n'y aucune pensÃ©e dans la queue, il n'y a rien Ã  gÃ©rer, on le dit
             self._penseeAGerer.desactiver()
             self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
-        else: #S'il y a encore des pensées dans la queue, on charge la prochaine pensée, on dit qu'elle est à gérer
+        else: #S'il y a encore des pensÃ©es dans la queue, on charge la prochaine pensÃ©e, on dit qu'elle est Ã  gÃ©rer
             penseeCourante = self._queuePensees.get()
             self._majPenseeActuelle(penseeCourante["message"], penseeCourante["vitesse"], penseeCourante["police"], penseeCourante["couleur"], penseeCourante["tempsLecture"], penseeCourante["nom"])
 

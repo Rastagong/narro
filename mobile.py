@@ -1,4 +1,4 @@
-# -*-coding:iso-8859-1 -*
+# -*-coding:utf-8 -*
 import pygame, pdb,math
 from pygame.locals import *
 from .constantes import *
@@ -7,26 +7,26 @@ from .interrupteur import *
 from .evenementConcret import *
 
 class Mobile(EvenementConcret):
-    """Classe représentant un évènement mobile, à savoir PNJ ou joueur, qui sont ses classes filles."""
+    """Classe reprÃ©sentant un Ã©vÃ¨nement mobile, Ã  savoir PNJ ou joueur, qui sont ses classes filles."""
 
     def __init__(self, jeu, gestionnaire, nom, x, y, c, fichier, couleurTransparente, persoCharset, vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
         """Initialise le mobile.
-        Paramètres  :
-        <jeu> est l'application entière.
-        <gestionnaire> est une instance du gestionnaire d'évènements.
+        ParamÃ¨tres  :
+        <jeu> est l'application entiÃ¨re.
+        <gestionnaire> est une instance du gestionnaire d'Ã©vÃ¨nements.
         <nom> est l'identifiant du mobile.
         <x><y> est la position initiale du mobile en indices de tiles.
-        <c> est l'indice de la couche sur laquelle le mobile est placé.
-        <fichier> est le nom de l'image située dans le dossier des ressources qui représente le mobile.
-        <couleurTransparente> désigne la couleur transparente du <fichier>. 
-        <persoCharset> désigne la partie de l'image correspondant au perso à afficher.
-        Paramètres facultatifs :
-        <directionDepart> désigne la direction que prend le mobile au départ. Valeur par défaut dans les constantes.
-        <vitesseDeplacement> désigne la vitesse de déplacement en pixels par seconde.
-        <dureeAnimation> désigne le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par défaut dans les constantes.
-        <dureeAnimationSP> désigne la durée en millisecondes entre deux animations sur place. Valeur par défaut dans les constantes.
-        <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
-        <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
+        <c> est l'indice de la couche sur laquelle le mobile est placÃ©.
+        <fichier> est le nom de l'image situÃ©e dans le dossier des ressources qui reprÃ©sente le mobile.
+        <couleurTransparente> dÃ©signe la couleur transparente du <fichier>. 
+        <persoCharset> dÃ©signe la partie de l'image correspondant au perso Ã  afficher.
+        ParamÃ¨tres facultatifs :
+        <directionDepart> dÃ©signe la direction que prend le mobile au dÃ©part. Valeur par dÃ©faut dans les constantes.
+        <vitesseDeplacement> dÃ©signe la vitesse de dÃ©placement en pixels par seconde.
+        <dureeAnimation> dÃ©signe le nombre de millisecondes, au sein d'un tile ou pas, entre deux animations. Valeur par dÃ©faut dans les constantes.
+        <dureeAnimationSP> dÃ©signe la durÃ©e en millisecondes entre deux animations sur place. Valeur par dÃ©faut dans les constantes.
+        <largeurSprite> est la largeur du sprite. Valeur par dÃ©faut dans les constantes.
+        <longueurSprite> est la longueur du sprite. Valeur par dÃ©faut dans les constantes."""
         EvenementConcret.__init__(self, jeu, gestionnaire)
         self._direction, self._directionRegard = directionDepart, directionDepart
         self._nom,  self._nomTileset = nom, fichier
@@ -41,14 +41,14 @@ class Mobile(EvenementConcret):
         self._etapeMarche, self._etapeAnimation, self._sensAnimation, self._pixelsParcourus = 1, 1, 1, 0
     
     def traiter(self):
-        """Traite l'évènement"""
+        """Traite l'Ã©vÃ¨nement"""
         super().traiter()
 
     def _deplacement(self, direction):
-        """Gère une action de déplacement (un pas, un regard, ou une attente)"""
+        """GÃ¨re une action de dÃ©placement (un pas, un regard, ou une attente)"""
 
     def _initialiserDeplacement(self, tempsAttente, joueur=False, appuiJoueur=False, direction="Aucune"):
-        """Initialise un déplacement"""
+        """Initialise un dÃ©placement"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile
         self._gestionnaire.registerPosition(self._nom, int(self._positionCarte.left / hauteurTile), int(self._positionCarte.top / hauteurTile), self._c, joueur=joueur, appuiJoueur=appuiJoueur, direction=direction)
         self._ajusterPositionSource(False,self._direction)
@@ -58,16 +58,16 @@ class Mobile(EvenementConcret):
         Horloge.initialiser(id(self), 2, 1)
     
     def _getPositionCarteSuivante(self, direction):
-        """Retourne le positionCarte du mobile qu'il aura une fois son déplacement fini"""
+        """Retourne le positionCarte du mobile qu'il aura une fois son dÃ©placement fini"""
         if direction == "Haut" or direction == "Bas":
             return self._positionCarte.move(0, (self._jeu.carteActuelle.hauteurTile if direction == "Bas" else -self._jeu.carteActuelle.hauteurTile))
         if direction == "Gauche" or direction == "Droite":
             return self._positionCarte.move((self._jeu.carteActuelle.hauteurTile if direction == "Droite" else -self._jeu.carteActuelle.hauteurTile), 0)
     
     def _determinerAnimation(self, surPlace=False):
-        """Adapte le pied actuel et le fait d'être en marche à l'étape d'animation actuelle s'il est temps de changer d'animation (selon l'horloge n°2). 
+        """Adapte le pied actuel et le fait d'Ãªtre en marche Ã  l'Ã©tape d'animation actuelle s'il est temps de changer d'animation (selon l'horloge nÂ°2). 
         <surPlace> doit valoir <True> quand on est en animation sur place.
-        Retourne <True> quand un changement d'animation est nécessaire."""
+        Retourne <True> quand un changement d'animation est nÃ©cessaire."""
         if Horloge.sonner(id(self), 2) is True or surPlace is True:
             if self._etapeAnimation == 1:
                 self._enMarche.activer()
