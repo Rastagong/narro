@@ -279,16 +279,26 @@ class Carte(Observateur):
         for nomTransformation in self._transformationsParties:
             p = self._parametresTransformations[nomTransformation]
             if nomTransformation == "AlphaFixe":
-                pixels = surfarray.pixels_alpha(surface)
+                """pixels = surfarray.pixels_alpha(surface)
                 positionsNulles = numpy.where(pixels == 0)
                 pixels[:,:] = p["alpha"]
-                pixels[positionsNulles] = 0
+                pixels[positionsNulles] = 0"""
+                surface.set_alpha(None)
+                surface.set_alpha(p["alpha"])
+                print(surface.get_alpha())
             elif nomTransformation == "Action Joueur" and nomPnj == "Joueur":
                 centre = positionCarte.move(-self._scrollingX, -self._scrollingY).center
                 pygame.draw.circle(self._fenetre, (255,255,255), centre, p["rayon"], 1)
 
     def _appliquerTransformationGlobale(self, nomTransformation, **p):
         """Applique la transformation globale <nomTransformation> avec le dico de paramètres <p>."""
+        if nomTransformation == "Alpha":
+            surface = self._fenetre.copy()
+            self._fenetre.fill((0,0,0))
+            surface.set_alpha(None)
+            surface.set_alpha(0)
+            surface.set_alpha(p["alpha"])
+            self._fenetre.blit(surface, (0,0))
         if nomTransformation == "Rouge":
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"], :FENETRE["largeurFenetre"]] #On exclut la zone de pensée
             pixels[:,:,1:] = 0
@@ -316,7 +326,6 @@ class Carte(Observateur):
                 for nomPnj in self._pnj[c]: 
                     self._afficherBlocPnj(c, nomPnj)
                 c += 1
-
 
     def _transformerSurfaceGlobalement(self, affichageComplet=False):
         """A chaque frame, regarde s'il y a des transformations globales à appliquer, et les exécute lorsque c'est le cas.
@@ -357,7 +366,10 @@ class Carte(Observateur):
             coucheActuelle = 0
             self._fenetre.fill((0,0,0))
             while coucheActuelle < self._nombreCouches: 
-                self._fenetre.blit(self._tilesLayers[coucheActuelle], (0,0), area=self._ecranVisible)
+                couche = self._tilesLayers[coucheActuelle]
+                if len(self._transformationsParties) > 0:
+                    self._transformerPartie(couche, False, (0,0))
+                self._fenetre.blit(couche, (0,0), area=self._ecranVisible)
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
                 #Tri des PNJs selon leur ordonnée (de manière croissante) : on affiche ceux en haut de l'écran avant ceux en bas, pour avoir une superposition
                 for nomPnj in nomsPnjs: 
