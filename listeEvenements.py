@@ -48,7 +48,6 @@ class AnimateurToucheAction(Evenement):
             self._animation = True
             self._rayon += 2
             self._boiteOutils.ajouterTransformation(False, "Action Joueur", rayon=self._rayon)
-            self._boiteOutils.jouerSon("Whip", "Whip Action Joueur", volume=VOLUME_MUSIQUE/1.5)
             Horloge.initialiser(id(self), "Maj rayon", 1)
         elif self._animation == True and Horloge.sonner(id(self), "Maj rayon") is True:
             self._rayon += 2
