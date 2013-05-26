@@ -21,6 +21,7 @@ class BoiteOutils():
         self._sons = dict()
         self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes = dict(), dict(), dict(), dict()
         self._joueurLibre = Interrupteur(True)
+        self._coucheJoueur, self._directionJoueurReelle = 0, "Aucune"
 
     def initialiser(self):
         Horloge.initialiser(id(self), "DEBUG", 1000)
@@ -308,6 +309,11 @@ class BoiteOutils():
         else:
             return False
     
+    def deplacementConsequentJoueur(self, coordonneesJoueur, nombreCases):
+        """Retourne <True> si le joueur s'est déplacé d'au moins <nombreCases> par rapport aux coordonnées de départ <coordonneesJoueur>."""
+        xJoueurOld, yJoueurOld, xJoueur, yJoueur = coordonneesJoueur[0], coordonneesJoueur[1], self._gestionnaire.xJoueur, self._gestionnaire.yJoueur
+        return xJoueur >= xJoueurOld + nombreCases or xJoueur <= xJoueurOld - nombreCases or yJoueur >= yJoueurOld + nombreCases or yJoueur <= yJoueurOld - nombreCases
+
     def deplacementVersPnj(self, nomEvenement, x, y):
         """Retourne une instruction de déplacement vers le PNJ nommé <nomEvenement> situé à côté."""
         if nomEvenement in self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].keys():
@@ -366,9 +372,27 @@ class BoiteOutils():
     def _setVariables(self, nouvellesVariables):
         self._variables = nouvellesVariables
 
+    def _getCoucheJoueur(self):
+        return self._coucheJoueur
+
+    def _setCoucheJoueur(self, c):
+        self._coucheJoueur = c
+
+    def _getPositionCarteJoueur(self):
+        return self._jeu.carteActuelle._pnj[self._coucheJoueur]["Joueur"].positionCarte
+
+    def _getDirectionJoueurReelle(self):
+        return self._directionJoueurReelle
+
+    def _setDirectionJoueurReelle(self, direction):
+        self._directionJoueurReelle = direction
+
     penseeAGerer = property(_getPenseeAGerer)
     nomCarte = property(_getNomCarte)
     interrupteurs = property(fget=_getInterrupteurs, fset=_setInterrupteurs)
     variables = property(_getVariables, _setVariables)
     joueurLibre = property(_getJoueurLibre, _setJoueurLibre)
+    positionCarteJoueur = property(_getPositionCarteJoueur)
+    directionJoueurReelle = property(_getDirectionJoueurReelle, _setDirectionJoueurReelle)
+    coucheJoueur = property(_getCoucheJoueur, _setCoucheJoueur)
 

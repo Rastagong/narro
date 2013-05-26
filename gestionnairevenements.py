@@ -16,6 +16,7 @@ class GestionnaireEvenements():
         self._jeu, self._nomCarte = jeu, None
         self._evenements = dict(concrets=dict(), abstraits=dict())
         self._boiteOutils, self._positionsARegistrer, self._evenementsATuer, self._appuiJoueur = BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], [], False
+        self._appuiTir = False
         self._initialiserEvenements()
         if SESSION_DEBUG:
             self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
@@ -118,6 +119,9 @@ class GestionnaireEvenements():
             if appui is True:
                 evenement.onJoueurInteraction(x, y, c, directionJoueur, enFace=False, dessus=True)
 
+    def registerAppuiTir(self, appuiTir):
+        self._appuiTir = appuiTir
+
     ##Accesseurs et mutateurs
     #
     #
@@ -138,6 +142,9 @@ class GestionnaireEvenements():
 
     def _getDirectionJoueur(self):
         return self._directionJoueur
+
+    def _getAppuiTir(self):
+        return self._appuiTir
     
     def _getAppuiJoueur(self):
         return self._appuiJoueur
@@ -150,6 +157,7 @@ class GestionnaireEvenements():
     xJoueur = property(_getXJoueur)
     yJoueur = property(_getYJoueur)
     cJoueur = property(_getCJoueur)
+    appuiTir = property(_getAppuiTir)
     directionJoueur = property(_getDirectionJoueur)
     appuiJoueur = property(_getAppuiJoueur)
     nomCarte = property(_getNomCarte)

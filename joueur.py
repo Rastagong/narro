@@ -35,13 +35,15 @@ class Joueur(Mobile, Observable):
         self._derniereDirection = "Aucune"
         self._regardDansDirection = dict(Haut=False, Bas=False, Droite=False, Gauche=False)
         self._jeu.joueur, self._appuiValidation, self._regardAttente, self._directionAttente, self._mouvement = self, False, True, str(self._direction), False
-        self._persoCharset = persoCharset
+        self._appuiTir, self._persoCharset = False, persoCharset
         self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
+        self._boiteOutils.coucheJoueur = self._c
 
     def traiter(self):
         Mobile.traiter(self)
         if self._etapeTraitement is 0:
             self._initialiserDeplacement(1, joueur=True, appuiJoueur=False, direction=self._directionRegard)
+            self._boiteOutils.directionJoueurReelle = self._directionRegard
             self._nomCarte = self._boiteOutils.nomCarte
             hauteurTile = self._jeu.carteActuelle.hauteurTile
             self._tempsPrecedent, self._deltaTimer = 0, 0
@@ -53,9 +55,11 @@ class Joueur(Mobile, Observable):
     def transfertCarte(self, x, y, c, direction):
         """Prépare l'apparition sur une nouvelle carte, en <x><y><c> avec un regard en <direction>."""
         self._cOld, self._c = c, c
+        self._boiteOutils.coucheJoueur = self._c
         self._positionCarte.left, self._positionCarte.top, self._mouvement = x * self._jeu.carteActuelle.hauteurTile, y * self._jeu.carteActuelle.hauteurTile, False
         self._etapeMarche, self._etapeTraitement, self._pixelsParcourus = 1, 0, 0
         self._derniereDirection = "Aucune"
+        self._boiteOutils.directionJoueurReelle = direction
         self._regardDansDirection = dict(Haut=False, Bas=False, Droite=False, Gauche=False)
         self._direction, self._directionRegard = direction, direction
 
@@ -63,6 +67,9 @@ class Joueur(Mobile, Observable):
         """Analyse la touche fléchée sur laquelle a appuyé le joueur et ajuste la direction du prochain déplacement en conséquence"""
         event = self._jeu.event
         if event.type is KEYDOWN and self._boiteOutils.joueurLibre.voir() is True:
+            if event.key == K_x:
+                self._appuiTir = True
+                self._gestionnaire.registerAppuiTir(self._appuiTir)
             if event.key == K_z:
                 if self._etapeMarche > 1:
                     self._gestionnaire.registerPosition(self._nom, self._xTilePrecedent, self._yTilePrecedent, self._c, joueur=True, appuiJoueur=True, direction=self._directionRegard)
@@ -83,6 +90,9 @@ class Joueur(Mobile, Observable):
                     self._directions["Bas"] = True
                     self._derniereDirection = "Bas"
         elif event.type is KEYUP:
+            if event.key == K_x:
+                self._appuiTir = False
+                self._gestionnaire.registerAppuiTir(self._appuiTir)
             if event.key == K_z:
                 self._appuiValidation = False
                 if self._etapeMarche > 1:
@@ -124,7 +134,9 @@ class Joueur(Mobile, Observable):
         if couche == -1:
             couche = self._c
         self._ajusterPositionSource(self, direction)
+        self._boiteOutils.coucheJoueur = couche
         self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
+        self._boiteOutils.directionJoueurReelle = direction
         self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
         self._positionCarte.left, self._positionCarte.top = xTile*self._jeu.carteActuelle.hauteurTile, yTile*self._jeu.carteActuelle.hauteurTile
         self._boiteOutils.teleporterSurPosition(self._positionCarte, couche, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
@@ -139,6 +151,7 @@ class Joueur(Mobile, Observable):
         carte = self._jeu.carteActuelle
         direction = self._direction
         if direction != "Aucune":
+            self._boiteOutils.directionJoueurReelle = direction
             if self._regardDansDirection[direction] == True: #Si on a déjà regardé dans la direction
                 tempsActuel = pygame.time.get_ticks()
                 avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
@@ -191,9 +204,13 @@ class Joueur(Mobile, Observable):
     def _getAppuiValidation(self):
         return self._appuiValidation
 
+    def _getAppuiTir(self):
+        return self._appuiTir
+
     def _getMouvement(self):
         return self._mouvement
 
     direction = property(_getDirection)
+    appuiTir = property(_getAppuiTir)
     appuiValidation = property(_getAppuiValidation)
     mouvement = property(_getMouvement)
