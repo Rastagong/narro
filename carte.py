@@ -167,9 +167,10 @@ class Carte(Observateur):
         pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and (pnj.positionCarte.colliderect(positionCarte) == 1 and (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False))]
         if len(pnjsEnCollision) > 0:
             deplacementPossible = False
-        for (x,y) in self._determinerPresenceSurTiles(positionCarte.left, positionCarte.top, positionCarte.width, positionCarte.height):
-            if self.tilePraticable(x, y, c) is False: #Si le tile est impraticable
-                deplacementPossible = False
+        if deplacementPossible:
+            for (x,y) in self._determinerPresenceSurTiles(positionCarte.left, positionCarte.top, positionCarte.width, positionCarte.height):
+                if self.tilePraticable(x, y, c) is False: #Si le tile est impraticable
+                    deplacementPossible = False
         return deplacementPossible
 
     def supprimerPNJ(self, nomPNJ, couche):
