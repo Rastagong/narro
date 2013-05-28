@@ -92,18 +92,14 @@ class Mobile(EvenementConcret):
         self._positionSource.left, self._positionSource.top = 0, 0
         self._positionSource.move_ip(self._persoCharset[0] * self._positionSource.width * 3, self._persoCharset[1] * self._positionSource.height * 4)
         self._positionSource.move_ip(self._positionSource.width, 0)
-        if direction.count("Bas") == 1:
+        if "Bas" in direction:
             pass
-        elif direction.count("Gauche") == 1:
+        elif "Gauche" in direction:
             self._positionSource.move_ip(0, 1 * self._positionSource.height)
-        elif direction.count("Droite") == 1:
+        elif "Droite" in direction:
             self._positionSource.move_ip(0, 2 * self._positionSource.height)
-        elif direction.count("Haut") == 1:
+        elif "Haut" in direction:
             self._positionSource.move_ip(0, 3 * self._positionSource.height)
-        """if self._etapeMarche == 1 or self._etapeMarche == self._frequenceDeplacement:
-            enMarche = False
-        else:
-            enMarche = True"""
         if enMarche is True: #Si le PNJ est en marche
             if self._pied.voir() is True: #Si on est sur le pied gauche
                 self._positionSource.move_ip(-self._positionSource.width, 0)

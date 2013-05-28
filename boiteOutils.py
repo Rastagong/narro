@@ -156,7 +156,6 @@ class BoiteOutils():
                 tileProche = True
         return tileProche
 
-
     def supprimerPNJ(self, nomPNJ, couche):
         self._jeu.carteActuelle.supprimerPNJ(nomPNJ, couche)
 
@@ -353,6 +352,11 @@ class BoiteOutils():
             return ["R" + direction[0]]
         else:
             return False
+
+    def getDirectionBase(self, directionEntiere):
+        for direction in ["Haut","Droite","Bas","Gauche"]:
+            if direction in directionEntiere:
+                return direction
 
     def deplacementSPVersPnj(self, nomEvenement, tempsDeplacement, x, y):
         """Retourne une instruction de déplacement sur place en direction du PNJ nommé <nomEvenement> situé à côté."""
