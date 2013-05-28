@@ -14,7 +14,6 @@ class ZonePensee(Observable):
         self._jeu = jeu
         self._polices, self._queuePensees = dict(), queue.Queue()
         self._polices["parDefaut"] = pygame.font.Font(os.path.join(DOSSIER_RESSOURCES,NOM_FICHIER_POLICE_PAR_DEFAUT), TAILLE_POLICE_PAR_DEFAUT) 
-        self._polices["splashText"] = pygame.font.Font(os.path.join(DOSSIER_RESSOURCES,NOM_FICHIER_POLICE_PAR_DEFAUT), TAILLE_POLICE_SPLASH_SCREEN) 
         self._messageActuel, self._vitesse = None, VITESSE_PENSEE_PAR_DEFAUT
         self._etapeAffichage, self._penseeAGerer, self._auMoinsUnePenseeGeree = 0, Interrupteur(False), False
         self._nombreEtapes, self._surface, self._positionSurface, self._policeActuelle = -1, None, None, "parDefaut"

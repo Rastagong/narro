@@ -32,9 +32,11 @@ class Carte(Observateur):
         self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee = None, None, False
         self._emplacementScrollingX, self._emplacementScrollingY = int(int(FENETRE["longueurFenetre"]/2) / 32)*32, int(int(FENETRE["largeurFenetre"]/2)/32)*32
         self._ecranVisible = Rect(0, 0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
-        self._positionsDepart = dict()
+        self._positionsDepart, self._polices = dict(), dict()
+        self._ajouterPolice(NOM_FICHIER_POLICE_PAR_DEFAUT, TAILLE_POLICE_SPLASH_SCREEN)
         self._fenetre, self._blitFrame = self._jeu.fenetre, False
         self._transformationsGlobales, self._transformationsParties, self._parametresTransformations = list(), list(), dict()
+        self._idParametres, self._donneesParametres = dict(), dict()
 
         self._dicoGid = dict()
         for tileset in self._carteTiled.tile_sets:
@@ -291,6 +293,12 @@ class Carte(Observateur):
                 centre = positionCarte.move(-self._scrollingX, -self._scrollingY).center
                 pygame.draw.circle(self._fenetre, (255,255,255), centre, p["rayon"], 1)
 
+    def _ajouterPolice(self, fichierPolice, taillePolice):
+        if fichierPolice not in self._polices.keys():
+            self._polices[fichierPolice] = dict()
+        if taillePolice not in self._polices[fichierPolice].keys():
+            self._polices[fichierPolice][taillePolice] = pygame.font.Font(os.path.join(DOSSIER_RESSOURCES, fichierPolice), taillePolice)
+
     def _appliquerTransformationGlobale(self, nomTransformation, **p):
         """Applique la transformation globale <nomTransformation> avec le dico de paramètres <p>."""
         if nomTransformation == "Alpha":
@@ -314,11 +322,15 @@ class Carte(Observateur):
         elif nomTransformation == "RemplirNoir":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
         elif "SplashText" in nomTransformation:
-            if "couleurFond" in p.keys():
-                couleurFond=p["couleurFond"]
+            idParam = id(p)
+            if self._idParametres[nomTransformation] == idParam:
+                surfaceTexte = self._donneesParametres[nomTransformation]
             else:
-                couleurFond=None
-            surfaceTexte = self._jeu.zonePensee.polices["splashText"].render(p["texte"], p["antialias"], p["couleurTexte"], couleurFond)
+                self._idParametres[nomTransformation] = id(p)
+                couleurFond, police, taille = p.get("couleurFond", None), p.get("police", NOM_FICHIER_POLICE_PAR_DEFAUT), p.get("taille", TAILLE_POLICE_SPLASH_SCREEN)
+                self._ajouterPolice(police, taille)
+                surfaceTexte = self._polices[police][taille].render(p["texte"], p["antialias"], p["couleurTexte"], couleurFond)
+                self._donneesParametres[nomTransformation] = surfaceTexte
             self._fenetre.blit(surfaceTexte, p["position"])
         elif nomTransformation == "Nuit":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
@@ -419,6 +431,12 @@ class Carte(Observateur):
     def _getParametresTransformations(self):
         return self._parametresTransformations
 
+    def _setIdParametres(self, val):
+        self._idParametres = val
+
+    def _getIdParametres(self):
+        return self._idParametres
+
     def _getTiles(self):
         return self._tiles
 
@@ -428,6 +446,7 @@ class Carte(Observateur):
     longueur = property(_getLongueur)
     largeur = property(_getLargeur)
     tiles = property(_getTiles)
+    idParametres = property(_getIdParametres, _setIdParametres)
     transformationsGlobales = property(_getTransformationsGlobales, _setTransformationsParties)
     transformationsParties = property(_getTransformationsParties, _setTransformationsParties)
     parametresTransformations = property(_getParametresTransformations)

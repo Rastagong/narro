@@ -96,6 +96,9 @@ INTELLIGENCE_PAR_DEFAUT = False
 #Le courage par défaut d'un PNJ. Quand il vaut <False>, le PNJ abandonne tout déplacement en cas de collision.
 COURAGE_PAR_DEFAUT = True
 
+#Un PNJ fuyard passe à l'action suivante en cas de collision.
+FUYARD_PAR_DEFAUT = False
+
 #Longueur d'un sprite de mobilepar défaut
 LONGUEUR_SPRITE_PAR_DEFAUT = 32
 

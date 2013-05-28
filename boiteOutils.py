@@ -1,5 +1,5 @@
 # -*-coding:utf-8 -*
-import pygame,pdb,math
+import pygame,pdb,math,random
 from pygame.locals import *
 from .constantes import *
 from .observateur import *
@@ -70,6 +70,7 @@ class BoiteOutils():
         elif globalite is False and nomTransformation not in self._jeu.carteActuelle.transformationsParties:
             self._jeu.carteActuelle.transformationsParties.append(nomTransformation)
         self._jeu.carteActuelle.parametresTransformations[nomTransformation] = parametres
+        self._jeu.carteActuelle.idParametres[nomTransformation] = None
 
     def retirerTransformation(self, globalite, nomTransformation):
         """Ordonne à la carte de ne plus appliquer la transformation <nomTransformation>, globale si <globalite> vaut <True>."""
@@ -79,6 +80,11 @@ class BoiteOutils():
             self._jeu.carteActuelle.transformationsParties.remove(nomTransformation)
         if nomTransformation in self._jeu.carteActuelle.parametresTransformations.keys():
             self._jeu.carteActuelle.parametresTransformations[nomTransformation] = dict()
+        del self._jeu.carteActuelle.idParametres[nomTransformation]
+
+    def getDirectionAuHasard(self):
+        directions = ["Haut","Droite","Bas","Gauche"]
+        return directions[random.randint(0,3)]
 
     def jouerSon(self, nomSon, instance, duree=0, nombreEcoutes=1, fixe=False, xFixe=-1, yFixe=-1, evenementFixe=-1, volume=VOLUME_MUSIQUE):
         """Joue le son nommé <nomSon> en une instance nommée <instance>. 
@@ -109,7 +115,7 @@ class BoiteOutils():
                 sourceSon = evenementFixe
             self._sourcesSonsFixes[instance] = sourceSon
             self.gererVolumeSonsFixes(self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
-    
+
     def viderSonsFixes(self, nomCarte):
         """Quand on change de cartes, on vide les sons fixes"""
         if nomCarte in self._sonsFixes.keys():
@@ -141,6 +147,15 @@ class BoiteOutils():
                 if nouveauVolume < 0:
                     nouveauVolume = 0
                 self._canauxSons[instance].set_volume(nouveauVolume)
+
+    def tileProcheDe(self, tile, positions, rayon):
+        """Retourne <True> si <tile> est dans un rayon de <rayon> pixels de n'importe laquelle des <positions>."""
+        tileProche = False
+        for position in positions:
+            if position.union(tile).width <= rayon or position.union(tile).height <= rayon:
+                tileProche = True
+        return tileProche
+
 
     def supprimerPNJ(self, nomPNJ, couche):
         self._jeu.carteActuelle.supprimerPNJ(nomPNJ, couche)

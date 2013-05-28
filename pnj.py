@@ -11,7 +11,7 @@ from .mobile import *
 class PNJ(Mobile):
     """Classe représentant un PNJ"""
 
-    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
+    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, fuyard=FUYARD_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
         """Initialise le PNJ
         Paramètres obligatoires :
         <jeu> est l'application entière.
@@ -31,13 +31,14 @@ class PNJ(Mobile):
         <directionDepart> désigne la direction que prend le mobile au départ. Valeur par défaut dans les constantes.
         <intelligence> est un booléen qui permet au PNJ de débloquer une situation de collision quand il vaut <True>.
         <courage> est un booléen qui définit l'attitude du PNJ en cas de collision : quand le PNJ n'est pas courageux, il abandonne ses actions.
+        <fuyard> fait de même mais avec un résultat différent : quand le PNJ est fuyard, il oublie l'action actuelle et passe à la suivante.
         <poseDepart> est un booléen qui vaut <False> quand le PNJ ne doit pas être posé dès le départ.
         <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
         <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
         Mobile.__init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,vitesseDeplacement=vitesseDeplacement,dureeAnimation=dureeAnimation,dureeAnimationSP=dureeAnimationSP,directionDepart=directionDepart)
         self._deplacementBoucle, self._etapeAction, self._collision = True, 0, False
         self._repetitionActions, self._listeActions = repetitionActions, listeActions
-        self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage = False, False, intelligence, poseDepart, courage
+        self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage, self._fuyard = False, False, intelligence, poseDepart, courage, fuyard
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet, self._blocsExclusTrajet = None, None, None, []
         self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
 
@@ -175,6 +176,8 @@ class PNJ(Mobile):
                             self._regardFait = True
                         if self._courage is False:
                             self._listeActions = ["Aucune"]
+                        elif self._fuyard:
+                            self._etapeAction += 1
                         self._debloquerCollision()
                 else: #Le déplacement est fini, on réinitialise
                     self._gestionnaire.registerPosition(self._nom, self._xTile, self._yTile, self._c, direction=self._directionRegard)
