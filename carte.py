@@ -26,7 +26,7 @@ class Carte(Observateur):
         self._nombreCouches, self._hauteurTile = len(self._carteTiled.layers), self._carteTiled.tilewidth
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
-        self._dicoSurfaces, self._tiles, self._blocsRef, self._pnj, i = dict(), list(), dict(), dict(), 0
+        self._dicoSurfaces, self._tiles, self._tilesRects, self._blocsRef, self._pnj, i = dict(), list(), list(), dict(), dict(), 0
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
         self._scrollingPossible, self._etapeScrolling = False, 0
         self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee = None, None, False
@@ -52,8 +52,10 @@ class Carte(Observateur):
             while x < self._longueur:
                 y = 0
                 self._tiles.append(list())
+                self._tilesRects.append(list())
                 while y < self._largeur:
                     self._tiles[x].append(Tile(self._nombreCouches))
+                    self._tilesRects[x].append(Rect(x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
                     gid = self._carteTiled.layers[i].content2D[x][y]
                     if gid != 0: #Bloc plein
                         self._tiles[x][y].bloc.append(Bloc(infos=self._dicoGid[gid]))
@@ -159,20 +161,37 @@ class Carte(Observateur):
             yReponse = int( directions.ajusterCoordonneesLorsDeplacement(y, direction) / 32)
         return (xReponse, yReponse)
 
-    def deplacementPossible(self, positionCarte, c, nomPNJ):
+    def _traiterPositionRelative(self, positionCarte, positionRelative):
+        positionFinale = positionCarte.copy()
+        positionFinale.width, positionFinale.height = positionCarte.width, positionCarte.height
+        return positionFinale.move(positionRelative.left, positionRelative.top)
+        
+    def deplacementPossible(self, positionCarte, c, nomPNJ, verifPrecise=False, positionCollision=False, positionVisible=False, ecranVisible=False, exclusionCollision=[]):
         """Indique si un déplacement en <x><y><c> est possible. Retourne un 2-tuple avec :
         * <True> si un PNJ peut être positionné en <x><y><c>, sinon <False>. Si <xOld>,<yOld> sont fournis, ne prend pas en compte le PNJ à cette position pour les collisions.
+        * La praticabilité est vérifiée via des Rect quand <verifPrecise> vaut <True>.
         * Le tile qui vient d'être quitté."""
         deplacementPossible = True
+        if positionCollision is False:
+            positionCollision = positionCarte
+        else:
+            positionCollision = self._traiterPositionRelative(positionCarte, positionCollision)
+        if not positionVisible:
+            positionVisible = positionCarte
+        else:
+            positionVisible = self._traiterPositionRelative(positionCarte, positionVisible)
         if self._ecran.contains(positionCarte) == 0: #Si la position d'arrivée existe dans la carte
             deplacementPossible = False
-        pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and (pnj.positionCarte.colliderect(positionCarte) == 1 and (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False))]
+        if ecranVisible and (not self._ecranVisible.contains(positionVisible)) and (not self._ecranVisible.colliderect(positionVisible)):
+            deplacementPossible = False
+        pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and pnj.nomPNJ not in exclusionCollision and (pnj.positionCollision.colliderect(positionCollision) == 1 and (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False))]
         if len(pnjsEnCollision) > 0:
             deplacementPossible = False
         if deplacementPossible:
             for (x,y) in self._determinerPresenceSurTiles(positionCarte.left, positionCarte.top, positionCarte.width, positionCarte.height):
                 if self.tilePraticable(x, y, c) is False: #Si le tile est impraticable
-                    deplacementPossible = False
+                    if (verifPrecise and positionCollision.colliderect(self._tilesRects[x][y])) or (not verifPrecise):
+                        deplacementPossible = False
         return deplacementPossible
 
     def supprimerPNJ(self, nomPNJ, couche):
@@ -181,13 +200,21 @@ class Carte(Observateur):
             del self._pnj[couche][nomPNJ]
             self._toutAChanger = True
 
-    def poserPNJ(self, positionCarte, c, positionSource, nomTileset, couleurTransparente, nomPNJ, positionCarteSuivante=False):
+    def poserPNJ(self, positionCarte, c, positionSource, nomTileset, couleurTransparente, nomPNJ, positionCarteSuivante=False, positionCollision=False, positionVisible=False):
         """Ordonne l'affichage à l'écran d'un PNJ à une nouvelle position et l'effacement du PNJ à sa position précedente"""
         hauteurTile = self._hauteurTile
         x,y = float(positionCarte.left), float(positionCarte.top)
         if nomPNJ not in self._pnj[c].keys():
-            self._pnj[c][nomPNJ] = Bloc(self._jeu, pnj=True, nomPNJ=nomPNJ, nomTileset=nomTileset, positionCarte=positionCarte, positionCarteSuivante=positionCarteSuivante, positionSource=positionSource)
+            self._pnj[c][nomPNJ] = Bloc(self._jeu, pnj=True, nomPNJ=nomPNJ, nomTileset=nomTileset, positionCarte=positionCarte, positionCarteSuivante=positionCarteSuivante, positionSource=positionSource, positionCollision=positionCollision, positionVisible=positionVisible)
         pnj = self._pnj[c][nomPNJ]
+        if not positionCollision:
+            positionCollision = pnj.positionCollision
+        if not positionVisible:
+            positionVisible =  pnj.positionVisible
+        if pnj.positionCollision != positionCollision:
+            pnj.positionCollision = positionCollision
+        if pnj.positionVisible != positionVisible:
+            pnj.positionVisible = positionVisible
         if pnj.positionSource != positionSource:
             pnj.positionSource = positionSource
         if pnj.nomTileset != nomTileset:
@@ -288,7 +315,6 @@ class Carte(Observateur):
                 pixels[positionsNulles] = 0"""
                 surface.set_alpha(None)
                 surface.set_alpha(p["alpha"])
-                print(surface.get_alpha())
             elif nomTransformation == "Action Joueur" and nomPnj == "Joueur":
                 centre = positionCarte.move(-self._scrollingX, -self._scrollingY).center
                 pygame.draw.circle(self._fenetre, (255,255,255), centre, p["rayon"], 1)
@@ -363,11 +389,12 @@ class Carte(Observateur):
     def _afficherBlocPnj(self, c, nomPnj):
         """Affiche un PNJ sur un bloc"""
         pnj = self._pnj[c][nomPnj]
-        if self._ecranVisible.contains(pnj.positionCarte) or self._ecranVisible.colliderect(pnj.positionCarte):
-            positionCollage = pnj.positionCarte.move(-self._scrollingX, -self._scrollingY)
+        positionVisible = pnj.positionVisible
+        if self._ecranVisible.contains(positionVisible) or self._ecranVisible.colliderect(positionVisible):
+            positionCollage = positionVisible.move(-self._scrollingX, -self._scrollingY)
             if len(self._transformationsParties) > 0:
                 surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)].copy()
-                self._transformerPartie(surfaceCollage, nomPnj, pnj.positionCarte)
+                self._transformerPartie(surfaceCollage, nomPnj, positionVisible)
             else:
                 surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)]
             self._fenetre.blit(surfaceCollage, positionCollage)
