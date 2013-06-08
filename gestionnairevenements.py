@@ -42,7 +42,6 @@ class GestionnaireEvenements():
     def _gererMessagesCollision(self):
         """Prévient tous les PNJ cognés des collisions qui ont eu lieu."""
         for message in self._jeu.carteActuelle.messagesCollision:
-            print(message)
             if message[0] in self._evenements["concrets"][self._nomCarte].keys():
                 self._evenements["concrets"][self._nomCarte][message[0]][0].onCollision(*message[1:])
         del self._jeu.carteActuelle.messagesCollision[:]

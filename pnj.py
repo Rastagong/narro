@@ -84,7 +84,7 @@ class PNJ(Mobile):
         Quand il y a collision, elle est appelée, permettant ainsi de débloquer la situation."""
         if self._intelligence is True and self._courage is True:
             self._collision = True
-            self._blocsExclusTrajet = [ self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[self._etapeAction], self._positionCarte.left, self._positionCarte.top) ]
+            self._blocsExclusTrajet = [self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[self._etapeAction], self._positionCarte.left, self._positionCarte.top)]
             self._argsvTrajet["blocsExclus"], self._argsTrajet[0], self._argsTrajet[1] = self._blocsExclusTrajet, self._positionCarte.left/32, self._positionCarte.top/32
             trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
             self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
