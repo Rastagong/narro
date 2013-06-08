@@ -86,6 +86,14 @@ class Mobile(EvenementConcret):
         else:
             return False
 
+    def _changerCouche(self, nouvelleCouche):
+        ancienneCouche = self._c
+        self._c = nouvelleCouche
+        if self._nom in self._jeu.carteActuelle.pnj[ancienneCouche].keys():
+            pnj = self._jeu.carteActuelle.pnj[ancienneCouche][self._nom]
+            self._jeu.carteActuelle.pnj[ancienneCouche].pop(self._nom)
+        self._jeu.carteActuelle.pnj[self._c][self._nom] = pnj
+
     def _ajusterPositionSource(self, enMarche, direction):
         """Donne la position source du PNJ en marche ou en fin de parcours, en fonction de la direction"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile

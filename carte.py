@@ -484,12 +484,19 @@ class Carte(Observateur):
     def _setMessagesCollision(self, nouveauxMessages):
         self._messagesCollision = nouveauxMessages
 
+    def _getPnj(self):
+        return self._pnj
+    
+    def _setPnj(self, nouveauxPnj):
+        self._pnj = nouveauxPnj
+
     nombreCouches = property(_getNombreCouches)
     hauteurTile = property(_getHauteurTile)
     nom = property(_getNom)
     longueur = property(_getLongueur)
     largeur = property(_getLargeur)
     tiles = property(_getTiles)
+    pnj = property(_getPnj, _setPnj)
     idParametres = property(_getIdParametres, _setIdParametres)
     transformationsGlobales = property(_getTransformationsGlobales, _setTransformationsParties)
     transformationsParties = property(_getTransformationsParties, _setTransformationsParties)
