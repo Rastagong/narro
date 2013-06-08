@@ -13,6 +13,9 @@ class EvenementConcret(Evenement):
         self._xJoueur, self._yJoueur, self._joueurBouge =  [-1, -1], [-1, -1], [True, True]
         self._xJoueurOld, self._yJoueurOld =  [-1, -1], [-1, -1]
 
+    def onCollision(self, nomPNJ, positionCarte):
+        """Méthode à redéfinir appelée lorsque le PNJ <nomPNJ> en <positionCarte> est rentré dans le PNJ actuel."""
+
     def onJoueurProche(self, x, y, c, direction):
         """Fonction appelée lorsque le joueur se trouve à proximité de l'évènement (à une case près sauf en diagonale).
         <x> et <y> sont ses coordonnées, exprimées en indices de tiles, sa direction est <direction>. <c> est sa couche."""

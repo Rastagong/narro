@@ -80,7 +80,8 @@ class BoiteOutils():
             self._jeu.carteActuelle.transformationsParties.remove(nomTransformation)
         if nomTransformation in self._jeu.carteActuelle.parametresTransformations.keys():
             self._jeu.carteActuelle.parametresTransformations[nomTransformation] = dict()
-        del self._jeu.carteActuelle.idParametres[nomTransformation]
+        if nomTransformation in self._jeu.carteActuelle.idParametres.keys():
+            del self._jeu.carteActuelle.idParametres[nomTransformation]
 
     def getDirectionAuHasard(self):
         directions = ["Haut","Droite","Bas","Gauche"]
@@ -149,12 +150,15 @@ class BoiteOutils():
                 self._canauxSons[instance].set_volume(nouveauVolume)
 
     def tileProcheDe(self, tile, positions, rayon):
-        """Retourne <True> si <tile> est dans un rayon de <rayon> pixels de n'importe laquelle des <positions>."""
         tileProche = False
         for position in positions:
             if position.union(tile).width <= rayon or position.union(tile).height <= rayon:
                 tileProche = True
         return tileProche
+
+    def tileProcheDe(self, tile1, tile2, rayon):
+        """Retourne <True> si les tiles sont séparés par moins de <rayon> blocs."""
+        return self.estimationDistanceRestante(tile1, tile2) <= rayon
 
     def supprimerPNJ(self, nomPNJ, couche):
         self._jeu.carteActuelle.supprimerPNJ(nomPNJ, couche)
@@ -210,7 +214,7 @@ class BoiteOutils():
             i += 1
         return positionsCorrectes
 
-    def _estimationDistanceRestante(self, positionActuelle, destination):
+    def estimationDistanceRestante(self, positionActuelle, destination):
         """Donne, en utilisant la méthode de Manhattan, une estimation heuristique entre <positionActuelle> et <destination>. 
         Cette estimation donne, avec le nombre de positions déjà parcourues, un coût <score> à chaque position.
         La position ayant le moindre côut est analysée prioritairement à chaque fois (algorithme A*)."""
@@ -264,7 +268,7 @@ class BoiteOutils():
         positionsVues, positionsLibres = list(), [positionDepart]
         if positionArrivee == positionDepart:
             return ["Aucune"]
-        scores, scoresPositions, parents = {positionDepart:self._estimationDistanceRestante(positionDepart, positionArrivee)}, {positionDepart:0}, {positionDepart:positionDepart}
+        scores, scoresPositions, parents = {positionDepart:self.estimationDistanceRestante(positionDepart, positionArrivee)}, {positionDepart:0}, {positionDepart:positionDepart}
         positionsLibres = sorted(positionsLibres, key=lambda position: scores[position]) #Positions à examiner
         if blocsExclus is not None:
             for (xExclu,yExclu) in blocsExclus:
@@ -295,7 +299,7 @@ class BoiteOutils():
             while i < len(voisins):
                 voisin = voisins[i]
                 if positionsVues.count(voisin) == 0: #Si la position n'est pas définitivement vérifiée
-                    score = scoresPositions[parents[position]] + 1 + self._estimationDistanceRestante(voisin, positionArrivee) 
+                    score = scoresPositions[parents[position]] + 1 + self.estimationDistanceRestante(voisin, positionArrivee) 
                     if positionsLibres.count(voisin) == 0: #Si on ne l'a même pas examinée
                         positionsLibres.append(voisin)
                         meilleurChemin = True
@@ -414,4 +418,3 @@ class BoiteOutils():
     positionCarteJoueur = property(_getPositionCarteJoueur)
     directionJoueurReelle = property(_getDirectionJoueurReelle, _setDirectionJoueurReelle)
     coucheJoueur = property(_getCoucheJoueur, _setCoucheJoueur)
-

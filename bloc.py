@@ -23,7 +23,7 @@ class Bloc:
             self._positionSource, self._nomTileset, self._couleurTransparente, self._nomPNJ, self._positionCarte = positionSource, nomTileset, couleurTransparente, nomPNJ, positionCarte
             self._positionCarteSuivante, self._positionCollision, self._positionVisible = positionCarteSuivante, positionCollision, positionVisible
             if self._positionCollision is False:
-                self._positionCollision = Rect(0, 0, 0, 0)
+                self._positionCollision = Rect(0, 0, self._positionCarte.width, self._positionCarte.height)
             if self._positionVisible is False:
                 self._positionVisible = Rect(0, 0, 0, 0)
     

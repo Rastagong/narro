@@ -38,10 +38,19 @@ class GestionnaireEvenements():
     def initialiserBoiteOutils(self):
         self._boiteOutils.initialiser()
         return self._boiteOutils
+
+    def _gererMessagesCollision(self):
+        """Prévient tous les PNJ cognés des collisions qui ont eu lieu."""
+        for message in self._jeu.carteActuelle.messagesCollision:
+            print(message)
+            if message[0] in self._evenements["concrets"][self._nomCarte].keys():
+                self._evenements["concrets"][self._nomCarte][message[0]][0].onCollision(*message[1:])
+        del self._jeu.carteActuelle.messagesCollision[:]
     
     def gererEvenements(self, nomCarteActuelle):
         """Gère tous les évènements"""
         self._nomCarte = nomCarteActuelle
+        self._gererMessagesCollision()
         for categorieEvenements in self._evenements["abstraits"].values():
             for evenement in categorieEvenements.values():
                 evenement.traiter()

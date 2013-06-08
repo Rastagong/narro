@@ -109,22 +109,35 @@ class Mobile(EvenementConcret):
             direction = direction[1:]
         self._directionRegard = str(direction)  
 
-    def _calculerNouvellesCoordonnees(self, tempsActuel, direction):
+    def _calculerNouvellesCoordonnees(self, tempsActuel):
         deltaTimer = (tempsActuel - self._tempsPrecedent) / 1000
         avancee = (self._vitesseDeplacement * deltaTimer)
         return (avancee, deltaTimer)
 
     def _majCoordonnees(self, tempsActuel, direction, deltaTimer, avancee):
         self._tempsPrecedent, self._avancee, self._deltaTimer = tempsActuel, round(avancee), deltaTimer
-        if self._pixelsParcourus + self._avancee > 32:
-            self._avancee = 32 - self._pixelsParcourus
-        self._avanceeOrientee = self._avancee
-        if direction == "Gauche" or direction == "Haut":
-            self._avanceeOrientee *= -1
-        if direction == "Haut" or direction == "Bas":
-            return (self._positionCarte.left, self._positionCarte.top + self._avanceeOrientee)
-        elif direction == "Gauche" or direction == "Droite":
-            return (self._positionCarte.left + self._avanceeOrientee, self._positionCarte.top)
+        if isinstance(direction, Rect):
+            sensAbscisse, sensOrdonnee = 0, 0
+            if direction.left != self._positionCarte.left:
+                sensAbscisse = 1 if direction.left > self._positionCarte.left else -1
+            if direction.top != self._positionCarte.top:
+                sensOrdonnee = 1 if direction.top > self._positionCarte.top else -1
+            self._avanceeOrientee = [sensAbscisse * self._avancee, sensOrdonnee * self._avancee]
+            if (sensAbscisse == 1 and self._positionCarte.left + self._avanceeOrientee[0] > direction.left) or (sensAbscisse == -1 and self._positionCarte.left + self._avanceeOrientee[0] < direction.left):
+                    self._avanceeOrientee[0] = (self._avanceeOrientee[0] / abs(self._avanceeOrientee[0])) * (direction.left - self._positionCarte.left)
+            if (sensOrdonnee == 1 and self._positionCarte.top + self._avanceeOrientee[1] > direction.top) or (sensOrdonnee == -1 and self._positionCarte.top + self._avanceeOrientee[1] < direction.top):
+                    self._avanceeOrientee[1] = (self._avanceeOrientee[1] / abs(self._avanceeOrientee[1])) * (direction.top - self._positionCarte.top)
+            return (self._positionCarte.left + self._avanceeOrientee[0], self._positionCarte.top + self._avanceeOrientee[1])
+        else:
+            if self._pixelsParcourus + self._avancee > 32:
+                self._avancee = 32 - self._pixelsParcourus
+            self._avanceeOrientee = self._avancee
+            if direction == "Gauche" or direction == "Haut":
+                self._avanceeOrientee *= -1
+            if direction == "Haut" or direction == "Bas":
+                return (self._positionCarte.left, self._positionCarte.top + self._avanceeOrientee)
+            elif direction == "Gauche" or direction == "Droite":
+                return (self._positionCarte.left + self._avanceeOrientee, self._positionCarte.top)
 
     def _getX(self):
         return self._positionCarte.left

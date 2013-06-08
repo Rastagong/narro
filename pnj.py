@@ -41,6 +41,7 @@ class PNJ(Mobile):
         self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage, self._fuyard = False, False, intelligence, poseDepart, courage, fuyard
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet, self._blocsExclusTrajet = None, None, None, []
         self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
+        self._deplacementLibre = False
 
     def onJoueurProche(self, x, y, c, direction):
         super().onJoueurProche(x, y, c, direction)
@@ -88,7 +89,7 @@ class PNJ(Mobile):
             trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
             self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
 
-    def _lancerTrajet(self, *args, nouvelleIntelligence=False):
+    def _lancerTrajet(self, *args, nouvelleIntelligence=False, deplacementLibre=False):
         """Lance un nouveau trajet (liste d'actions <nouveauTrajet>) au PNJ.
         Si <repetition> vaut <True>, la liste d'actions fonctionne en boucle.
         <nouvelleIntelligence> ne vaut <True> que quand le trajet est lancé depuis <_lancerTrajetEtoile> : il s'agit d'un trajet A*, donc où il faut être intelligent.
@@ -99,7 +100,7 @@ class PNJ(Mobile):
             nouveauTrajet, repetition = args[0], args[1]
         else:
             nouveauTrajet, repetition = args[:len(args) - 1], args[len(args) - 1]
-        self._listeActions, self._intelligence = nouveauTrajet, nouvelleIntelligence
+        self._listeActions, self._intelligence, self._deplacementLibre = nouveauTrajet, nouvelleIntelligence, deplacementLibre
         self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = 0, 0, repetition, True
         Horloge.initialiser(id(self), 1, 1)
 
@@ -126,7 +127,9 @@ class PNJ(Mobile):
 
     def _deplacement(self, direction):
         """Gère une action de déplacement (un pas, un regard, ou une attente)"""
-        hauteurTile = self._jeu.carteActuelle.hauteurTile
+        hauteurTile, deplacementAxe = self._jeu.carteActuelle.hauteurTile, True
+        if isinstance(direction, Rect):
+            deplacementAxe = False
         if direction is "Aucune":
             self._ajusterPositionSource(False, self._directionRegard) 
             if self._poseDepart is True:
@@ -145,19 +148,21 @@ class PNJ(Mobile):
                 self._etapeAction += 1
                 self._etapeMarche = 1
                 self._tempsPrecedent = pygame.time.get_ticks()
-        elif direction in ("Haut","Bas","Gauche","Droite"): #Un pas
+        elif deplacementAxe is False or direction in ("Haut","Bas","Gauche","Droite"): #Un pas
             tempsActuel = pygame.time.get_ticks()
-            avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
+            avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel)
             if avancee >= 1.0:
-                if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
+                if (deplacementAxe and self._pixelsParcourus < hauteurTile) or (not deplacementAxe and direction != self._positionCarte): #Si le déplacement n'est pas fini
                     deplacementPossible = False
                     (self._positionCarteFuture.left, self._positionCarteFuture.top) = self._majCoordonnees(tempsActuel, direction, deltaTimer, avancee)
                     if self._etapeMarche == 1: #On ne vérifie si on peut se déplacer qu'en étape 1
-                        self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
+                        if deplacementAxe:
+                            self._positionCarteSuivante = self._getPositionCarteSuivante(direction)
+                            self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
                         self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
-                        self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
-                        deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
-                    if deplacementPossible is True or self._etapeMarche > 1:
+                        if not self._deplacementLibre:
+                            deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
+                    if (deplacementPossible or self._deplacementLibre) or (self._etapeMarche > 1 and deplacementAxe):
                         self._regardFait, self._collision = False, False
                         self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top
                         self._positionCarte.left, self._positionCarte.top = self._positionCarteFuture.left, self._positionCarteFuture.top

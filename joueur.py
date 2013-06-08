@@ -154,7 +154,7 @@ class Joueur(Mobile, Observable):
             self._boiteOutils.directionJoueurReelle = direction
             if self._regardDansDirection[direction] == True: #Si on a déjà regardé dans la direction
                 tempsActuel = pygame.time.get_ticks()
-                avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel, direction)
+                avancee, deltaTimer = self._calculerNouvellesCoordonnees(tempsActuel)
                 if avancee >= 1.0:
                     if self._pixelsParcourus < hauteurTile: #Si le déplacement n'est pas fini
                         deplacementPossible = False

@@ -36,7 +36,7 @@ class Carte(Observateur):
         self._ajouterPolice(NOM_FICHIER_POLICE_PAR_DEFAUT, TAILLE_POLICE_SPLASH_SCREEN)
         self._fenetre, self._blitFrame = self._jeu.fenetre, False
         self._transformationsGlobales, self._transformationsParties, self._parametresTransformations = list(), list(), dict()
-        self._idParametres, self._donneesParametres = dict(), dict()
+        self._idParametres, self._donneesParametres, self._messagesCollision = dict(), dict(), list()
 
         self._dicoGid = dict()
         for tileset in self._carteTiled.tile_sets:
@@ -95,7 +95,7 @@ class Carte(Observateur):
         if nomTileset not in self._dicoSurfaces:
             self._dicoSurfaces[nomTileset] = dict()
             try:
-                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES,cheminVersTileset))
+                self._dicoSurfaces[nomTileset]["Source"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES,nomTileset))
                 if tileset is not False:
                     self._completerDicoGids(nomTileset, tileset, self._dicoSurfaces[nomTileset]["Source"].get_width(), self._dicoSurfaces[nomTileset]["Source"].get_height())
             except pygame.error as erreur:
@@ -166,10 +166,15 @@ class Carte(Observateur):
         positionFinale.width, positionFinale.height = positionCarte.width, positionCarte.height
         return positionFinale.move(positionRelative.left, positionRelative.top)
         
-    def deplacementPossible(self, positionCarte, c, nomPNJ, verifPrecise=False, positionCollision=False, positionVisible=False, ecranVisible=False, exclusionCollision=[]):
+    def _prevenirCollision(self, pnjCogne, pnjCogneur, positionCogneur):
+        self._messagesCollision.append((pnjCogne, pnjCogneur, positionCogneur))
+
+    def deplacementPossible(self, positionCarte, c, nomPNJ, verifPrecise=False, positionCollision=False, positionVisible=False, ecranVisible=False, exclusionCollision=[], collisionEffective=False, axeTiles=True):
         """Indique si un déplacement en <x><y><c> est possible. Retourne un 2-tuple avec :
         * <True> si un PNJ peut être positionné en <x><y><c>, sinon <False>. Si <xOld>,<yOld> sont fournis, ne prend pas en compte le PNJ à cette position pour les collisions.
         * La praticabilité est vérifiée via des Rect quand <verifPrecise> vaut <True>.
+        * Vérifie que l'objet est visible à l'écran quand <ecranVisible> vaut <True>.
+        * Ne prend pas en compte les collisions avec tout PNJ dont le nom est présent dans la liste <exclusionCollision>.
         * Le tile qui vient d'être quitté."""
         deplacementPossible = True
         if positionCollision is False:
@@ -182,11 +187,14 @@ class Carte(Observateur):
             positionVisible = self._traiterPositionRelative(positionCarte, positionVisible)
         if self._ecran.contains(positionCarte) == 0: #Si la position d'arrivée existe dans la carte
             deplacementPossible = False
-        if ecranVisible and (not self._ecranVisible.contains(positionVisible)) and (not self._ecranVisible.colliderect(positionVisible)):
+        if ecranVisible is True and not (self._ecranVisible.contains(positionVisible) or self._ecranVisible.colliderect(positionVisible)):
             deplacementPossible = False
-        pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and pnj.nomPNJ not in exclusionCollision and (pnj.positionCollision.colliderect(positionCollision) == 1 and (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False))]
+        pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and pnj.nomPNJ not in exclusionCollision and (pnj.positionCollision.colliderect(positionCollision) == 1 and (not axeTiles or (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False)))]
         if len(pnjsEnCollision) > 0:
             deplacementPossible = False
+            if collisionEffective:
+                for pnj in pnjsEnCollision:
+                    self._prevenirCollision(pnj.nomPNJ, nomPNJ, positionCarte)
         if deplacementPossible:
             for (x,y) in self._determinerPresenceSurTiles(positionCarte.left, positionCarte.top, positionCarte.width, positionCarte.height):
                 if self.tilePraticable(x, y, c) is False: #Si le tile est impraticable
@@ -304,7 +312,7 @@ class Carte(Observateur):
         elif isinstance(instance, ZonePensee) is True and nomAttribut == "_positionSurface":
             self._positionZonePensee = list(info)
 
-    def _transformerPartie(self, surface, nomPnj, positionCarte, **p):
+    def _transformerPartie(self, surface, nomPnj, positionVisible, positionCarte, **p):
         """Applique une transformation individuellement à chaque <surface> (mobile) lors de sa pose."""
         for nomTransformation in self._transformationsParties:
             p = self._parametresTransformations[nomTransformation]
@@ -318,6 +326,9 @@ class Carte(Observateur):
             elif nomTransformation == "Action Joueur" and nomPnj == "Joueur":
                 centre = positionCarte.move(-self._scrollingX, -self._scrollingY).center
                 pygame.draw.circle(self._fenetre, (255,255,255), centre, p["rayon"], 1)
+            elif "Rouge" in nomTransformation and nomPnj == p["nom"]:
+                pixels = surfarray.pixels3d(surface) #On exclut la zone de pensée
+                pixels[:,:,1:] = 0
 
     def _ajouterPolice(self, fichierPolice, taillePolice):
         if fichierPolice not in self._polices.keys():
@@ -389,12 +400,12 @@ class Carte(Observateur):
     def _afficherBlocPnj(self, c, nomPnj):
         """Affiche un PNJ sur un bloc"""
         pnj = self._pnj[c][nomPnj]
-        positionVisible = pnj.positionVisible
-        if self._ecranVisible.contains(positionVisible) or self._ecranVisible.colliderect(positionVisible):
+        positionVisible, positionCarte = pnj.positionVisible, pnj.positionCarte
+        if self._ecranVisible.contains(positionCarte) or self._ecranVisible.colliderect(positionCarte):
             positionCollage = positionVisible.move(-self._scrollingX, -self._scrollingY)
             if len(self._transformationsParties) > 0:
                 surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)].copy()
-                self._transformerPartie(surfaceCollage, nomPnj, positionVisible)
+                self._transformerPartie(surfaceCollage, nomPnj, positionVisible, positionCarte)
             else:
                 surfaceCollage = self._dicoSurfaces[pnj.nomTileset][(pnj.positionSource.left, pnj.positionSource.top, pnj.positionSource.width, pnj.positionSource.height)]
             self._fenetre.blit(surfaceCollage, positionCollage)
@@ -408,7 +419,7 @@ class Carte(Observateur):
             while coucheActuelle < self._nombreCouches: 
                 couche = self._tilesLayers[coucheActuelle]
                 if len(self._transformationsParties) > 0:
-                    self._transformerPartie(couche, False, (0,0))
+                    self._transformerPartie(couche, False, (0,0), (0,0))
                 self._fenetre.blit(couche, (0,0), area=self._ecranVisible)
                 nomsPnjs = sorted(self._pnj[coucheActuelle], key=lambda nomPNJ: self._pnj[coucheActuelle][nomPNJ].positionCarte.top)
                 #Tri des PNJs selon leur ordonnée (de manière croissante) : on affiche ceux en haut de l'écran avant ceux en bas, pour avoir une superposition
@@ -467,6 +478,12 @@ class Carte(Observateur):
     def _getTiles(self):
         return self._tiles
 
+    def _getMessagesCollision(self):
+        return self._messagesCollision
+
+    def _setMessagesCollision(self, nouveauxMessages):
+        self._messagesCollision = nouveauxMessages
+
     nombreCouches = property(_getNombreCouches)
     hauteurTile = property(_getHauteurTile)
     nom = property(_getNom)
@@ -477,3 +494,4 @@ class Carte(Observateur):
     transformationsGlobales = property(_getTransformationsGlobales, _setTransformationsParties)
     transformationsParties = property(_getTransformationsParties, _setTransformationsParties)
     parametresTransformations = property(_getParametresTransformations)
+    messagesCollision = property(_getMessagesCollision, _setMessagesCollision)
