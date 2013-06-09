@@ -117,6 +117,14 @@ class BoiteOutils():
             self._sourcesSonsFixes[instance] = sourceSon
             self.gererVolumeSonsFixes(self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
 
+    def enleverInstanceSon(self, nomCarte, instance):
+        if instance in self._canauxSons.keys():
+            self._canauxSons[instance].stop()
+        if nomCarte in self._sonsFixes.keys():
+            if instance in self._sonsFixes[nomCarte]:
+                self._sonsFixes[nomCarte].remove(instance)
+                self._sourcesSonsFixes.pop(instance)
+
     def viderSonsFixes(self, nomCarte):
         """Quand on change de cartes, on vide les sons fixes"""
         if nomCarte in self._sonsFixes.keys():

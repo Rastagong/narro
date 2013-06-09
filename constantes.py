@@ -155,6 +155,9 @@ LIMITER_FPS = True
 #Volume par défaut (compris entre 0 et 1
 VOLUME_MUSIQUE = 0.7 #0.0007
 
+#Le nombre de canaux de sons utilisés par Pygame Mixer
+NOMBRE_CANAUX_SONS = 8
+
 #La durée d'une pause lors d'une balade (un trajet aléatoire) exprimée en millisecondes
 DUREE_PAUSE_BALADE = 300
 

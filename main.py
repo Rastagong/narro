@@ -50,6 +50,7 @@ class Narro:
         pygame.event.set_allowed(None)
         pygame.event.set_allowed(LISTE_EVENTS_AUTORISES)
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(NOMBRE_CANAUX_SONS)
 
     def _chargerCarteAExecuter(self):
         """Charge en mémoire la carte à exécuter"""
