@@ -121,8 +121,9 @@ class BoiteOutils():
         if instance in self._canauxSons.keys():
             self._canauxSons[instance].stop()
         if nomCarte in self._sonsFixes.keys():
-            if instance in self._sonsFixes[nomCarte]:
+            while instance in self._sonsFixes[nomCarte]:
                 self._sonsFixes[nomCarte].remove(instance)
+            while instance in self._sourcesSonsFixes.values():
                 self._sourcesSonsFixes.pop(instance)
 
     def viderSonsFixes(self, nomCarte):
@@ -148,14 +149,20 @@ class BoiteOutils():
         if self._jeu.carteAExecuter in self._sonsFixes.keys():
             for instance in self._sonsFixes[self._jeu.carteAExecuter]:
                 if isinstance(self._sourcesSonsFixes[instance], str): #Si la source du son fixe est un évènement (désigné par une chaîne)
-                    (xFixe, yFixe) = self.getCoordonneesEvenement(self._sourcesSonsFixes[instance])
+                    coordonnees = self.getCoordonneesEvenement(self._sourcesSonsFixes[instance])
+                    xFixe,yFixe = (-1, -1) if coordonnees is False else coordonnees
                 else: #Sinon, la source donne directement les coordonnées
                     (xFixe, yFixe) = self._sourcesSonsFixes[instance]
-                estimationEloignement = abs(xJoueur - xFixe) + abs(yJoueur - yFixe) - 1 #On soustrait 1 car le joueur ne peut pas être SUR la source
-                nouveauVolume = self._volumesFixes[instance] - (estimationEloignement / 50) #Plus on est éloigné, plus le volume est diminué. 1 bloc d'éloignement = 0,02 ua en moins sur le volume
-                if nouveauVolume < 0:
-                    nouveauVolume = 0
-                self._canauxSons[instance].set_volume(nouveauVolume)
+                if (xFixe,yFixe) != (-1, -1):
+                    estimationEloignement = abs(xJoueur - xFixe) + abs(yJoueur - yFixe) - 1 #On soustrait 1 car le joueur ne peut pas être SUR la source
+                    nouveauVolume = self._volumesFixes[instance] - (estimationEloignement / 50) #Plus on est éloigné, plus le volume est diminué. 1 bloc d'éloignement = 0,02 ua en moins sur le volume
+                    if nouveauVolume < 0:
+                        nouveauVolume = 0
+                    self._canauxSons[instance].set_volume(nouveauVolume)
+                else:
+                    self._canauxSons[instance].stop()
+                    self._sourcesSonsFixes.pop(instance)
+                    self._sonsFixes[self._jeu.carteAExecuter].remove(instance)
 
     def tileProcheDe(self, tile, positions, rayon):
         tileProche = False
