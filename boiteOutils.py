@@ -164,13 +164,6 @@ class BoiteOutils():
                     self._sourcesSonsFixes.pop(instance)
                     self._sonsFixes[self._jeu.carteAExecuter].remove(instance)
 
-    def tileProcheDe(self, tile, positions, rayon):
-        tileProche = False
-        for position in positions:
-            if position.union(tile).width <= rayon or position.union(tile).height <= rayon:
-                tileProche = True
-        return tileProche
-
     def tileProcheDe(self, tile1, tile2, rayon):
         """Retourne <True> si les tiles sont séparés par moins de <rayon> blocs."""
         return self.estimationDistanceRestante(tile1, tile2) <= rayon
@@ -233,7 +226,7 @@ class BoiteOutils():
         """Donne, en utilisant la méthode de Manhattan, une estimation heuristique entre <positionActuelle> et <destination>. 
         Cette estimation donne, avec le nombre de positions déjà parcourues, un coût <score> à chaque position.
         La position ayant le moindre côut est analysée prioritairement à chaque fois (algorithme A*)."""
-        return abs(destination[0]-positionActuelle[0]) + abs(destination[1]-positionActuelle[0])
+        return abs(destination[0]-positionActuelle[0]) + abs(destination[1]-positionActuelle[1])
 
     def _determinerChemin(self, parents, position, positionDepart, chemin):
         """Détermine le chemin pour un mobile à partir de <position>, l'arrivée, et de la chaîne de parents <parents>. Le chemin est la liste de positions <chemin>."""
