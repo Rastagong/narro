@@ -19,7 +19,7 @@ class BoiteOutils():
         for (nom, valeur) in VARIABLES:
             self._variables[nom] = valeur
         self._sons = dict()
-        self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes = dict(), dict(), dict(), dict()
+        self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes, self._dureesSons = dict(), dict(), dict(), dict(), dict()
         self._joueurLibre = Interrupteur(True)
         self._coucheJoueur, self._directionJoueurReelle = 0, "Aucune"
 
@@ -101,6 +101,7 @@ class BoiteOutils():
         self._canauxSons[instance] = pygame.mixer.find_channel()
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
         self._canauxSons[instance].set_volume(volume)
+        self._dureesSons[instance] = (self._sons[nomSon].get_length()*1000) * nombreEcoutes
         if fixe is True:
             if self._jeu.carteAExecuter not in self._sonsFixes.keys():
                 self._sonsFixes[self._jeu.carteAExecuter] = list()
@@ -116,6 +117,10 @@ class BoiteOutils():
                 sourceSon = evenementFixe
             self._sourcesSonsFixes[instance] = sourceSon
             self.gererVolumeSonsFixes(self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
+
+    def getDureeInstanceSon(self, instance):
+        if instance in self._canauxSons.keys():
+            return self._dureesSons[instance]
 
     def enleverInstanceSon(self, nomCarte, instance):
         if instance in self._canauxSons.keys():
