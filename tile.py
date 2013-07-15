@@ -19,6 +19,8 @@ class Tile:
             praticabiliteActuelle = self._bloc[i].praticabilite
             if praticabiliteActuelle is False:
                 toutFaux = True
+            if praticabiliteActuelle is True and i == 0 and self._bloc[i].vide is True: #Bloc vide en couche 0 : c'est du vide, donc impraticable
+                toutFaux = True
             if toutFaux is True:
                 self._praticabilite[i] = False
             else:

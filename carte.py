@@ -113,6 +113,7 @@ class Carte(Observateur):
                 bloc = Bloc(nomTileset=nomTileset, positionSource=positionSource, couleurTransparente=couleurTransparente, praticabilite=praticabilite)
                 self._tiles[x][y].bloc[c] = bloc
                 surfaceBloc = self._ajouterSurface(positionSource, nomTileset, couleurTransparente, tileset=False, mobile=False)
+                self._tilesLayers[c].fill((0,0,0,0), rect=Rect(x*self._hauteurTile, y*self._hauteurTile, self._hauteurTile, self._hauteurTile))
                 self._tilesLayers[c].blit(surfaceBloc, (x*self._hauteurTile, y*self._hauteurTile) )
             else:
                 bloc, praticabilite = Bloc(jeu, vide=True), True

@@ -99,7 +99,8 @@ class Teleporteur(EvenementConcret):
             self._fonctionAvant = self._texteTransition
         self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
 
-    def onJoueurDessus(self, x, y, c, direction):
+
+    def _verifierAutorisationTeleportation(self):
         teleportationAutoriseeCondition, teleportationAutoriseeNoCondition = False, False
         if self._condition is True: #Pas de condition spécifiée, on téléporte
             teleportationAutoriseeCondition = True
@@ -111,6 +112,10 @@ class Teleporteur(EvenementConcret):
         elif self._noCondition in self._boiteOutils.interrupteurs.keys(): #NoCondition spécifiée : on ne téléporte que si l'interrupteur est désactivé
             if self._boiteOutils.interrupteurs[self._noCondition].voir() is False:
                 teleportationAutoriseeNoCondition = True
+        return teleportationAutoriseeCondition, teleportationAutoriseeNoCondition
+
+    def onJoueurDessus(self, x, y, c, direction):
+        teleportationAutoriseeCondition, teleportationAutoriseeNoCondition = self._verifierAutorisationTeleportation()
         if teleportationAutoriseeCondition is True and teleportationAutoriseeNoCondition is True and self._boiteOutils.getJoueurMouvement() is True: 
             if self._xDestination == -1:
                 self._xDestination = x
@@ -159,6 +164,32 @@ class Teleporteur(EvenementConcret):
         else:
             return False
 
+class Porte(Teleporteur):
+    def __init__(self, jeu, gestionnaire, nomCarte, porteOuverte, nomTileset, positionSourceTileOuvert, positionSourceTileFerme, xPorte, yPorte, cPorte, x=-1, y=-1, c=-1, direction=-1, transition=True, condition=True, noCondition=True, fonctionAvant=False, parametresFAvant=[], fonctionApres=False):
+        super().__init__(jeu, gestionnaire, nomCarte, x, y, c, direction, transition, condition, noCondition, fonctionAvant, parametresFAvant, fonctionApres)
+        self._porteOuverte, self._nomTileset, self._positionsSources = Interrupteur(porteOuverte), nomTileset, {True:positionSourceTileOuvert, False:positionSourceTileFerme}
+        self._xPorte, self._yPorte, self._cPorte = xPorte, yPorte, cPorte
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction): 
+        self._porteOuverte.inverser()
+        bloc = self._jeu.carteActuelle.tiles[self._xPorte][self._yPorte].bloc[self._cPorte]
+        self._boiteOutils.changerBloc(self._xPorte, self._yPorte, self._cPorte, self._nomTileset, self._positionsSources[self._porteOuverte.voir()], (0,0,0), self._porteOuverte.voir())
+        bloc = self._jeu.carteActuelle.tiles[self._xPorte][self._yPorte].bloc[self._cPorte]
+
+    def _verifierAutorisationTeleportation(self):
+        teleportationAutoriseeCondition, teleportationAutoriseeNoCondition = False, False
+        if self._porteOuverte.voir() is True: #Pas de téléportation quand la porte n'est pas ouverte
+            if self._condition is True: #Pas de condition spécifiée, on téléporte
+                teleportationAutoriseeCondition = True
+            elif self._condition in self._boiteOutils.interrupteurs.keys(): #Condition spécifiée : on ne téléporte que si l'interrupteur est activé
+                if self._boiteOutils.interrupteurs[self._condition].voir() is True:
+                    teleportationAutoriseeCondition = True
+            if self._noCondition is True:
+                teleportationAutoriseeNoCondition = True
+            elif self._noCondition in self._boiteOutils.interrupteurs.keys(): #NoCondition spécifiée : on ne téléporte que si l'interrupteur est désactivé
+                if self._boiteOutils.interrupteurs[self._noCondition].voir() is False:
+                    teleportationAutoriseeNoCondition = True
+        return teleportationAutoriseeCondition, teleportationAutoriseeNoCondition
 
 class ModulateurMusique(Evenement):
     def __init__(self, jeu, gestionnaire):
