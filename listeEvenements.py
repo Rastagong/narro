@@ -123,7 +123,7 @@ class Teleporteur(EvenementConcret):
             if self._transition is False:
                 self._executionTeleportation = True
             else: #Transition de téléportation
-                Horloge.initialiser(id(self), 1, 300)
+                Horloge.initialiser(id(self), 1, 500)
                 self._teleportationRetardee = True
 
     def traiter(self):
