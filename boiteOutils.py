@@ -300,7 +300,11 @@ class BoiteOutils():
                 elif arretAvant:
                     del chemin[len(chemin)-1]
                 if regardFinal is not False:
-                    chemin.append("R" + regardFinal)
+                    if regardFinal in ["Haut","Bas","Gauche","Droite"]:
+                        chemin.append("R" + regardFinal)
+                    else: #Le regard final est un nom de PNJ vers qui il faut regarder
+                        chemin.append(self.regardVersPnj(regardFinal, positionArrivee[0], positionArrivee[1]))
+                        print(positionArrivee)
                 if balade:
                     nombrePauses, i = math.floor(len(chemin) / frequencePauseBalade), 0
                     while i < nombrePauses:
@@ -329,6 +333,14 @@ class BoiteOutils():
             positionsLibres = sorted(positionsLibres, key=lambda position: scores[position]) #On trie les positions à examiner pour avoir la meilleure en premier
         return ["RelanceEtoile"]
 
+    def evenementVisible(self, nomEvenement, couche, positionCarte=-1):
+        if positionCarte == -1:
+            if nomEvenement in self._jeu.carteActuelle.pnj[couche].keys():
+                positionCarte = self._jeu.carteActuelle.pnj[couche][nomEvenement].positionCarte
+            else:
+                return False
+        return self._jeu.carteActuelle._ecranVisible.colliderect(positionCarte) or self._jeu.carteActuelle._ecranVisible.contains(positionCarte)
+
     def getCoordonneesJoueur(self):
         """Retourne un tuple contenant les coordonnées du joueur."""
         return (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
@@ -345,26 +357,27 @@ class BoiteOutils():
         xJoueurOld, yJoueurOld, xJoueur, yJoueur = coordonneesJoueur[0], coordonneesJoueur[1], self._gestionnaire.xJoueur, self._gestionnaire.yJoueur
         return xJoueur >= xJoueurOld + nombreCases or xJoueur <= xJoueurOld - nombreCases or yJoueur >= yJoueurOld + nombreCases or yJoueur <= yJoueurOld - nombreCases
 
-    def deplacementVersPnj(self, nomEvenement, x, y):
+    def deplacementVersPnj(self, nomEvenement, x, y, evenementReference=False):
         """Retourne une instruction de déplacement vers le PNJ nommé <nomEvenement> situé à côté."""
         if nomEvenement in self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].keys():
             (xEvenement, yEvenement) = self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte][nomEvenement][1]
-            if xEvenement == x - 1:
-                return ["Gauche"]
-            elif xEvenement == x + 1:
+            if evenementReference is not False and evenementReference in self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].keys():
+                (x, y) = self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte][evenementReference][1]
+            distanceX, distanceY = xEvenement - x, yEvenement - y
+            if distanceX > 0 and abs(distanceX) >= abs(distanceY):
                 return ["Droite"]
-            elif yEvenement == y - 1:
-                return ["Haut"]
-            elif yEvenement == y + 1:
+            elif distanceX < 0 and abs(distanceX) >= abs(distanceY):
+                return ["Gauche"]
+            elif distanceY > 0 and abs(distanceY) >= abs(distanceX):
                 return ["Bas"]
+            elif distanceY < 0 and abs(distanceY) >= abs(distanceX):
+                return ["Haut"]
             else:
                 return False
-        else:
-            return False
 
-    def regardVersPnj(self, nomEvenement, x, y):
+    def regardVersPnj(self, nomEvenement, x, y, evenementReference=False):
         """Retourne une instruction de regard vers le PNJ nommé <nomEvenement> situé à côté."""
-        direction = self.deplacementVersPnj(nomEvenement, x, y) 
+        direction = self.deplacementVersPnj(nomEvenement, x, y, evenementReference=evenementReference) 
         if direction is not False:
             return ["R" + direction[0]]
         else:

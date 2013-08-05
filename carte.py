@@ -192,6 +192,9 @@ class Carte(Observateur):
             deplacementPossible = False
         pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and pnj.nomPNJ not in exclusionCollision and (pnj.positionCollision.colliderect(positionCollision) == 1 and (not axeTiles or (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False)))]
         if len(pnjsEnCollision) > 0:
+            """print("\n On a",nomPNJ,positionCollision,)
+            for pnj in pnjsEnCollision:
+                print(pnj.nomPNJ, pnj.positionCollision)"""
             deplacementPossible = False
             if collisionEffective:
                 for pnj in pnjsEnCollision:

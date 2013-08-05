@@ -1,5 +1,5 @@
 # -*-coding:utf-8 -*
-import pygame, pdb,math
+import pygame, pdb, math, random
 from pygame.locals import *
 from .constantes import *
 from .horloge import *
@@ -84,7 +84,8 @@ class PNJ(Mobile):
         Quand il y a collision, elle est appelée, permettant ainsi de débloquer la situation."""
         if self._intelligence is True and self._courage is True:
             self._collision = True
-            self._blocsExclusTrajet = [self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[self._etapeAction], self._positionCarte.left, self._positionCarte.top)]
+            etapeActuelle = self._etapeAction - 1 if self._fuyard and self._etapeAction == len(self._listeActions) else self._etapeAction 
+            self._blocsExclusTrajet = [self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[etapeActuelle], self._positionCarte.left, self._positionCarte.top)]
             self._argsvTrajet["blocsExclus"], self._argsTrajet[0], self._argsTrajet[1] = self._blocsExclusTrajet, self._positionCarte.left/32, self._positionCarte.top/32
             trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
             self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
@@ -93,7 +94,7 @@ class PNJ(Mobile):
         """Lance un nouveau trajet (liste d'actions <nouveauTrajet>) au PNJ.
         Si <repetition> vaut <True>, la liste d'actions fonctionne en boucle.
         <nouvelleIntelligence> ne vaut <True> que quand le trajet est lancé depuis <_lancerTrajetEtoile> : il s'agit d'un trajet A*, donc où il faut être intelligent.
-        Les paramètres principaux <nouveauTrajet> et <repetition> peuvent être fournirs de deux manière : 
+        Les paramètres principaux <nouveauTrajet> et <repetition> peuvent être fournirs de deux manières : 
             - Soit on donne la liste <nouveauTrajet> puis le booléen <repetition>
             - Soit on donne les actions composant le trajet les unes après les autres, en finissant par le booléen <repetition>"""
         if len(args) == 2 and isinstance(args[0], list):
@@ -103,6 +104,13 @@ class PNJ(Mobile):
         self._listeActions, self._intelligence, self._deplacementLibre = nouveauTrajet, nouvelleIntelligence, deplacementLibre
         self._etapeAction, self._pixelsParcourus, self._repetitionActions, self._deplacementBoucle = 0, 0, repetition, True
         Horloge.initialiser(id(self), 1, 1)
+
+    def _lancerFuiteDansUneDirection(self, direction):
+        self._fuyard, xHasard, yHasard, positionHasard, carte = True, -1, -1, Rect(-1, -1, 32, 32), self._jeu.carteActuelle
+        while (xHasard,yHasard) == (-1,-1) or self._boiteOutils.tileProcheDe((xHasard,yHasard), (self._xTile,self._yTile), 10) or self._boiteOutils.evenementVisible("",-1,positionCarte=positionHasard):
+            xHasard, yHasard = random.randint(0, carte.longueur), random.randint(0, carte.largeur)
+            positionHasard.left, positionHasard.top = xHasard * 32, yHasard * 32
+        self._lancerTrajetEtoile(self._boiteOutils.cheminVersPosition, self._xTile, self._yTile, self._c, xHasard, yHasard, arretAvant=True)
 
     def _determinerDirectionSP(self, direction):
         """Retourne la direction coresspondant à la direction SP."""
