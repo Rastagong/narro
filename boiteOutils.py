@@ -122,6 +122,12 @@ class BoiteOutils():
         if instance in self._canauxSons.keys():
             return self._dureesSons[instance]
 
+    def arreterSonEnFondu(self, instance, dureeFondu):
+        """Arrête de jouer l'instance de son <instance> en fondu de <dureeFondu> millisecondes."""
+        if instance in self._canauxSons.keys():
+            self._canauxSons[instance].fadeout(dureeFondu)
+            Horloge.initialiser(id(self), instance, dureeFondu) #Au cas où le son est un son fixe : à la fin du fondu, il faut le retirer de la liste (cf. actualiserSonsFixes)
+
     def enleverInstanceSon(self, nomCarte, instance):
         if instance in self._canauxSons.keys():
             self._canauxSons[instance].stop()

@@ -60,7 +60,6 @@ class AnimateurToucheAction(Evenement):
         elif self._animation is False and Horloge.sonner(id(self), "Maj rayon") is True:
             self._boiteOutils.retirerTransformation(False, "Action Joueur")
 
-
 class Panneau(EvenementConcret):
     def __init__(self, jeu, gestionnaire, message, *directionsMessage):
         super().__init__(jeu, gestionnaire)
