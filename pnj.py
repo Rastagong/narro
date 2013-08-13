@@ -78,6 +78,7 @@ class PNJ(Mobile):
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet = args[0], list(args[1:]), argsv
         trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
         self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
+        self._tempsPrecedent = pygame.time.get_ticks() #Evite un lag dû au delta timer, qui corrige le temps passé à trouver le trajet
 
     def _debloquerCollision(self):
         """Méthode qui ne s'applique qu'aux PNJ intelligents et qui peut être redéfinie. 

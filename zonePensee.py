@@ -17,7 +17,7 @@ class ZonePensee(Observable):
         self._messageActuel, self._vitesse = None, VITESSE_PENSEE_PAR_DEFAUT
         self._etapeAffichage, self._penseeAGerer, self._auMoinsUnePenseeGeree = 0, Interrupteur(False), False
         self._nombreEtapes, self._surface, self._positionSurface, self._policeActuelle = -1, None, None, "parDefaut"
-        self._couleur, self._tempsLecture = COULEUR_ECRITURE_PENSEE, 0
+        self._couleur, self._tempsLecture, self._nomPensee = COULEUR_ECRITURE_PENSEE, 0, False
         self._compteurMots = collections.Counter(self._messageActuel)
 
     def _majPenseeActuelle(self, message, vitesse, police, couleur, tempsLecture , nom):

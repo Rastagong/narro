@@ -198,6 +198,7 @@ class BoiteOutils():
         self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
         self._gestionnaire.evenements["concrets"][nomCarte]["Joueur"] = [jeu.joueur, (x,y), direction]
         self._gestionnaire.evenements["concrets"][nomCarte].move_to_end("Joueur", last=False)
+        self._gestionnaire._xJoueur, self._gestionnaire._yJoueur, self._gestionnaire._cJoueur, self._gestionnaire._directionJoueur, self._gestionnaire._appuiJoueur = x, y, c, direction, False
         jeu.joueur.transfertCarte(x, y, c, direction)
 
     def getJoueurMouvement(self):
