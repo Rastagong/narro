@@ -10,7 +10,7 @@ class ZonePensee(Observable):
     """Classe gérant la zone de pensée en bas de l'écran."""
 
     def __init__(self, jeu):
-        Observable.__init__(self, "_surface", "_positionSurface", "_penseeAGerer")
+        Observable.__init__(self, "_surface", "_positionSurface", "_faceActuelle", "_penseeAGerer")
         self._jeu = jeu
         self._polices, self._queuePensees = dict(), queue.Queue()
         self._polices["parDefaut"] = pygame.font.Font(os.path.join(DOSSIER_RESSOURCES,NOM_FICHIER_POLICE_PAR_DEFAUT), TAILLE_POLICE_PAR_DEFAUT) 
@@ -18,14 +18,31 @@ class ZonePensee(Observable):
         self._etapeAffichage, self._penseeAGerer, self._auMoinsUnePenseeGeree = 0, Interrupteur(False), False
         self._nombreEtapes, self._surface, self._positionSurface, self._policeActuelle = -1, None, None, "parDefaut"
         self._couleur, self._tempsLecture, self._nomPensee = COULEUR_ECRITURE_PENSEE, 0, False
-        self._compteurMots = collections.Counter(self._messageActuel)
+        self._compteurMots, self._surfaceFaceset, self._faceActuelle, self._faceset, self._etapeFace = collections.Counter(self._messageActuel), dict(), False, False, 0
 
-    def _majPenseeActuelle(self, message, vitesse, police, couleur, tempsLecture , nom):
-        self._message, self._vitesse, self._nomPensee = message, vitesse, nom
+    def _majPenseeActuelle(self, message, vitesse, police, couleur, tempsLecture , nom, faceset):
+        self._message, self._vitesse, self._nomPensee, self._faceset = message, vitesse, nom, faceset
         self._etapeAffichage, self._auMoinsUnePenseeGeree = 0, True
         self._penseeAGerer.activer()
         self._nombreEtapes = len(self._message) #Autant d'étapes que de caractères
         Horloge.initialiser(id(self), 1, 0)
+        if self._faceset is not False:
+            Horloge.initialiser(id(self), "Faceset", 1)
+            if self._faceset not in self._surfaceFaceset.keys():
+                self._surfaceFaceset[self._faceset] = dict()
+                try:
+                    self._surfaceFaceset[self._faceset]["Surface"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES, self._faceset))
+                except pygame.error as erreur:
+                    print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(self._faceset), str(erreur) )
+            i, positionFace = 0, Rect(0, 0, 32, 32)
+            while i < 3:
+                positionFace.left = i * 32
+                self._surfaceFaceset[self._faceset][i] = self._surfaceFaceset[self._faceset]["Surface"].subsurface(positionFace)
+                i += 1
+            self._etapeFace = 0
+        else:
+            self._faceActuelle = False
+            self.obsOnMiseAJour("_faceActuelle", self._faceActuelle)
         self._policeActuelle, self._couleur, self._tempsLecture = police, couleur, tempsLecture
         self._positionSurface = [0,FENETRE["largeurFenetre"]]
         self._surfaceComplete = self._polices[self._policeActuelle].render(self._message, True, self._couleur, COULEUR_FOND_ZONE_PENSEE)
@@ -45,16 +62,16 @@ class ZonePensee(Observable):
         """Fonction appelée lors d'un changement de carte qui redonne la position de la surface."""
         self.obsOnMiseAJour("_positionSurface", self._positionSurface)
 
-    def ajouterPensee(self, message, vitesse=VITESSE_PENSEE_PAR_DEFAUT, police="parDefaut", couleur=COULEUR_ECRITURE_PENSEE, tempsLecture=TEMPS_LECTURE_PENSEE, nom=False):
+    def ajouterPensee(self, message, vitesse=VITESSE_PENSEE_PAR_DEFAUT, police="parDefaut", couleur=COULEUR_ECRITURE_PENSEE, tempsLecture=TEMPS_LECTURE_PENSEE, nom=False, faceset=False):
         """Ajoute une pensée à afficher. Elle devient un <message> affiché à la <vitesse> exprimée en millisecondes.
         La police <police> fait référence à un nom dans le dico des polices. Le <tempsLecture> est le temps en millisecondes nécessaire à la lecture :
         il sert de référence à de nombreux évènements, et permet d'afficher la pensée suivante après un certain temps seulement.
         Cette pensée n'est affichée immédiatement que si aucune autre pensée n'est actuellement gérée (en train de s'afficher, ou en train d'être lue).
         Si une autre pensée est déjà gérée, on ajoute cette nouvelle pensée à la queue."""
         if self._penseeAGerer.voir() is False:
-            self._majPenseeActuelle(message, vitesse, police, couleur, tempsLecture, nom)
+            self._majPenseeActuelle(message, vitesse, police, couleur, tempsLecture, nom, faceset)
         else:
-            self._queuePensees.put_nowait(dict(message=message, vitesse=vitesse, police=police, couleur=couleur, tempsLecture=tempsLecture, nom=nom))
+            self._queuePensees.put_nowait(dict(message=message, vitesse=vitesse, police=police, couleur=couleur, tempsLecture=tempsLecture, nom=nom, faceset=faceset))
     
     def _gererPenseeActuelle(self):
         """S'il y a une pensée à gérer, gère son affichage. Sinon, gère la queue (pour prendre la pensée suivante)."""
@@ -75,6 +92,12 @@ class ZonePensee(Observable):
             elif self._tempsLecture > 0:
                 self._etapeAffichage = 0
                 Horloge.initialiser(id(self), "Lecture", self._tempsLecture)
+        if self._faceset and Horloge.sonner(id(self), "Faceset"):
+            self._etapeFace = self._etapeFace if self._etapeFace < 3 else 0
+            self._faceActuelle = self._surfaceFaceset[self._faceset][self._etapeFace]
+            self.obsOnMiseAJour("_faceActuelle", self._faceActuelle)
+            self._etapeFace += 1
+            Horloge.initialiser(id(self), "Faceset", DUREE_ANIMATION_MOBILE_PAR_DEFAUT)
         elif Horloge.sonner(id(self), "Lecture") is True:
             self._gererQueuePensees()
     
@@ -86,7 +109,7 @@ class ZonePensee(Observable):
             self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
         else: #S'il y a encore des pensées dans la queue, on charge la prochaine pensée, on dit qu'elle est à gérer
             penseeCourante = self._queuePensees.get()
-            self._majPenseeActuelle(penseeCourante["message"], penseeCourante["vitesse"], penseeCourante["police"], penseeCourante["couleur"], penseeCourante["tempsLecture"], penseeCourante["nom"])
+            self._majPenseeActuelle(penseeCourante["message"], penseeCourante["vitesse"], penseeCourante["police"], penseeCourante["couleur"], penseeCourante["tempsLecture"], penseeCourante["nom"], penseeCourante["faceset"])
 
     def gererSurfacePensee(self):
         self._gererPenseeActuelle()

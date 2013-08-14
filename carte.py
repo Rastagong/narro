@@ -29,7 +29,7 @@ class Carte(Observateur):
         self._dicoSurfaces, self._tiles, self._tilesRects, self._blocsRef, self._pnj, i = dict(), list(), list(), dict(), dict(), 0
         self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
         self._scrollingPossible, self._etapeScrolling = False, 0
-        self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee = None, None, False
+        self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee, self._faceActuelle = None, None, False, False
         self._emplacementScrollingX, self._emplacementScrollingY = int(int(FENETRE["longueurFenetre"]/2) / 32)*32, int(int(FENETRE["largeurFenetre"]/2)/32)*32
         self._ecranVisible = Rect(0, 0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
         self._positionsDepart, self._polices = dict(), dict()
@@ -315,6 +315,8 @@ class Carte(Observateur):
             self._surfaceZonePensee, self._besoinAffichageZonePensee = info.copy(), True
         elif isinstance(instance, ZonePensee) is True and nomAttribut == "_positionSurface":
             self._positionZonePensee = list(info)
+        elif isinstance(instance, ZonePensee) is True and nomAttribut == "_faceActuelle":
+            self._faceActuelle = info.copy() if isinstance(info, pygame.Surface) else False
 
     def _transformerPartie(self, surface, nomPnj, positionVisible, positionCarte, **p):
         """Applique une transformation individuellement à chaque <surface> (mobile) lors de sa pose."""
@@ -397,6 +399,8 @@ class Carte(Observateur):
         self._fenetre.fill(COULEUR_FOND_ZONE_PENSEE,rect=positionZoneEntiere)
         if self._surfaceZonePensee is not None:
             self._fenetre.blit(self._surfaceZonePensee, self._positionZonePensee)
+        if self._faceActuelle is not False:
+            self._fenetre.blit(self._faceActuelle, positionZoneEntiere)
         if affichageComplet is False:
             pygame.display.update(positionZoneEntiere)
         self._besoinAffichageZonePensee = False

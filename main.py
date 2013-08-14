@@ -54,17 +54,10 @@ class Narro:
 
     def _chargerCarteAExecuter(self):
         """Charge en mémoire la carte à exécuter"""
-        """if self._carteAExecuter not in self._cartes.keys(): #Si la carte n'a pas encore été initialisée, on l'initialise
-            cheminFichierCarte = DOSSIER_RESSOURCES + self._carteAExecuter + EXTENSION_FICHIER_CARTE
-            config = configparser.ConfigParser()
-            config.read(cheminFichierCarte)
-            self._cartes[self._carteAExecuter] = Carte(config, self)"""
         if self._premiereCarteChargee is True: #Il y a une carte précédente, on enlève toutes ses transformations (dont les transitions) 
-            """del self._carteActuelle.transformationsGlobales[:]
-            del self._carteActuelle.transformationsParties[:]
-            self._carteActuelle.mettreToutAChanger()"""
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_surface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
+            self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_faceActuelle")
             self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
             self._boiteOutils.viderSonsFixes(self._carteActuelle.nom)
             del self._carteActuelle
@@ -73,6 +66,7 @@ class Narro:
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface")
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_positionSurface")
+        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_faceActuelle")
         self._gestionnaireEvenements.chargerEvenements(self._carteActuelle.nom)
         if self._zonePensee.auMoinsUnePenseeGeree is True:
             self._zonePensee.redonnerPositionSurface()
