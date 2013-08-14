@@ -248,7 +248,7 @@ class BoiteOutils():
         else:
             chemin.append(positionDepart)
 
-    def _determinerDirectionDeplacement(self, positionDepart, positionArrivee):
+    def determinerDirectionDeplacement(self, positionDepart, positionArrivee):
         """Détermine la direction correspondant au déplacement entre <positionDepart> et <positionArrivee>, qui sont deux tiles adjacents (pas en diagonale)."""
         x1, y1, x2, y2 = positionDepart[0], positionDepart[1], positionArrivee[0], positionArrivee[1]
         if x2 == x1 + 1:
@@ -268,7 +268,7 @@ class BoiteOutils():
         cheminPositions.reverse()
         while i < len(cheminPositions) - 1:
             positionActuelle, positionSuivante = cheminPositions[i], cheminPositions[i+1]
-            cheminDirections.append( self._determinerDirectionDeplacement(positionActuelle, positionSuivante) )
+            cheminDirections.append( self.determinerDirectionDeplacement(positionActuelle, positionSuivante) )
             i += 1
         return cheminDirections
 
