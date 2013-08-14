@@ -98,6 +98,10 @@ class BoiteOutils():
         <volume> désigne le volume du son (compris entre 0.0 et 1.0)."""
         if nomSon not in self._sons.keys():
             self._sons[nomSon] = pygame.mixer.Sound(os.path.join(DOSSIER_RESSOURCES, nomSon + ".wav"))
+        i = 1
+        while instance in self._canauxSons:
+            instance = instance + "---" + str(i)
+            i += 1
         self._canauxSons[instance] = pygame.mixer.find_channel()
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
         self._canauxSons[instance].set_volume(volume)

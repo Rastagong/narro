@@ -170,11 +170,14 @@ class Porte(Teleporteur):
         self._xPorte, self._yPorte, self._cPorte = xPorte, yPorte, cPorte
 
     def _onJoueurInteractionQuelconque(self, x, y, c, direction): 
+        self.ouvrirOuFermerPorte()
+
+    def ouvrirOuFermerPorte(self):
         self._porteOuverte.inverser()
         bloc = self._jeu.carteActuelle.tiles[self._xPorte][self._yPorte].bloc[self._cPorte]
         self._boiteOutils.changerBloc(self._xPorte, self._yPorte, self._cPorte, self._nomTileset, self._positionsSources[self._porteOuverte.voir()], (0,0,0), self._porteOuverte.voir())
         bloc = self._jeu.carteActuelle.tiles[self._xPorte][self._yPorte].bloc[self._cPorte]
-        self._boiteOutils.jouerSon("DoorOpening", "Door Opening")
+        self._boiteOutils.jouerSon("DoorOpening", "Door Opening", fixe=True, xFixe=self._xPorte, yFixe=self._yPorte)
 
     def _verifierAutorisationTeleportation(self):
         teleportationAutoriseeCondition, teleportationAutoriseeNoCondition = False, False

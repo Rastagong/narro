@@ -11,7 +11,7 @@ from .mobile import *
 class PNJ(Mobile):
     """Classe représentant un PNJ"""
 
-    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, fuyard=FUYARD_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT):
+    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, fuyard=FUYARD_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT, deplacementLibre=False):
         """Initialise le PNJ
         Paramètres obligatoires :
         <jeu> est l'application entière.
@@ -41,7 +41,7 @@ class PNJ(Mobile):
         self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage, self._fuyard = False, False, intelligence, poseDepart, courage, fuyard
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet, self._blocsExclusTrajet = None, None, None, []
         self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
-        self._deplacementLibre = False
+        self._deplacementLibre, self._positionCarteSuivante = deplacementLibre, None
 
     def onJoueurProche(self, x, y, c, direction):
         super().onJoueurProche(x, y, c, direction)
