@@ -28,17 +28,13 @@ class Mobile(EvenementConcret):
         <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
         <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
         EvenementConcret.__init__(self, jeu, gestionnaire)
-        self._direction, self._directionRegard = directionDepart, directionDepart
         self._nom,  self._nomTileset = nom, fichier
-        self._positionCarte = Rect(x*32, y*32, longueurSprite, largeurSprite)
-        self._positionCarteOld, self._positionCarteFuture = self._positionCarte.copy(), self._positionCarte.copy()
-        self._xTilePrecedent, self._yTilePrecedent = self._positionCarte.left/32, self._positionCarte.top/32
-        self._xTileSuivant, self._yTileSuivant = self._positionCarte.left/32, self._positionCarte.top/32
-        self._c, self._cOld = c, c
+        self._modifierPositionInitiale(x,y,c,directionDepart,longueurSprite=longueurSprite,largeurSprite=largeurSprite)
         self._vitesseDeplacement, self._dureeAnimationSP, self._dureeAnimation = vitesseDeplacement, dureeAnimationSP, dureeAnimation
         self._couleurTransparente, self._persoCharset = couleurTransparente, persoCharset
         self._pied, self._enMarche = Interrupteur(True), Interrupteur(True)
         self._etapeMarche, self._etapeAnimation, self._sensAnimation, self._pixelsParcourus = 1, 1, 1, 0
+        self._tempsPrecedent = pygame.time.get_ticks()
     
     def traiter(self):
         """Traite l'évènement"""
@@ -47,13 +43,22 @@ class Mobile(EvenementConcret):
     def _deplacement(self, direction):
         """Gère une action de déplacement (un pas, un regard, ou une attente)"""
 
+    def _modifierPositionInitiale(self, x, y, c, directionDepart, longueurSprite=32, largeurSprite=32):
+        """Initialise les variables de déplacement."""
+        self._positionCarte = Rect(x*32, y*32, longueurSprite, largeurSprite)
+        self._positionCarteOld, self._positionCarteFuture = self._positionCarte.copy(), self._positionCarte.copy()
+        self._xTilePrecedent, self._yTilePrecedent = self._positionCarte.left/32, self._positionCarte.top/32
+        self._xTileSuivant, self._yTileSuivant = self._positionCarte.left/32, self._positionCarte.top/32
+        self._c, self._cOld = c, c
+        self._direction, self._directionRegard = directionDepart, directionDepart
+
     def _initialiserDeplacement(self, tempsAttente, joueur=False, appuiJoueur=False, direction="Aucune"):
         """Initialise un déplacement"""
         hauteurTile = self._jeu.carteActuelle.hauteurTile
         self._gestionnaire.registerPosition(self._nom, int(self._positionCarte.left / hauteurTile), int(self._positionCarte.top / hauteurTile), self._c, joueur=joueur, appuiJoueur=appuiJoueur, direction=direction)
         self._ajusterPositionSource(False,self._direction)
         self._jeu.carteActuelle.poserPNJ(self._positionCarte, self._c, self._positionSource, self._nomTileset, self._couleurTransparente, self._nom)
-        self._tempsPrecedent, self._deltaTimer = 0, 0
+        self._tempsPrecedent, self._deltaTimer = pygame.time.get_ticks(), 0
         Horloge.initialiser(id(self), 1, tempsAttente)
         Horloge.initialiser(id(self), 2, 1)
     

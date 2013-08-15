@@ -137,6 +137,8 @@ class PNJ(Mobile):
     def _deplacement(self, direction):
         """Gère une action de déplacement (un pas, un regard, ou une attente)"""
         hauteurTile, deplacementAxe = self._jeu.carteActuelle.hauteurTile, True
+        if not self._poseDepart:
+            direction = "Aucune"
         if isinstance(direction, Rect):
             deplacementAxe = False
         if direction is "Aucune":

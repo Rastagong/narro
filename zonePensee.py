@@ -106,6 +106,7 @@ class ZonePensee(Observable):
         S'il n'y a rien dans la queue, on dit que plus aucune pensée n'est à gérer."""
         if self._queuePensees.empty() is True: #S'il n'y aucune pensée dans la queue, il n'y a rien à gérer, on le dit
             self._penseeAGerer.desactiver()
+            self._faceset = False
             self.obsOnMiseAJour("_penseeAGerer", self._penseeAGerer)
         else: #S'il y a encore des pensées dans la queue, on charge la prochaine pensée, on dit qu'elle est à gérer
             penseeCourante = self._queuePensees.get()

@@ -172,6 +172,9 @@ class Porte(Teleporteur):
     def _onJoueurInteractionQuelconque(self, x, y, c, direction): 
         self.ouvrirOuFermerPorte()
 
+    def getPorteOuverte(self):
+        return self._porteOuverte.voir()
+
     def ouvrirOuFermerPorte(self):
         self._porteOuverte.inverser()
         bloc = self._jeu.carteActuelle.tiles[self._xPorte][self._yPorte].bloc[self._cPorte]
