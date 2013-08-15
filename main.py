@@ -16,7 +16,7 @@ class Narro:
 
     def __init__(self):
         self._initialiserAffichage(**FENETRE)
-        self._zonePensee = ZonePensee(self)
+        self._zonePensee, self._modificationsCarte = ZonePensee(self), dict()
 
     def inclureGestionnaire(self, gestionnaireEvenements):
         self._gestionnaireEvenements = gestionnaireEvenements
@@ -52,6 +52,17 @@ class Narro:
         pygame.mixer.init()
         pygame.mixer.set_num_channels(NOMBRE_CANAUX_SONS)
 
+    def ajouterModificationCarte(self, nomCarte, nomModif, *args, **argv):
+        """Ajoute une modification permanente de la carte <nomCarte>. Dès son initialisation, les arguments <args> et <argv> seront transmis à la méthode <changerBloc>."""
+        if nomCarte not in self._modificationsCarte.keys():
+            self._modificationsCarte[nomCarte] = dict()
+        self._modificationsCarte[nomCarte][nomModif] = args,argv
+
+    def retirerModificationCarte(self, nomCarte, nomModif):
+        if nomCarte in self._modificationsCarte.keys():
+            if nomModif in self._modificationsCarte[nomCarte].keys():
+                self._modificationsCarte[nomCarte].pop(nomModif)
+
     def _chargerCarteAExecuter(self):
         """Charge en mémoire la carte à exécuter"""
         if self._premiereCarteChargee is True: #Il y a une carte précédente, on enlève toutes ses transformations (dont les transitions) 
@@ -62,6 +73,9 @@ class Narro:
             self._boiteOutils.viderSonsFixes(self._carteActuelle.nom)
             del self._carteActuelle
         self._carteActuelle = Carte(self._carteAExecuter, self)
+        if self._carteActuelle.nom in self._modificationsCarte.keys():
+            for (args,argv) in self._modificationsCarte[self._carteActuelle.nom].values():
+                self._carteActuelle.changerBloc(*args, **argv)
         self._premiereCarteChargee = True
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface")

@@ -45,6 +45,12 @@ class BoiteOutils():
         """Change la praticabilité d'un bloc"""
         self._jeu.carteActuelle.tiles[x][y].modifierPraticabilite(c, nouvellePraticabilite)
 
+    def ajouterModificationCarte(self, nomCarte, nomModif, *args, **argv):
+        self._jeu.ajouterModificationCarte(nomCarte, nomModif, *args, **argv)
+
+    def retirerModificationCarte(self, nomCarte, nomModif):
+        self._jeu.retirerModificationCarte(self, nomCarte, nomModif)
+
     def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv):
         """Change le tile d'un bloc."""
         self._jeu.carteActuelle.changerBloc(x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, **argsv)

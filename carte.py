@@ -106,7 +106,7 @@ class Carte(Observateur):
         elif mobile is False and positionSource is not False: #pour changerBloc : on retourne la sous-surface pour la blitter sur les tiles layers
             return self._dicoSurfaces[nomTileset]["Source"].subsurface(positionSource)
 
-    def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, vide=False):
+    def changerBloc(self, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, vide=False, permanente=False, nomModif=None):
         if self.tileExistant(x,y) is True and c < self.nombreCouches:
             bloc, jeu = self._tiles[x][y].bloc[c], self._jeu
             if vide is False:
@@ -126,9 +126,10 @@ class Carte(Observateur):
                         self._tilesLayers[c].set_at((absi+i, ordo+a), couleurEntierementTransparente)
                         a += 1
                     i += 1
+            if permanente:
+                self._jeu.ajouterModificationCarte(self._nom, nomModif, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, vide=vide)
             self._tiles[x][y].modifierPraticabilite(c, praticabilite)
             self.mettreToutAChanger()
-
 
     def tileExistant(self,x,y):
         """Retourne True si le tile de coordonnées <x>,<y> existe"""
