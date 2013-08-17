@@ -86,7 +86,7 @@ class GestionnaireEvenements():
        self._boiteOutils.actualiserSonsFixes()
 
     def majActionsJoueur(self, nomEvenement):
-        """Prévient l'évènement nommée <nomEvenement> des actions du joueur."""
+        """Prévient l'évènement <nomEvenement> des actions du joueur."""
         infosEvenement, position = self._evenements["concrets"][self._nomCarte][nomEvenement], self._positionJoueur
         evenement, abs, ord, directionEvenement = infosEvenement[0], infosEvenement[1][0], infosEvenement[1][1], infosEvenement[2]
         nom, x, y, c, joueur, appui, directionJoueur = position[0], position[1], position[2], position[3], position[4], position[5], position[6]

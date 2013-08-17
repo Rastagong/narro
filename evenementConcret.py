@@ -10,8 +10,6 @@ class EvenementConcret(Evenement):
     def __init__(self, jeu, gestionnaire):
         """<gestionnaire> est une instance du gestionnaire d'évènements"""
         Evenement.__init__(self, jeu, gestionnaire)
-        self._xJoueur, self._yJoueur, self._joueurBouge =  [-1, -1], [-1, -1], [True, True]
-        self._xJoueurOld, self._yJoueurOld =  [-1, -1], [-1, -1]
 
     def onCollision(self, nomPNJ, positionCarte):
         """Méthode à redéfinir appelée lorsque le PNJ <nomPNJ> en <positionCarte> est rentré dans le PNJ actuel."""
@@ -53,9 +51,6 @@ class EvenementConcret(Evenement):
         et qu'ils sont tournés l'un vers l'autre. Le joueur est situé au tile de coordonnées <x><y>, couche <c> et a <direction> pour direction."""
 
     def _majInfosJoueur(self, i=0):
-        self._xJoueurOld[i], self._yJoueurOld[i] = self._xJoueur[i], self._yJoueur[i]
-        self._xJoueur[i], self._yJoueur[i] = self._gestionnaire.xJoueur, self._gestionnaire.yJoueur
-        self._joueurProche, self._joueurBouge[i] = False, False
+        super()._majInfosJoueur(i=i)
+        self._joueurProche = False
         self._gestionnaire.majActionsJoueur(self._nom) #On vérifie si le joueur est proche (cf. onJoueurProche)
-        if self._xJoueur[i] != self._xJoueurOld[i] or self._yJoueur[i] != self._yJoueurOld[i]:
-            self._joueurBouge[i] = True

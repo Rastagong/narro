@@ -69,7 +69,7 @@ class Narro:
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_surface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_faceActuelle")
-            self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
+            #self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
             self._boiteOutils.viderSonsFixes(self._carteActuelle.nom)
             del self._carteActuelle
         self._carteActuelle = Carte(self._carteAExecuter, self)
@@ -101,21 +101,6 @@ class Narro:
             while self._changementCarte is not True and self._jeuFini is not True: #Tant que le joueur ne veut pas quitter ou changer de carte
                 self._event = pygame.event.poll()
                 self._jeuFini = self._verifierSiLeJeuEstFini()
-                """if self._event.type == KEYDOWN:
-                    if self._event.key == K_LEFT:
-                        self._gauche = -UNITE
-                    if self._event.key == K_RIGHT:
-                        self._gauche = +UNITE
-                    if self._event.key == K_UP:
-                        self._haut = -UNITE
-                    if self._event.key == K_DOWN:
-                        self._haut = +UNITE
-                elif self._event.type == KEYUP:
-                    if self._event.key == K_LEFT or self._event.key == K_RIGHT:
-                        self._gauche = 0
-                    if self._event.key == K_UP or self._event.key == K_DOWN:
-                        self._haut = 0
-                self._carteActuelle._ecranVisible.move_ip(self._gauche, self._haut)"""
                 self._gestionnaireEvenements.gererEvenements(self._carteActuelle.nom)
                 self._gestionnaireEvenements.traiterPositions()
                 self._gestionnaireEvenements.actualiserSonsFixes()

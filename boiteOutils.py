@@ -109,6 +109,7 @@ class BoiteOutils():
             instance = instance + "---" + str(i)
             i += 1
         self._canauxSons[instance] = pygame.mixer.find_channel()
+        print(instance,self._canauxSons[instance])
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
         self._canauxSons[instance].set_volume(volume)
         self._dureesSons[instance] = (self._sons[nomSon].get_length()*1000) * nombreEcoutes
@@ -205,7 +206,7 @@ class BoiteOutils():
         """Téléporte le joueur sur la carte <nomCarte> en <x>,<y>,<c> avec un regard en <direction>."""
         jeu = self._jeu
         jeu.carteAExecuter, jeu.changementCarte = nomCarte, True
-        self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
+        #self._gestionnaire.evenements["concrets"][self._gestionnaire.nomCarte].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
         self._gestionnaire.evenements["concrets"][nomCarte]["Joueur"] = [jeu.joueur, (x,y), direction]
         self._gestionnaire.evenements["concrets"][nomCarte].move_to_end("Joueur", last=False)
         self._gestionnaire._xJoueur, self._gestionnaire._yJoueur, self._gestionnaire._cJoueur, self._gestionnaire._directionJoueur, self._gestionnaire._appuiJoueur = x, y, c, direction, False
