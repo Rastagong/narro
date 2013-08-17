@@ -16,7 +16,7 @@ class GestionnaireEvenements():
         self._jeu, self._nomCarte = jeu, None
         self._evenements = dict(concrets=dict(), abstraits=dict())
         self._boiteOutils, self._positionsARegistrer, self._evenementsATuer, self._appuiJoueur = BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], [], False
-        self._appuiTir = False
+        self._appuiTir, self._changementsCarteANotifier = False, dict()
         self._initialiserEvenements()
         if SESSION_DEBUG:
             self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
@@ -57,6 +57,23 @@ class GestionnaireEvenements():
             for cle,infosEvenement in self._evenements["concrets"][nomCarteActuelle].items():
                 infosEvenement[0].traiter()
         self._tuerEvenementsATuer()
+
+    def ajouterChangementCarteANotifier(self, carteQuittee, carteEntree, nomEvenement, carteEvenement):
+        changement = self._changementsCarteANotifier.setdefault((carteQuittee,carteEntree), dict())
+        changement[nomEvenement] = carteEvenement
+
+    def supprimerChangementCarteANotifier(self, carteQuittee, carteEntree, nomEvenement):
+        if carteQuittee,carteEntree in self._changementsCarteANotifier.keys():
+            if nomEvenement in self._changementsCarteANotifier[carteQuittee,carteEntree].keys():
+                self._changementsCarteANotifier[carteQuittee,carteEntree].pop(nomEvenement)
+
+    def prevenirEvenementsChangementCarte(self, carteQuittee, carteEntree):
+        if carteQuittee,carteEntree in self._changementsCarteANotifier.keys(): #On prévient les évènements qui ont fait une demande précise
+            for nomEvenement,carteEvenement in self._changementsCarteANotifier[carteQuittee,carteEntree]:
+                self._evenements["concrets"][carteEvenement][0].onChangementDeCarte(carteQuittee, carteEntree)
+        if carteQuittee in self._evenements["concrets"]: #On prévient les évènements concrets de la carte quittée
+            for nomEvenement, infosEvenement in self._evenements["concrets"][carteQuittee].items():
+                infosEvenement[0].onChangementDeCarte(carteQuittee, carteEntree)
 
     def ajouterEvenementATuer(self, typeEvenement, categorieEvenement, nomEvenement):
         """Ajoute un évènement à tuer à la fin du traitement des évènements. 

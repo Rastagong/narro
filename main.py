@@ -65,12 +65,13 @@ class Narro:
 
     def _chargerCarteAExecuter(self):
         """Charge en mémoire la carte à exécuter"""
-        if self._premiereCarteChargee is True: #Il y a une carte précédente, on enlève toutes ses transformations (dont les transitions) 
+        if self._premiereCarteChargee is True: #Il y a une carte précédente, on la supprime proprement : sons fixes, obsertvation par la zone de pensée, etc
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_surface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_faceActuelle")
-            #self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].clear()
             self._boiteOutils.viderSonsFixes(self._carteActuelle.nom)
+            self._gestionnaire.prevenirEvenementsChangementCarte(self._carteActuelle.nom, self._carteAExecuter)
+            self._gestionnaire.evenements["concrets"][self._carteActuelle.nom].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
             del self._carteActuelle
         self._carteActuelle = Carte(self._carteAExecuter, self)
         if self._carteActuelle.nom in self._modificationsCarte.keys():
