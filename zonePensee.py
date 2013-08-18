@@ -75,6 +75,12 @@ class ZonePensee(Observable):
     
     def _gererPenseeActuelle(self):
         """S'il y a une pensée à gérer, gère son affichage. Sinon, gère la queue (pour prendre la pensée suivante)."""
+        if self._faceset and Horloge.sonner(id(self), "Faceset"):
+            self._etapeFace = self._etapeFace if self._etapeFace < 3 else 0
+            self._faceActuelle = self._surfaceFaceset[self._faceset][self._etapeFace]
+            self.obsOnMiseAJour("_faceActuelle", self._faceActuelle)
+            self._etapeFace += 1
+            Horloge.initialiser(id(self), "Faceset", DUREE_ANIMATION_MOBILE_PAR_DEFAUT)
         if self._etapeAffichage < self._nombreEtapes and Horloge.sonner(id(self), 1) is True:
             if self._message[self._etapeAffichage] == ' ': #L'espace ne nécessite pas d'étape en soi, donc on affiche le caractère suivant en même temps
                 self._etapeAffichage += 1
@@ -92,12 +98,6 @@ class ZonePensee(Observable):
             elif self._tempsLecture > 0:
                 self._etapeAffichage = 0
                 Horloge.initialiser(id(self), "Lecture", self._tempsLecture)
-        if self._faceset and Horloge.sonner(id(self), "Faceset"):
-            self._etapeFace = self._etapeFace if self._etapeFace < 3 else 0
-            self._faceActuelle = self._surfaceFaceset[self._faceset][self._etapeFace]
-            self.obsOnMiseAJour("_faceActuelle", self._faceActuelle)
-            self._etapeFace += 1
-            Horloge.initialiser(id(self), "Faceset", DUREE_ANIMATION_MOBILE_PAR_DEFAUT)
         elif Horloge.sonner(id(self), "Lecture") is True:
             self._gererQueuePensees()
     
