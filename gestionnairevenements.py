@@ -16,7 +16,7 @@ class GestionnaireEvenements():
         self._jeu, self._nomCarte = jeu, None
         self._evenements = dict(concrets=dict(), abstraits=dict())
         self._boiteOutils, self._positionsARegistrer, self._evenementsATuer, self._appuiJoueur = BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], [], False
-        self._appuiTir, self._changementsCarteANotifier = False, dict()
+        self._appuiTir, self._changementsCarteANotifier, self._cartesChargees = False, dict(), list()
         self._initialiserEvenements()
         if SESSION_DEBUG:
             self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
@@ -56,35 +56,57 @@ class GestionnaireEvenements():
         if nomCarteActuelle in self._evenements["concrets"]:
             for cle,infosEvenement in self._evenements["concrets"][nomCarteActuelle].items():
                 infosEvenement[0].traiter()
-        self._tuerEvenementsATuer()
+        self.tuerEvenementsATuer()
+
+    def deplacerEvenementSurCarte(self, nomEvenement, carteQuittee, carteEntree, x, y, c, direction):
+        """Déplace un évènement sur une autre carte. Méthode appelée par _deplacerSurCarte dans la classe PNJ, car il faut aussi supprimer le mobile sur la carte actuelle,
+        et réinitialiser des variables."""
+        if carteQuittee in self._evenements["concrets"].keys():
+            if nomEvenement in self._evenements["concrets"][carteQuittee].keys():
+                evenement = self._evenements["concrets"][carteQuittee][nomEvenement][0]
+                evenementsCarteEntree = self._evenements["concrets"].setdefault(carteEntree, OrderedDict())
+                evenementsCarteEntree[nomEvenement] = [evenement, (x,y), direction]
+                self.ajouterEvenementATuer("concrets", carteQuittee, nomEvenement)
 
     def ajouterChangementCarteANotifier(self, carteQuittee, carteEntree, nomEvenement, carteEvenement):
         changement = self._changementsCarteANotifier.setdefault((carteQuittee,carteEntree), dict())
         changement[nomEvenement] = carteEvenement
 
     def supprimerChangementCarteANotifier(self, carteQuittee, carteEntree, nomEvenement):
-        if carteQuittee,carteEntree in self._changementsCarteANotifier.keys():
+        if (carteQuittee,carteEntree) in self._changementsCarteANotifier.keys():
             if nomEvenement in self._changementsCarteANotifier[carteQuittee,carteEntree].keys():
                 self._changementsCarteANotifier[carteQuittee,carteEntree].pop(nomEvenement)
 
     def prevenirEvenementsChangementCarte(self, carteQuittee, carteEntree):
-        if carteQuittee,carteEntree in self._changementsCarteANotifier.keys(): #On prévient les évènements qui ont fait une demande précise
-            for nomEvenement,carteEvenement in self._changementsCarteANotifier[carteQuittee,carteEntree]:
-                self._evenements["concrets"][carteEvenement][0].onChangementDeCarte(carteQuittee, carteEntree)
-        if carteQuittee in self._evenements["concrets"]: #On prévient les évènements concrets de la carte quittée
-            for nomEvenement, infosEvenement in self._evenements["concrets"][carteQuittee].items():
-                infosEvenement[0].onChangementDeCarte(carteQuittee, carteEntree)
+        """Fonction appelée à chaque changement de carte qui en notifie les évènements via <onChangementCarte>, soit quand ils l'ont demandé, soit quand ils sont sur la carte quittée."""
+        evenementsPrevenus = []
+        if (carteQuittee,carteEntree) in self._changementsCarteANotifier.keys(): #On prévient les évènements qui ont fait une demande précise
+            for (nomEvenement,carteEvenement) in self._changementsCarteANotifier[carteQuittee,carteEntree].items():
+                if carteEvenement in self._evenements["concrets"].keys():
+                    if nomEvenement in self._evenements["concrets"][carteEvenement].keys():
+                        evenementsPrevenus.append(nomEvenement)
+                        self._evenements["concrets"][carteEvenement][nomEvenement][0].onChangementCarte(carteQuittee, carteEntree)
+        if carteQuittee in self._evenements["concrets"].keys(): #On prévient les évènements concrets de la carte quittée
+            for (nomEvenement, infosEvenement) in self._evenements["concrets"][carteQuittee].items():
+                if nomEvenement not in evenementsPrevenus:
+                    infosEvenement[0].onChangementCarte(carteQuittee, carteEntree)
 
     def ajouterEvenementATuer(self, typeEvenement, categorieEvenement, nomEvenement):
         """Ajoute un évènement à tuer à la fin du traitement des évènements. 
         On ne peut pas le faire pendant le traitement des évènements car ça changerait la taille du dico pendant l'itération."""
         self._evenementsATuer.append((typeEvenement, categorieEvenement, nomEvenement))
 
-    def _tuerEvenementsATuer(self):
+    def tuerEvenementsATuer(self):
         """A la fin du traitement des évènements, tue tous les évènements à tuer."""
         for (typeEvenement, categorieEvenement, nomEvenement) in self._evenementsATuer:
             self._evenements[typeEvenement][categorieEvenement].pop(nomEvenement)
         del self._evenementsATuer[:]
+
+    def registerPositionInitialeJoueur(self, nomCarte):
+        """Fonction appelée à chaque changement de carte qui initialise la position de départ du joueur."""
+        infosJoueur = self._evenements["concrets"][nomCarte]["Joueur"]
+        (self._xJoueur, self._yJoueur), self._directionJoueur, self._cJoueur, self._appuiJoueur, self._appuiTir  = infosJoueur[1], infosJoueur[2], infosJoueur[3],  False, False
+        self._boiteOutils.coucheJoueur, self._boiteOutils.directionJoueurReelle = self._cJoueur, self._directionJoueur
 
     def registerPosition(self, nom, x, y, c, joueur=False, appuiJoueur=False, direction="Aucune"):
         """Enregistre la position d'un évènement nommé <nom> à la position <x><y><c> sur la carte. Elle est exprimée en indices de tiles.

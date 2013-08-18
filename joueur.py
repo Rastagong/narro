@@ -54,12 +54,10 @@ class Joueur(Mobile, Observable):
             
     def transfertCarte(self, x, y, c, direction):
         """Prépare l'apparition sur une nouvelle carte, en <x><y><c> avec un regard en <direction>."""
-        self._cOld, self._c = c, c
-        self._boiteOutils.coucheJoueur = self._c
+        self._cOld, self._c, self._boiteOutils.coucheJoueurFuture = c, c, c
         self._positionCarte.left, self._positionCarte.top, self._mouvement = x * self._jeu.carteActuelle.hauteurTile, y * self._jeu.carteActuelle.hauteurTile, False
         self._etapeMarche, self._etapeTraitement, self._pixelsParcourus = 1, 0, 0
         self._derniereDirection = "Aucune"
-        self._boiteOutils.directionJoueurReelle = direction
         self._regardDansDirection = dict(Haut=False, Bas=False, Droite=False, Gauche=False)
         self._direction, self._directionRegard = direction, direction
 

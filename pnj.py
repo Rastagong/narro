@@ -43,10 +43,6 @@ class PNJ(Mobile):
         self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
         self._deplacementLibre, self._positionCarteSuivante = deplacementLibre, None
 
-    def onJoueurProche(self, x, y, c, direction):
-        super().onJoueurProche(x, y, c, direction)
-        self._joueurProche = True
-    
     def traiter(self):
         """Traite l'évènement"""
         super().traiter()
@@ -59,6 +55,15 @@ class PNJ(Mobile):
 
     def _gererEtape(self):
         """Gère une étape"""
+
+    def _deplacerSurCarte(self, nouvelleCarte, x, y, c, direction, carteQuittee=False):
+        if carteQuittee is False:
+            carteQuittee = self._jeu.carteActuelle.nom
+        self._boiteOutils.supprimerPNJ(self._nom, self._c)
+        self._cOld, self._c, self._directionRegard = c, c, direction
+        self._positionCarte.left, self._positionCarte.top = x * self._jeu.carteActuelle.hauteurTile, y * self._jeu.carteActuelle.hauteurTile
+        self._etapeMarche, self._pixelsParcourus, self._deplacementBoucle = 1, 0, False
+        self._gestionnaire.deplacerEvenementSurCarte(self._nom, carteQuittee, nouvelleCarte, x, y, c, direction)
 
     def _gererActions(self):
         if self._deplacementBoucle is True:

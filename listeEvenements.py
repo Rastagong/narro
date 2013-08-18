@@ -175,6 +175,10 @@ class Porte(Teleporteur):
     def getPorteOuverte(self):
         return self._porteOuverte.voir()
 
+    def onJoueurDessus(self, x, y, c, direction):
+        super().onJoueurDessus(x, y, c, direction)
+        self._porteOuverte.inverser()
+
     def ouvrirOuFermerPorte(self):
         self._porteOuverte.inverser()
         bloc = self._jeu.carteActuelle.tiles[self._xPorte][self._yPorte].bloc[self._cPorte]

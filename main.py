@@ -70,8 +70,10 @@ class Narro:
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_faceActuelle")
             self._boiteOutils.viderSonsFixes(self._carteActuelle.nom)
-            self._gestionnaire.prevenirEvenementsChangementCarte(self._carteActuelle.nom, self._carteAExecuter)
-            self._gestionnaire.evenements["concrets"][self._carteActuelle.nom].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
+            self._gestionnaireEvenements.prevenirEvenementsChangementCarte(self._carteActuelle.nom, self._carteAExecuter)
+            self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
+            self._gestionnaireEvenements.tuerEvenementsATuer()
+            self._gestionnaireEvenements.registerPositionInitialeJoueur(self._carteAExecuter)
             del self._carteActuelle
         self._carteActuelle = Carte(self._carteAExecuter, self)
         if self._carteActuelle.nom in self._modificationsCarte.keys():

@@ -17,6 +17,7 @@ class EvenementConcret(Evenement):
     def onJoueurProche(self, x, y, c, direction):
         """Fonction appelée lorsque le joueur se trouve à proximité de l'évènement (à une case près sauf en diagonale).
         <x> et <y> sont ses coordonnées, exprimées en indices de tiles, sa direction est <direction>. <c> est sa couche."""
+        self._joueurProche = True
 
     def onJoueurDessus(self, x, y, c, direction):
         """Fonction appelée lorsque le joueur se trouve à l'emplacement même de l'évènement, au tile de coordonnées <x>,<y> sur la couche <c>.
@@ -50,7 +51,7 @@ class EvenementConcret(Evenement):
         """Fonction appelée lorsque le joueur, situé à proximité et tourné vers l'évènement, a appuyé sur Entrée pour interagir avec lui, 
         et qu'ils sont tournés l'un vers l'autre. Le joueur est situé au tile de coordonnées <x><y>, couche <c> et a <direction> pour direction."""
 
-    def onChangementDeCarte(self, carteQuittee, carteEntree):
+    def onChangementCarte(self, carteQuittee, carteEntree):
         """Fonction appelée lorsque le joueur quitte <carteQuittee> et se rend sur <carteEntree>, mais seulement si :
         1. L'évènement est sur <carteQuittee> OU 2. L'évènement a demandé au gestionnaire d'évènements à être prévenu lors de ce changement précis."""
 
