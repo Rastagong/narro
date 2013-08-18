@@ -69,6 +69,7 @@ class GestionnaireEvenements():
                 self.ajouterEvenementATuer("concrets", carteQuittee, nomEvenement)
 
     def ajouterChangementCarteANotifier(self, carteQuittee, carteEntree, nomEvenement, carteEvenement):
+        """Demande au gestionnaire d'informer <nomEvenement> sur <carteEvenement> de tout changement de carte du joueur en <carteQuittee> vers <carteEntree>."""
         changement = self._changementsCarteANotifier.setdefault((carteQuittee,carteEntree), dict())
         changement[nomEvenement] = carteEvenement
 
@@ -90,6 +91,13 @@ class GestionnaireEvenements():
             for (nomEvenement, infosEvenement) in self._evenements["concrets"][carteQuittee].items():
                 if nomEvenement not in evenementsPrevenus:
                     infosEvenement[0].onChangementCarte(carteQuittee, carteEntree)
+
+    def envoyerNotificationEvenement(self, nomNotifieur, nomEvenement, carteEvenement, objetNotification, *parametres1, carteNotifieur=False, **parametres2):
+        """Permet à un évènement d'envoyer une notification à un évènement gelé sur une autre carte."""
+        if carteEvenement in self._evenements["concrets"].keys():
+            if nomEvenement in self._evenements["concrets"][carteEvenement].keys():
+                carteNotifieur = carteNotifieur if carteNotifieur is not False else self._jeu.carteActuelle.nom
+                self._evenements["concrets"][carteEvenement][nomEvenement][0].onNotification(nomNotifieur, carteNotifieur, objetNotification, *parametres1, **parametres2)
 
     def ajouterEvenementATuer(self, typeEvenement, categorieEvenement, nomEvenement):
         """Ajoute un évènement à tuer à la fin du traitement des évènements. 
