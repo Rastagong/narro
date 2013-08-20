@@ -81,9 +81,9 @@ class Narro:
                 self._carteActuelle.changerBloc(*args, **argv)
         self._premiereCarteChargee = True
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
-        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface")
-        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_positionSurface")
-        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_faceActuelle")
+        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface", transmissionImmediate=True)
+        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_positionSurface", transmissionImmediate=True)
+        self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_faceActuelle", transmissionImmediate=True)
         self._gestionnaireEvenements.chargerEvenements(self._carteActuelle.nom)
         if self._zonePensee.auMoinsUnePenseeGeree is True:
             self._zonePensee.redonnerPositionSurface()

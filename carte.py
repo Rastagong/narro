@@ -313,9 +313,11 @@ class Carte(Observateur):
 
     def obsOnNouvelleObservation(self, instance, nomAttribut, info):
         if isinstance(instance, ZonePensee) is True and nomAttribut == "_surface":
-            self._surfaceZonePensee, self._besoinAffichageZonePensee = info.copy(), True
+            if info is not None:
+                self._surfaceZonePensee, self._besoinAffichageZonePensee = info.copy(), True
         elif isinstance(instance, ZonePensee) is True and nomAttribut == "_positionSurface":
-            self._positionZonePensee = list(info)
+            if info is not None:
+                self._positionZonePensee = list(info)
         elif isinstance(instance, ZonePensee) is True and nomAttribut == "_faceActuelle":
             self._faceActuelle = info.copy() if isinstance(info, pygame.Surface) else False
 
