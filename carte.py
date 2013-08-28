@@ -193,9 +193,6 @@ class Carte(Observateur):
             deplacementPossible = False
         pnjsEnCollision = [pnj for pnj in self._pnj[c].values() if pnj.nomPNJ != nomPNJ and pnj.nomPNJ not in exclusionCollision and (pnj.positionCollision.colliderect(positionCollision) == 1 and (not axeTiles or (pnj.positionCarteSuivante == positionCarte or pnj.positionCarteSuivante == False)))]
         if len(pnjsEnCollision) > 0:
-            """print("\n On a",nomPNJ,positionCollision,)
-            for pnj in pnjsEnCollision:
-                print(pnj.nomPNJ, pnj.positionCollision)"""
             deplacementPossible = False
             if collisionEffective:
                 for pnj in pnjsEnCollision:
@@ -357,7 +354,7 @@ class Carte(Observateur):
         if nomTransformation == "Rouge":
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"], :FENETRE["largeurFenetre"]] #On exclut la zone de pensée
             pixels[:,:,1:] = 0
-        elif nomTransformation == "Noir":
+        elif nomTransformation == "Noir" or "NoirTransition":
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
             pixels /= p["coef"]
             if p["coef"] >= 12:

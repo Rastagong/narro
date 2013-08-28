@@ -134,7 +134,7 @@ class Teleporteur(EvenementConcret):
         if self._teleportationRetardee is True and self._executionTeleportation is False: #On est en transition
             if Horloge.sonner(id(self), 1) is False: #On gère la transition, ce n'est pas fini
                 self._coefNoircisseur += 1
-                self._boiteOutils.ajouterTransformation(True, "Noir", coef=self._coefNoircisseur)
+                self._boiteOutils.ajouterTransformation(True, "NoirTransition", coef=self._coefNoircisseur)
                 self._boiteOutils.mettreToutAChanger()
             else: #On téléporte enfin
                 self._executionTeleportation = True
@@ -214,6 +214,7 @@ class ModulateurMusique(Evenement):
         if self._xJoueur != self._xJoueurOld or self._yJoueur != self._yJoueurOld or self._besoinInitialisation is True:
             self._boiteOutils.gererVolumeSonsFixes(self._xJoueur, self._yJoueur)
             self._besoinInitialisation = False
+        self._boiteOutils.gererVolumeCrescendo()
 
 
 

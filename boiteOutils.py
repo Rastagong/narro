@@ -19,7 +19,7 @@ class BoiteOutils():
         for (nom, valeur) in VARIABLES:
             self._variables[nom] = valeur
         self._sons = dict()
-        self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes, self._dureesSons = dict(), dict(), dict(), dict(), dict()
+        self._canauxSons, self._sonsFixes, self._volumesFixes, self._sourcesSonsFixes, self._dureesSons, self._sonsCrescendo = dict(), dict(), dict(), dict(), dict(), dict()
         self._joueurLibre = Interrupteur(True)
         self._coucheJoueur, self._directionJoueurReelle = 0, "Aucune"
 
@@ -93,7 +93,7 @@ class BoiteOutils():
         directions = ["Haut","Droite","Bas","Gauche"]
         return directions[random.randint(0,3)]
 
-    def jouerSon(self, nomSon, instance, duree=0, nombreEcoutes=1, fixe=False, xFixe=-1, yFixe=-1, evenementFixe=-1, volume=VOLUME_MUSIQUE):
+    def jouerSon(self, nomSon, instance, duree=0, nombreEcoutes=1, fixe=False, xFixe=-1, yFixe=-1, evenementFixe=-1, volume=VOLUME_MUSIQUE, crescendo=False, rythmeCrescendo=0.08):
         """Joue le son nommé <nomSon> en une instance nommée <instance>. 
         Le son peut s'arrêter au bout d'un certain temps <duree> (en millisecondes).
         <nombreEcoutes> désigne le nombre de fois où le son est joué.
@@ -111,8 +111,12 @@ class BoiteOutils():
             i += 1
         self._canauxSons[instance] = pygame.mixer.find_channel()
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
+        volume = 0 if crescendo else volume
         self._canauxSons[instance].set_volume(volume)
         self._dureesSons[instance] = (self._sons[nomSon].get_length()*1000) * nombreEcoutes
+        if crescendo:
+            tempsFinCrescendo = pygame.time.get_ticks() + self._dureesSons[instance] if self._dureesSons[instance] > 0 else -1
+            self._sonsCrescendo[instance] = [rythmeCrescendo, tempsFinCrescendo, pygame.time.get_ticks() + 500]
         if fixe is True:
             if self._jeu.carteAExecuter not in self._sonsFixes.keys():
                 self._sonsFixes[self._jeu.carteAExecuter] = list()
@@ -128,6 +132,23 @@ class BoiteOutils():
                 sourceSon = evenementFixe
             self._sourcesSonsFixes[instance] = sourceSon
             self.gererVolumeSonsFixes(self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
+
+    def gererVolumeCrescendo(self):
+        aSupprimer = []
+        for (instance, (rythmeCrescendo, tempsFinCrescendo, etapeCrescendo)) in self._sonsCrescendo.items():
+            tempsActuel =  pygame.time.get_ticks()
+            if tempsFinCrescendo >= tempsActuel:
+                if etapeCrescendo <= tempsActuel:
+                    volumeActuel = self._canauxSons[instance].get_volume()
+                    if  volumeActuel < 1.0:
+                        self._canauxSons[instance].set_volume(volumeActuel + rythmeCrescendo)
+                        self._sonsCrescendo[instance][2] = tempsActuel + 500
+                    else:
+                        aSupprimer.append(instance)
+            else:
+                aSupprimer.append(instance)
+        for instance in aSupprimer:
+            self._sonsCrescendo.pop(instance)
 
     def getDureeInstanceSon(self, instance):
         if instance in self._canauxSons.keys():
@@ -320,7 +341,6 @@ class BoiteOutils():
                         chemin.append("R" + regardFinal)
                     else: #Le regard final est un nom de PNJ vers qui il faut regarder
                         chemin.append(self.regardVersPnj(regardFinal, positionArrivee[0], positionArrivee[1]))
-                        print(positionArrivee)
                 if balade:
                     nombrePauses, i = math.floor(len(chemin) / frequencePauseBalade), 0
                     while i < nombrePauses:

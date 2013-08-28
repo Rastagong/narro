@@ -50,6 +50,7 @@ class Narro:
         pygame.event.set_allowed(None)
         pygame.event.set_allowed(LISTE_EVENTS_AUTORISES)
         pygame.mixer.init()
+        #pygame.mixer.init(44100, -16, 2, 2048)
         pygame.mixer.set_num_channels(NOMBRE_CANAUX_SONS)
 
     def ajouterModificationCarte(self, nomCarte, nomModif, *args, **argv):
@@ -65,6 +66,7 @@ class Narro:
 
     def _chargerCarteAExecuter(self):
         """Charge en mémoire la carte à exécuter"""
+        transformationsPermanentes = dict()
         if self._premiereCarteChargee is True: #Il y a une carte précédente, on la supprime proprement : sons fixes, obsertvation par la zone de pensée, etc
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_surface")
             self._zonePensee.obsSupprimerObservateur(self._carteActuelle, "_positionSurface")
@@ -74,11 +76,21 @@ class Narro:
             self._gestionnaireEvenements.evenements["concrets"][self._carteActuelle.nom].pop("Joueur") #Le joueur ne doit plus être traité sur l'ancienne carte
             self._gestionnaireEvenements.tuerEvenementsATuer()
             self._gestionnaireEvenements.registerPositionInitialeJoueur(self._carteAExecuter)
+            for transformation in self._carteActuelle.transformationsGlobales+self._carteActuelle.transformationsParties: #On sauvegarde les transformations permanentes
+                if transformation in self._carteActuelle.parametresTransformations.keys():
+                    if "permanente" in self._carteActuelle.parametresTransformations[transformation].keys():
+                        transformationsPermanentes[transformation] = transformation in self._carteActuelle.transformationsGlobales, self._carteActuelle.parametresTransformations[transformation]
             del self._carteActuelle
         self._carteActuelle = Carte(self._carteAExecuter, self)
         if self._carteActuelle.nom in self._modificationsCarte.keys():
             for (args,argv) in self._modificationsCarte[self._carteActuelle.nom].values():
                 self._carteActuelle.changerBloc(*args, **argv)
+        for (transformation, (globale, parametres)) in transformationsPermanentes.items():
+            if globale:
+                self._carteActuelle.transformationsGlobales.append(transformation)
+            else:
+                self._carteActuelle.transformationsParties.append(transformation)
+            self._carteActuelle.parametresTransformations[transformation], self._carteActuelle.idParametres[transformation] = parametres, None
         self._premiereCarteChargee = True
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface", transmissionImmediate=True)
