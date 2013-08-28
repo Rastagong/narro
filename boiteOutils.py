@@ -111,12 +111,13 @@ class BoiteOutils():
             i += 1
         self._canauxSons[instance] = pygame.mixer.find_channel()
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
-        volume = 0 if crescendo else volume
+        if crescendo:
+            volumeFinal, volume = volume, 0
         self._canauxSons[instance].set_volume(volume)
         self._dureesSons[instance] = (self._sons[nomSon].get_length()*1000) * nombreEcoutes
         if crescendo:
             tempsFinCrescendo = pygame.time.get_ticks() + self._dureesSons[instance] if self._dureesSons[instance] > 0 else -1
-            self._sonsCrescendo[instance] = [rythmeCrescendo, tempsFinCrescendo, pygame.time.get_ticks() + 500]
+            self._sonsCrescendo[instance] = [rythmeCrescendo, tempsFinCrescendo, pygame.time.get_ticks() + 500, volumeFinal]
         if fixe is True:
             if self._jeu.carteAExecuter not in self._sonsFixes.keys():
                 self._sonsFixes[self._jeu.carteAExecuter] = list()
@@ -135,12 +136,12 @@ class BoiteOutils():
 
     def gererVolumeCrescendo(self):
         aSupprimer = []
-        for (instance, (rythmeCrescendo, tempsFinCrescendo, etapeCrescendo)) in self._sonsCrescendo.items():
+        for (instance, (rythmeCrescendo, tempsFinCrescendo, etapeCrescendo, volumeFinal)) in self._sonsCrescendo.items():
             tempsActuel =  pygame.time.get_ticks()
-            if tempsFinCrescendo >= tempsActuel:
+            if tempsFinCrescendo >= tempsActuel or tempsFinCrescendo == -1:
                 if etapeCrescendo <= tempsActuel:
                     volumeActuel = self._canauxSons[instance].get_volume()
-                    if  volumeActuel < 1.0:
+                    if  volumeActuel < volumeFinal:
                         self._canauxSons[instance].set_volume(volumeActuel + rythmeCrescendo)
                         self._sonsCrescendo[instance][2] = tempsActuel + 500
                     else:
