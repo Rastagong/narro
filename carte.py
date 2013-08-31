@@ -354,7 +354,7 @@ class Carte(Observateur):
         if nomTransformation == "Rouge":
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"], :FENETRE["largeurFenetre"]] #On exclut la zone de pensée
             pixels[:,:,1:] = 0
-        elif nomTransformation == "Noir" or "NoirTransition":
+        elif nomTransformation == "Noir" or nomTransformation == "NoirTransition":
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
             pixels /= p["coef"]
             if p["coef"] >= 12:
@@ -362,6 +362,12 @@ class Carte(Observateur):
         elif nomTransformation == "NoirTotal":
             pixels = surfarray.pixels3d(self._fenetre)[:FENETRE["longueurFenetre"],:FENETRE["largeurFenetre"]]
             pixels[:] = (0,0,0)
+        elif nomTransformation == "Glow":
+            nomPNJ, c = p["nomPNJ"], p["couche"]
+            x, y = self._pnj[c][nomPNJ].positionCarte.left - self._scrollingX, self._pnj[c][nomPNJ].positionCarte.top - self._scrollingY
+            xCentre, yCentre, (xPixels, yPixels), pixels = x+16, y+16, numpy.mgrid[x-32:x+64, y-32:y+64], surfarray.pixels3d(self._fenetre)[x-32:x+64,y-32:y+64]
+            distancesCarrees = (xPixels - xCentre) ** 2 + (yPixels - yCentre) ** 2
+            pixels[distancesCarrees <= 32 ** 2] *= 5
         elif nomTransformation == "RemplirNoir":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
         elif "SplashText" in nomTransformation:
