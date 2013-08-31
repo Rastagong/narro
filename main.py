@@ -90,7 +90,7 @@ class Narro:
                 self._carteActuelle.transformationsGlobales.append(transformation)
             else:
                 self._carteActuelle.transformationsParties.append(transformation)
-            self._carteActuelle.parametresTransformations[transformation], self._carteActuelle.idParametres[transformation] = parametres, None
+            self._carteActuelle.parametresTransformations[transformation] = parametres
         self._premiereCarteChargee = True
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface", transmissionImmediate=True)

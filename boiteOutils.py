@@ -76,7 +76,6 @@ class BoiteOutils():
         elif globalite is False and nomTransformation not in self._jeu.carteActuelle.transformationsParties:
             self._jeu.carteActuelle.transformationsParties.append(nomTransformation)
         self._jeu.carteActuelle.parametresTransformations[nomTransformation] = parametres
-        self._jeu.carteActuelle.idParametres[nomTransformation] = None
 
     def retirerTransformation(self, globalite, nomTransformation):
         """Ordonne à la carte de ne plus appliquer la transformation <nomTransformation>, globale si <globalite> vaut <True>."""

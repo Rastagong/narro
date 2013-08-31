@@ -372,7 +372,7 @@ class Carte(Observateur):
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
         elif "SplashText" in nomTransformation:
             idParam = id(p)
-            if self._idParametres[nomTransformation] == idParam:
+            if self._idParametres.get(nomTransformation, False) == idParam:
                 surfaceTexte = self._donneesParametres[nomTransformation]
             else:
                 self._idParametres[nomTransformation] = id(p)
@@ -380,7 +380,12 @@ class Carte(Observateur):
                 self._ajouterPolice(police, taille)
                 surfaceTexte = self._polices[police][taille].render(p["texte"], p["antialias"], p["couleurTexte"], couleurFond)
                 self._donneesParametres[nomTransformation] = surfaceTexte
-            self._fenetre.blit(surfaceTexte, p["position"])
+            if p.get("position", False) is not False:
+                position = p["position"]
+            else:
+                position = self._pnj[p["couche"]][p["nomPNJ"]].positionCarte.move(-16, -surfaceTexte.get_height())
+                position.move_ip(-self._scrollingX, -self._scrollingY)
+            self._fenetre.blit(surfaceTexte, position)
         elif nomTransformation == "Nuit":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
             c = 0
