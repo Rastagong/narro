@@ -364,10 +364,16 @@ class Carte(Observateur):
             pixels[:] = (0,0,0)
         elif nomTransformation == "Glow":
             nomPNJ, c = p["nomPNJ"], p["couche"]
-            x, y = self._pnj[c][nomPNJ].positionCarte.left - self._scrollingX, self._pnj[c][nomPNJ].positionCarte.top - self._scrollingY
-            xCentre, yCentre, (xPixels, yPixels), pixels = x+16, y+16, numpy.mgrid[x-32:x+64, y-32:y+64], surfarray.pixels3d(self._fenetre)[x-32:x+64,y-32:y+64]
-            distancesCarrees = (xPixels - xCentre) ** 2 + (yPixels - yCentre) ** 2
-            pixels[distancesCarrees <= 32 ** 2] *= 5
+            if nomPNJ in self._pnj[c].keys():
+                x, y = self._pnj[c][nomPNJ].positionCarte.left - self._scrollingX, self._pnj[c][nomPNJ].positionCarte.top - self._scrollingY
+                x1, y1, x2, y2 = x-32 if x-32 >= 0 else 0, y-32 if y-32 >= 0 else 0, x+64 if x+64 <= FENETRE["longueurFenetre"] else FENETRE["longueurFenetre"], y+64 if y+64 <= FENETRE["largeurFenetre"] else FENETRE["largeurFenetre"]
+                #On limite les coordonnées du carré autour du cercle aux limites de la fenêtre
+                cerclePossible = False
+                if x1 < x2 and y1 < y2: #On évite les problèmes quand le cercle est en dehors de l'écran à l'arrière
+                    xCentre, yCentre, (xPixels, yPixels), pixels, cerclePossible = x+16, y+16, numpy.mgrid[x1:x2, y1:y2], surfarray.pixels3d(self._fenetre)[x1:x2,y1:y2], True
+                if cerclePossible and 0 not in pixels.shape: #comme à l'avant
+                    distancesCarrees = (xPixels - xCentre) ** 2 + (yPixels - yCentre) ** 2
+                    pixels[distancesCarrees <= 32 ** 2] *= 5
         elif nomTransformation == "RemplirNoir":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
         elif "SplashText" in nomTransformation:
