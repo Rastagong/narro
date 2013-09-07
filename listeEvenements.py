@@ -130,6 +130,9 @@ class Teleporteur(EvenementConcret):
                 Horloge.initialiser(id(self), 1, 500)
                 self._teleportationRetardee = True
 
+    def changerDestination(self, nouvelleCarte):
+        self._nomCarte = nouvelleCarte
+
     def traiter(self):
         if self._teleportationRetardee is True and self._executionTeleportation is False: #On est en transition
             if Horloge.sonner(id(self), 1) is False: #On gère la transition, ce n'est pas fini
@@ -162,6 +165,8 @@ class Teleporteur(EvenementConcret):
             return True
         else:
             return False
+
+    nomCarte = property(fset=changerDestination)
 
 class Porte(Teleporteur):
     def __init__(self, jeu, gestionnaire, nomCarte, porteOuverte, nomTileset, positionSourceTileOuvert, positionSourceTileFerme, xPorte, yPorte, cPorte, x=-1, y=-1, c=-1, direction=-1, transition=True, condition=True, noCondition=True, fonctionAvant=False, parametresFAvant=[], fonctionApres=False):
