@@ -168,6 +168,9 @@ SESSION_DEBUG = False
 #S'il n'y en a aucun (<False>), Pygame tentera de mettre l'icône par défaut, mais cela ne fonctionne pas sur tous les systèmes/avec cx_Freeze (du moins on dirait).
 FICHIER_ICONE = False
 
+#La vitesse de défilement de l'effet Fog, en pixels/seconde.
+VITESSE_DEFILEMENT_FOG = 50
+
 ##Messages d'erreurs
 ##
 ##

@@ -369,11 +369,53 @@ class Carte(Observateur):
                 x1, y1, x2, y2 = x-32 if x-32 >= 0 else 0, y-32 if y-32 >= 0 else 0, x+64 if x+64 <= FENETRE["longueurFenetre"] else FENETRE["longueurFenetre"], y+64 if y+64 <= FENETRE["largeurFenetre"] else FENETRE["largeurFenetre"]
                 #On limite les coordonnées du carré autour du cercle aux limites de la fenêtre
                 cerclePossible = False
-                if x1 < x2 and y1 < y2: #On évite les problèmes quand le cercle est en dehors de l'écran à l'arrière
+                if x1 < x2 and y1 < y2: #On évite les problèmes quand le cercle est en dehors de l'écran à l'arrière...
                     xCentre, yCentre, (xPixels, yPixels), pixels, cerclePossible = x+16, y+16, numpy.mgrid[x1:x2, y1:y2], surfarray.pixels3d(self._fenetre)[x1:x2,y1:y2], True
-                if cerclePossible and 0 not in pixels.shape: #comme à l'avant
+                if cerclePossible and 0 not in pixels.shape: #...comme à l'avant
                     distancesCarrees = (xPixels - xCentre) ** 2 + (yPixels - yCentre) ** 2
                     pixels[distancesCarrees <= 32 ** 2] *= 5
+        elif nomTransformation == "Fog":
+            idParam = id(self._parametresTransformations[nomTransformation])
+            if self._idParametres.get(nomTransformation, False) == idParam:
+                fog, tempsPrecedent = self._donneesParametres[nomTransformation]["fog"], self._donneesParametres[nomTransformation]["tempsPrecedent"]
+                fogScrollX = self._donneesParametres[nomTransformation]["fogScrollX"]
+            else:
+                fog = pygame.image.load(os.path.join(DOSSIER_RESSOURCES, "fog.png"))
+                surfarray.pixels_alpha(fog)[:] = 150
+                self._donneesParametres[nomTransformation] = {"fog":fog, "tempsPrecedent":pygame.time.get_ticks(), "fogScrollX":0}
+                self._idParametres[nomTransformation], tempsPrecedent = idParam, self._donneesParametres[nomTransformation]["tempsPrecedent"]
+                fogScrollX = self._donneesParametres[nomTransformation]["fogScrollX"]
+            tempsActuel = pygame.time.get_ticks() 
+            avancee = ((tempsActuel - tempsPrecedent) / 1000) * VITESSE_DEFILEMENT_FOG
+            if avancee >= 1.0:
+                self._donneesParametres[nomTransformation]["tempsPrecedent"] = tempsActuel
+                fogScrollX += avancee
+                self._donneesParametres[nomTransformation]["fogScrollX"] = fogScrollX
+            #We calculate where the junction between two scroll images will be on screen
+            xScrollRelatif = (((self._scrollingX+fogScrollX) / FENETRE["longueurFenetre"]) - int((self._scrollingX+fogScrollX) / FENETRE["longueurFenetre"])) * FENETRE["longueurFenetre"]
+            yScrollRelatif = ((self._scrollingY / FENETRE["largeurFenetre"]) - int(self._scrollingY / FENETRE["largeurFenetre"])) * FENETRE["largeurFenetre"]
+            fogPositions = dict()
+            #Four images on screen
+            if xScrollRelatif > 0 and yScrollRelatif > 0:
+                fogPositions[0] = Rect(xScrollRelatif, yScrollRelatif, FENETRE["longueurFenetre"]-xScrollRelatif, FENETRE["largeurFenetre"]-yScrollRelatif)
+                fogPositions[1] = Rect(0, yScrollRelatif, xScrollRelatif, FENETRE["largeurFenetre"]-yScrollRelatif)
+                fogPositions[2] = Rect(xScrollRelatif, 0, FENETRE["longueurFenetre"]-xScrollRelatif, yScrollRelatif)
+                fogPositions[3] = Rect(0, 0, xScrollRelatif, yScrollRelatif)
+            elif xScrollRelatif > 0:
+                fogPositions[0] = Rect(xScrollRelatif, 0, FENETRE["longueurFenetre"]-xScrollRelatif, FENETRE["largeurFenetre"])
+                fogPositions[1] = Rect(0, 0, xScrollRelatif, FENETRE["largeurFenetre"])
+            elif yScrollRelatif > 0:
+                fogPositions[0] = Rect(0, yScrollRelatif, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"]-yScrollRelatif)
+                fogPositions[2] = Rect(0, 0, FENETRE["longueurFenetre"], yScrollRelatif)
+            else:
+                fogPositions[0] = Rect(0,0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
+            i = 0
+            while i < 4:
+                coord = (0,0) if i == 0 else (FENETRE["longueurFenetre"]-xScrollRelatif,0) if i == 1 else (0, FENETRE["largeurFenetre"]-yScrollRelatif) if i == 2 else (FENETRE["longueurFenetre"]-xScrollRelatif, FENETRE["largeurFenetre"]-yScrollRelatif)
+                self._fenetre.blit(fog.subsurface(fogPositions[i]), coord)
+                i += 1
+                while i not in fogPositions.keys() and i < 4:
+                    i += 1
         elif nomTransformation == "RemplirNoir":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
         elif "SplashText" in nomTransformation:
