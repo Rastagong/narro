@@ -74,18 +74,12 @@ class Carte(Observateur):
                             while yActuel < yMax:
                                 xActuel = xMin
                                 while xActuel < xMax:
-                                    self._subTilesEtendus[(xActuel, yActuel, couches[i2])] = couches[i2], praticabilites[i2], ((xActuel-xMin) * self._hauteurTile, (yActuel-yMin) * self._hauteurTile, self._hauteurTile, self._hauteurTile), self._dicoGid[gid][0]
+                                    self._subTilesEtendus.setdefault((xActuel, yActuel, couches[i2]), [])
+                                    self._subTilesEtendus[(xActuel, yActuel, couches[i2])].append((couches[i2], praticabilites[i2], ((xActuel-xMin) * self._hauteurTile, (yActuel-yMin) * self._hauteurTile, self._hauteurTile, self._hauteurTile), self._dicoGid[gid][0]))
                                     if (xActuel < x or yActuel < y) and couches[i2] <= i:
-                                        print((x,y,i), (xActuel,yActuel,couches[i2]))
                                         self._completerAvecTileEtendu(xActuel,yActuel,couches[i2])
-                                    print((x,y,i), xActuel,yActuel,couches[i2], self._subTilesEtendus[xActuel, yActuel, couches[i2]])
-                                    print(self._subTilesEtendus, (x,y,i), "\n")
                                     xActuel, i2 = xActuel + 1, i2 + 1
                                 yActuel += 1
-                            """infosBloc, surfaceTileset = list(self._dicoGid), self._dicoSurfaces[self._dicoGid[gid][0]]["Source"]
-                            infosBloc[2] = (infosBloc[2][2]-self._hauteurTile, infosBloc[2][3]-self._hauteurTile, self._hauteurTile, self._hauteurTile)
-                            self._tiles[x][y].bloc.append(Bloc(infos=infosBloc))
-                            self._tilesLayers[i].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=infosBloc[2]) """
                     else: #Bloc vide
                         self._tiles[x][y].bloc.append(Bloc(vide=True))
                         if i == 0: #Sur la couche 0, il faut mettre du noir pour les blocs vides
@@ -99,11 +93,12 @@ class Carte(Observateur):
             i += 1
         del self._dicoGid
 
-    def _completerAvecTileEtendu(self, x, y, c):
-        self._tiles[x][y].completerAvecTileEtendu(*self._subTilesEtendus[x,y,c])
-        surfaceTileset, positionSource = self._dicoSurfaces[self._subTilesEtendus[x,y,c][3]]["Source"], self._subTilesEtendus[x,y,c][2]
-        print(x,y,c,positionSource,self._subTilesEtendus[x,y,c])
-        self._tilesLayers[c].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
+    def _completerAvecTileEtendu(self, x, y, c, initialisation=True):
+        for tileEtendu in self._subTilesEtendus[x,y,c]:
+            if initialisation:
+                self._tiles[x][y].ajouterTileEtendu(*tileEtendu)
+            surfaceTileset, positionSource = self._dicoSurfaces[tileEtendu[3]]["Source"], tileEtendu[2]
+            self._tilesLayers[c].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
 
     def _completerDicoGids(self, nomTileset, tileset, longueur, largeur):
         """Lors du chargement d'un tileset dans _ajouterSurface (quand une carte est créée), cette fonction se charge de faire correspondre à chaque tile du tileset les infos
@@ -175,6 +170,8 @@ class Carte(Observateur):
             if permanente:
                 self._jeu.ajouterModificationCarte(self._nom, nomModif, x, y, c, nomTileset, positionSource, couleurTransparente, praticabilite, vide=vide)
             self._tiles[x][y].modifierPraticabilite(c, praticabilite)
+            if (x,y,c) in self._tilesEtendus.keys():
+                self._completerAvecTileEtendu(x, y, c, initialisation=False)
             self.mettreToutAChanger()
 
     def tileExistant(self,x,y):

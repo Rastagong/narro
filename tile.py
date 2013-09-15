@@ -13,9 +13,7 @@ class Tile:
         if recalcul is True:
             self.recalculerPraticabilites()
 
-    def completerAvecTileEtendu(self, couche, praticabilite, positionSource, nomTileset):
-        if not hasattr(self, "_blocsSupplementaires"):
-            self._blocsSupplementaires = dict()
+    def ajouterTileEtendu(self, couche, praticabilite, positionSource, nomTileset):
         self._blocsSupplementaires.setdefault(couche, [])
         self._blocsSupplementaires[couche].append((praticabilite, positionSource))
         self.recalculerPraticabilites()
