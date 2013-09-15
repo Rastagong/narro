@@ -26,7 +26,7 @@ class Bloc:
                 self._positionCollision = Rect(0, 0, self._positionCarte.width, self._positionCarte.height)
             if self._positionVisible is False:
                 self._positionVisible = Rect(0, 0, 0, 0)
-    
+
     def _getPositionSource(self):
         return self._positionSource
 

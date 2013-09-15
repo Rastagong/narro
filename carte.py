@@ -26,8 +26,8 @@ class Carte(Observateur):
         self._nombreCouches, self._hauteurTile = len(self._carteTiled.layers), self._carteTiled.tilewidth
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
-        self._dicoSurfaces, self._tiles, self._tilesRects, self._blocsRef, self._pnj, i = dict(), list(), list(), dict(), dict(), 0
-        self._ecran = Rect(0, 0, self._longueur*32, self._largeur*32)
+        self._dicoSurfaces, self._tiles, self._tileRect, self._tilesEtendus, self._blocsRef, self._pnj, i = dict(), list(), Rect(0, 0, 32, 32), dict(), list(), dict(), 0
+        self._subTilesEtendus, self._ecran = dict(), Rect(0, 0, self._longueur*32, self._largeur*32)
         self._scrollingPossible, self._etapeScrolling = False, 0
         self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee, self._faceActuelle = None, None, False, False
         self._emplacementScrollingX, self._emplacementScrollingY = int(int(FENETRE["longueurFenetre"]/2) / 32)*32, int(int(FENETRE["largeurFenetre"]/2)/32)*32
@@ -52,19 +52,46 @@ class Carte(Observateur):
             while x < self._longueur:
                 y = 0
                 self._tiles.append(list())
-                self._tilesRects.append(list())
                 while y < self._largeur:
                     self._tiles[x].append(Tile(self._nombreCouches))
-                    self._tilesRects[x].append(Rect(x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
                     gid = self._carteTiled.layers[i].content2D[x][y]
                     if gid != 0: #Bloc plein
-                        self._tiles[x][y].bloc.append(Bloc(infos=self._dicoGid[gid]))
-                        surfaceTileset, positionSource = self._dicoSurfaces[self._dicoGid[gid][0]]["Source"], self._dicoGid[gid][2]
-                        self._tilesLayers[i].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
+                        if gid not in self._tilesEtendus.keys(): #Tile plein standard
+                            self._tiles[x][y].bloc.append(Bloc(infos=self._dicoGid[gid]))
+                            surfaceTileset, positionSource = self._dicoSurfaces[self._dicoGid[gid][0]]["Source"], self._dicoGid[gid][2]
+                            self._tilesLayers[i].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
+                        else: #Tile étendu formé de sous-tiles
+                            self._tiles[x][y].bloc.append(Bloc(vide=True)) #On met un tile vide en la position de réf du tile étendu ; ce sera complété avec un sous-tile étendu
+                            if i == 0:
+                                self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
+                            ####
+                            longueurPixels, largeurPixels = self._dicoGid[gid][2][2], self._dicoGid[gid][2][3]
+                            longueurTileset, largeurTileset = int(longueurPixels/self._hauteurTile), int(largeurPixels/self._hauteurTile)
+                            xMin, yMin = x, y - largeurTileset + 1
+                            xMax, yMax, xActuel, yActuel, i2 = xMin + longueurTileset, yMin + largeurTileset, xMin, yMin, 0
+                            (praticabilites, couches) = self._tilesEtendus[gid] 
+                            couches = [i if c == -1 else int(c) for c in couches] #-1 est la valeur par défaut pour dire la couche du tile étendu 
+                            while yActuel < yMax:
+                                xActuel = xMin
+                                while xActuel < xMax:
+                                    self._subTilesEtendus[(xActuel, yActuel, couches[i2])] = couches[i2], praticabilites[i2], ((xActuel-xMin) * self._hauteurTile, (yActuel-yMin) * self._hauteurTile, self._hauteurTile, self._hauteurTile), self._dicoGid[gid][0]
+                                    if (xActuel < x or yActuel < y) and couches[i2] <= i:
+                                        print((x,y,i), (xActuel,yActuel,couches[i2]))
+                                        self._completerAvecTileEtendu(xActuel,yActuel,couches[i2])
+                                    print((x,y,i), xActuel,yActuel,couches[i2], self._subTilesEtendus[xActuel, yActuel, couches[i2]])
+                                    print(self._subTilesEtendus, (x,y,i), "\n")
+                                    xActuel, i2 = xActuel + 1, i2 + 1
+                                yActuel += 1
+                            """infosBloc, surfaceTileset = list(self._dicoGid), self._dicoSurfaces[self._dicoGid[gid][0]]["Source"]
+                            infosBloc[2] = (infosBloc[2][2]-self._hauteurTile, infosBloc[2][3]-self._hauteurTile, self._hauteurTile, self._hauteurTile)
+                            self._tiles[x][y].bloc.append(Bloc(infos=infosBloc))
+                            self._tilesLayers[i].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=infosBloc[2]) """
                     else: #Bloc vide
                         self._tiles[x][y].bloc.append(Bloc(vide=True))
                         if i == 0: #Sur la couche 0, il faut mettre du noir pour les blocs vides
                             self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
+                    if (x,y,i) in self._subTilesEtendus.keys(): #Un sous-tile étendu en cette position
+                        self._completerAvecTileEtendu(x,y,i)
                     if i == self._nombreCouches - 1:
                         self._tiles[x][y].recalculerPraticabilites()
                     y += 1
@@ -72,10 +99,17 @@ class Carte(Observateur):
             i += 1
         del self._dicoGid
 
+    def _completerAvecTileEtendu(self, x, y, c):
+        self._tiles[x][y].completerAvecTileEtendu(*self._subTilesEtendus[x,y,c])
+        surfaceTileset, positionSource = self._dicoSurfaces[self._subTilesEtendus[x,y,c][3]]["Source"], self._subTilesEtendus[x,y,c][2]
+        print(x,y,c,positionSource,self._subTilesEtendus[x,y,c])
+        self._tilesLayers[c].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
+
     def _completerDicoGids(self, nomTileset, tileset, longueur, largeur):
         """Lors du chargement d'un tileset dans _ajouterSurface (quand une carte est créée), cette fonction se charge de faire correspondre à chaque tile du tileset les infos
         qui lui correspondent. 1 Tile dans le tileset = 1 GID = 1 position source, 1 praticabilité, 1 nom de tileset"""
         gid, idTileset, x, y, tileWidth, tileHeight = int(tileset.firstgid), 0, 0, 0, int(tileset.tilewidth), int(tileset.tileheight)
+        tilesEtendus = tileset.properties.get("tileEtendu", False)
         while y < largeur:
             x = 0
             while x < longueur:
@@ -84,8 +118,20 @@ class Carte(Observateur):
                 else: #Tileset importé d'ailleurs, les praticabilités n'ont pas été indiquées
                     praticabilite = True
                 self._dicoGid[gid] = nomTileset, praticabilite, (x, y, tileWidth, tileHeight)
+                if tilesEtendus: #On récupère les praticabilités et couches des sous-tiles
+                    if "Praticabilites" in tileset.properties.keys():
+                        praticabilitesTile = tileset.properties["Praticabilites"].split(",") 
+                        praticabilitesTile = [praticabiliteTile == "True" for praticabiliteTile in praticabilitesTile]
+                    else:
+                        praticabilitesTile = [praticabilite] * ( (tileWidth/self._hauteurTile) * (tileHeight/self._hauteurTile) )
+                    if "Couches" in tileset.properties.keys():
+                        couchesTile = tileset.properties["Couches"].split(",") 
+                    else:
+                        couchesTile = [-1] * ( (tileWidth/self._hauteurTile) * (tileHeight/self._hauteurTile) )
+                    self._tilesEtendus[gid] = praticabilitesTile, couchesTile
                 gid, idTileset, x = gid + 1, idTileset + 1, x + tileWidth #increments
             y += tileHeight
+
 
     def _ajouterSurface(self, positionSource, cheminVersTileset,couleurTransparente, tileset=False, mobile=True):
         """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà. 
@@ -200,7 +246,8 @@ class Carte(Observateur):
         if deplacementPossible:
             for (x,y) in self._determinerPresenceSurTiles(positionCarte.left, positionCarte.top, positionCarte.width, positionCarte.height):
                 if self.tilePraticable(x, y, c) is False: #Si le tile est impraticable
-                    if (verifPrecise and positionCollision.colliderect(self._tilesRects[x][y])) or (not verifPrecise):
+                    self._tileRect.left, self._tileRect.top = x*32, y*32
+                    if (verifPrecise and positionCollision.colliderect(self._tileRect)) or (not verifPrecise):
                         deplacementPossible = False
         return deplacementPossible
 

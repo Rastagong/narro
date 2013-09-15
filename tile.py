@@ -6,21 +6,32 @@ from pygame.locals import *
 class Tile:
     """Classe représentant un tile, cad une case de la carte"""
     def __init__(self, nombreCouches):
-        self._bloc, self._praticabilite, self._nombreCouches = list(), [False]*nombreCouches, nombreCouches
+        self._bloc, self._praticabilite, self._nombreCouches, self._blocsSupplementaires = list(), [False]*nombreCouches, nombreCouches, dict()
 
     def modifierPraticabilite(self, indice, nouvelleValeur, recalcul=True):
         self._bloc[indice].praticabilite = nouvelleValeur
         if recalcul is True:
             self.recalculerPraticabilites()
 
+    def completerAvecTileEtendu(self, couche, praticabilite, positionSource, nomTileset):
+        if not hasattr(self, "_blocsSupplementaires"):
+            self._blocsSupplementaires = dict()
+        self._blocsSupplementaires.setdefault(couche, [])
+        self._blocsSupplementaires[couche].append((praticabilite, positionSource))
+        self.recalculerPraticabilites()
+
     def recalculerPraticabilites(self):
         i, toutFaux =  0, False
-        while i < self._nombreCouches:
+        while i < len(self._bloc):
             praticabiliteActuelle = self._bloc[i].praticabilite
             if praticabiliteActuelle is False:
                 toutFaux = True
             if praticabiliteActuelle is True and i == 0 and self._bloc[i].vide is True: #Bloc vide en couche 0 : c'est du vide, donc impraticable
                 toutFaux = True
+            if i in self._blocsSupplementaires.keys():
+                for (praticabiliteBlocSupplementaire, positionSource) in self._blocsSupplementaires[i]:
+                    if praticabiliteBlocSupplementaire is False:
+                        toutFaux = True
             if toutFaux is True:
                 self._praticabilite[i] = False
             else:
