@@ -115,12 +115,12 @@ class Carte(Observateur):
                 self._dicoGid[gid] = nomTileset, praticabilite, (x, y, tileWidth, tileHeight)
                 if tilesEtendus: #On récupère les praticabilités et couches des sous-tiles
                     if "Praticabilites" in tileset.properties.keys():
-                        praticabilitesTile = tileset.properties["Praticabilites"].split(",") 
+                        praticabilitesTile =tileset.tiles[idTileset].properties["Praticabilites"].split(",") 
                         praticabilitesTile = [praticabiliteTile == "True" for praticabiliteTile in praticabilitesTile]
                     else:
                         praticabilitesTile = [praticabilite] * ( (tileWidth/self._hauteurTile) * (tileHeight/self._hauteurTile) )
                     if "Couches" in tileset.properties.keys():
-                        couchesTile = tileset.properties["Couches"].split(",") 
+                        couchesTile = tileset.tiles[idTileset].properties["Couches"].split(",") 
                     else:
                         couchesTile = [-1] * ( (tileWidth/self._hauteurTile) * (tileHeight/self._hauteurTile) )
                     self._tilesEtendus[gid] = praticabilitesTile, couchesTile
