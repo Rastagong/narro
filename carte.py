@@ -65,8 +65,8 @@ class Carte(Observateur):
                             if i == 0:
                                 self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
                             ####
-                            longueurPixels, largeurPixels = self._dicoGid[gid][2][2], self._dicoGid[gid][2][3]
-                            longueurTileset, largeurTileset = int(longueurPixels/self._hauteurTile), int(largeurPixels/self._hauteurTile)
+                            positionSource = self._dicoGid[gid][2]
+                            longueurTileset, largeurTileset = int(positionSource[2]/self._hauteurTile), int(positionSource[3]/self._hauteurTile)
                             xMin, yMin = x, y - largeurTileset + 1
                             xMax, yMax, xActuel, yActuel, i2 = xMin + longueurTileset, yMin + largeurTileset, xMin, yMin, 0
                             (praticabilites, couches) = self._tilesEtendus[gid] 
@@ -75,7 +75,8 @@ class Carte(Observateur):
                                 xActuel = xMin
                                 while xActuel < xMax:
                                     self._subTilesEtendus.setdefault((xActuel, yActuel, couches[i2]), [])
-                                    self._subTilesEtendus[(xActuel, yActuel, couches[i2])].append((couches[i2], praticabilites[i2], ((xActuel-xMin) * self._hauteurTile, (yActuel-yMin) * self._hauteurTile, self._hauteurTile, self._hauteurTile), self._dicoGid[gid][0]))
+                                    positionSourceSubTile = positionSource[0] + ((xActuel-xMin)*self._hauteurTile), positionSource[1] + ((yActuel-yMin)*self._hauteurTile), self._hauteurTile, self._hauteurTile
+                                    self._subTilesEtendus[(xActuel, yActuel, couches[i2])].append((couches[i2], praticabilites[i2], positionSourceSubTile, self._dicoGid[gid][0]))
                                     if (xActuel < x or yActuel < y) and couches[i2] <= i:
                                         self._completerAvecTileEtendu(xActuel,yActuel,couches[i2])
                                     xActuel, i2 = xActuel + 1, i2 + 1
@@ -114,15 +115,15 @@ class Carte(Observateur):
                     praticabilite = True
                 self._dicoGid[gid] = nomTileset, praticabilite, (x, y, tileWidth, tileHeight)
                 if tilesEtendus: #On récupère les praticabilités et couches des sous-tiles
-                    if "Praticabilites" in tileset.properties.keys():
+                    if "Praticabilites" in tileset.tiles[idTileset].properties.keys():
                         praticabilitesTile =tileset.tiles[idTileset].properties["Praticabilites"].split(",") 
                         praticabilitesTile = [praticabiliteTile == "True" for praticabiliteTile in praticabilitesTile]
                     else:
-                        praticabilitesTile = [praticabilite] * ( (tileWidth/self._hauteurTile) * (tileHeight/self._hauteurTile) )
-                    if "Couches" in tileset.properties.keys():
+                        praticabilitesTile = [praticabilite] * ( int(tileWidth/self._hauteurTile) * int(tileHeight/self._hauteurTile) )
+                    if "Couches" in tileset.tiles[idTileset].properties.keys():
                         couchesTile = tileset.tiles[idTileset].properties["Couches"].split(",") 
                     else:
-                        couchesTile = [-1] * ( (tileWidth/self._hauteurTile) * (tileHeight/self._hauteurTile) )
+                        couchesTile = [-1] * ( int(tileWidth/self._hauteurTile) * int(tileHeight/self._hauteurTile) )
                     self._tilesEtendus[gid] = praticabilitesTile, couchesTile
                 gid, idTileset, x = gid + 1, idTileset + 1, x + tileWidth #increments
             y += tileHeight
