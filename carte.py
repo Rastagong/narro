@@ -27,7 +27,7 @@ class Carte(Observateur):
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
         self._dicoSurfaces, self._tiles, self._tileRect, self._tilesEtendus, self._blocsRef, self._pnj, i = dict(), list(), Rect(0, 0, 32, 32), dict(), list(), dict(), 0
-        self._subTilesEtendus, self._ecran = dict(), Rect(0, 0, self._longueur*32, self._largeur*32)
+        self._subTilesEtendus, self._subTilesBlittes, self._ecran = dict(), list(), Rect(0, 0, self._longueur*32, self._largeur*32)
         self._scrollingPossible, self._etapeScrolling = False, 0
         self._surfaceZonePensee, self._positionZonePensee, self._besoinAffichageZonePensee, self._faceActuelle = None, None, False, False
         self._emplacementScrollingX, self._emplacementScrollingY = int(int(FENETRE["longueurFenetre"]/2) / 32)*32, int(int(FENETRE["largeurFenetre"]/2)/32)*32
@@ -85,7 +85,7 @@ class Carte(Observateur):
                         self._tiles[x][y].bloc.append(Bloc(vide=True))
                         if i == 0: #Sur la couche 0, il faut mettre du noir pour les blocs vides
                             self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
-                    if (x,y,i) in self._subTilesEtendus.keys(): #Un sous-tile étendu en cette position
+                    if (x,y,i) in self._subTilesEtendus.keys() and (x,y,i) not in self._subTilesBlittes: #Un sous-tile étendu en cette position qu'on n'a pas encore blitté
                         self._completerAvecTileEtendu(x,y,i)
                     if i == self._nombreCouches - 1:
                         self._tiles[x][y].recalculerPraticabilites()
@@ -100,6 +100,7 @@ class Carte(Observateur):
                 self._tiles[x][y].ajouterTileEtendu(*tileEtendu)
             surfaceTileset, positionSource = self._dicoSurfaces[tileEtendu[3]]["Source"], tileEtendu[2]
             self._tilesLayers[c].blit(surfaceTileset, (x * self._hauteurTile, y * self._hauteurTile), area=positionSource) 
+            self._subTilesBlittes.append((x,y,c))
 
     def _completerDicoGids(self, nomTileset, tileset, longueur, largeur):
         """Lors du chargement d'un tileset dans _ajouterSurface (quand une carte est créée), cette fonction se charge de faire correspondre à chaque tile du tileset les infos

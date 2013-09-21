@@ -15,7 +15,7 @@ class Tile:
 
     def ajouterTileEtendu(self, couche, praticabilite, positionSource, nomTileset):
         self._blocsSupplementaires.setdefault(couche, [])
-        self._blocsSupplementaires[couche].append((praticabilite, positionSource))
+        self._blocsSupplementaires[couche].append((praticabilite, positionSource, nomTileset))
         self.recalculerPraticabilites()
 
     def recalculerPraticabilites(self):
@@ -27,7 +27,7 @@ class Tile:
             if praticabiliteActuelle is True and i == 0 and self._bloc[i].vide is True: #Bloc vide en couche 0 : c'est du vide, donc impraticable
                 toutFaux = True
             if i in self._blocsSupplementaires.keys():
-                for (praticabiliteBlocSupplementaire, positionSource) in self._blocsSupplementaires[i]:
+                for (praticabiliteBlocSupplementaire, positionSource, nomTileset) in self._blocsSupplementaires[i]:
                     if praticabiliteBlocSupplementaire is False:
                         toutFaux = True
             if toutFaux is True:
