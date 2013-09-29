@@ -43,6 +43,7 @@ class Carte(Observateur):
             for image in tileset.images:
                 self._ajouterSurface(False, image.source, False, tileset=tileset, mobile=False)
             
+        #Création des tiles vides, le parcours de blit a lieu ensuite
         self._tilesLayers = []
         i, x, y = 0, 0, 0
         while i < self._nombreCouches:
@@ -54,6 +55,18 @@ class Carte(Observateur):
                 self._tiles.append(list())
                 while y < self._largeur:
                     self._tiles[x].append(Tile(self._nombreCouches))
+                    y += 1
+                x += 1
+            i += 1
+        ###
+
+
+        i, x, y = 0, 0, 0
+        while i < self._nombreCouches:
+            y = 0
+            while y < self._largeur:
+                x = 0
+                while x < self._longueur:
                     gid = self._carteTiled.layers[i].content2D[x][y]
                     if gid != 0: #Bloc plein
                         if gid not in self._tilesEtendus.keys(): #Tile plein standard
@@ -77,7 +90,7 @@ class Carte(Observateur):
                                     self._subTilesEtendus.setdefault((xActuel, yActuel, couches[i2]), [])
                                     positionSourceSubTile = positionSource[0] + ((xActuel-xMin)*self._hauteurTile), positionSource[1] + ((yActuel-yMin)*self._hauteurTile), self._hauteurTile, self._hauteurTile
                                     self._subTilesEtendus[(xActuel, yActuel, couches[i2])].append((couches[i2], praticabilites[i2], positionSourceSubTile, self._dicoGid[gid][0]))
-                                    if (xActuel <= x or yActuel <= y) and couches[i2] <= i:
+                                    if couches[i2] <= i:
                                         self._completerAvecTileEtendu(xActuel,yActuel,couches[i2])
                                     xActuel, i2 = xActuel + 1, i2 + 1
                                 yActuel += 1
@@ -85,12 +98,10 @@ class Carte(Observateur):
                         self._tiles[x][y].bloc.append(Bloc(vide=True))
                         if i == 0: #Sur la couche 0, il faut mettre du noir pour les blocs vides
                             self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
-                    if (x,y,i) in self._subTilesEtendus.keys() and (x,y,i) not in self._subTilesBlittes: #Un sous-tile étendu en cette position qu'on n'a pas encore blitté
-                        self._completerAvecTileEtendu(x,y,i)
                     if i == self._nombreCouches - 1:
                         self._tiles[x][y].recalculerPraticabilites()
-                    y += 1
-                x += 1
+                    x += 1
+                y += 1
             i += 1
         del self._dicoGid
 
