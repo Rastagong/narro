@@ -77,7 +77,7 @@ class Carte(Observateur):
                                     self._subTilesEtendus.setdefault((xActuel, yActuel, couches[i2]), [])
                                     positionSourceSubTile = positionSource[0] + ((xActuel-xMin)*self._hauteurTile), positionSource[1] + ((yActuel-yMin)*self._hauteurTile), self._hauteurTile, self._hauteurTile
                                     self._subTilesEtendus[(xActuel, yActuel, couches[i2])].append((couches[i2], praticabilites[i2], positionSourceSubTile, self._dicoGid[gid][0]))
-                                    if (xActuel < x or yActuel < y) and couches[i2] <= i:
+                                    if (xActuel <= x or yActuel <= y) and couches[i2] <= i:
                                         self._completerAvecTileEtendu(xActuel,yActuel,couches[i2])
                                     xActuel, i2 = xActuel + 1, i2 + 1
                                 yActuel += 1
