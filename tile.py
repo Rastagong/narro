@@ -30,7 +30,7 @@ class Tile:
                 for (praticabiliteBlocSupplementaire, positionSource, nomTileset) in self._blocsSupplementaires[i]:
                     if praticabiliteBlocSupplementaire is False:
                         toutFaux = True
-            if toutFaux is True:
+            if toutFaux is True and self._bloc[i].pont is False:
                 self._praticabilite[i] = False
             else:
                 self._praticabilite[i] = True

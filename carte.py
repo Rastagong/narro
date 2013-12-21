@@ -433,15 +433,18 @@ class Carte(Observateur):
                     pixels[distancesCarrees <= 32 ** 2] *= 5
         elif nomTransformation == "Fog":
             idParam = id(self._parametresTransformations[nomTransformation])
-            if self._idParametres.get(nomTransformation, False) == idParam:
+            fogAlpha = p.get("alpha", 150)
+            if self._idParametres.get(nomTransformation, False) == idParam or (self._idParametres.get(nomTransformation, False) != idParam and p.get("minorChange", False) is True):
                 fog, tempsPrecedent = self._donneesParametres[nomTransformation]["fog"], self._donneesParametres[nomTransformation]["tempsPrecedent"]
                 fogScrollX = self._donneesParametres[nomTransformation]["fogScrollX"]
             else:
                 fog = pygame.image.load(os.path.join(DOSSIER_RESSOURCES, "fog.png"))
-                surfarray.pixels_alpha(fog)[:] = 150
+                surfarray.pixels_alpha(fog)[:] = fogAlpha
                 self._donneesParametres[nomTransformation] = {"fog":fog, "tempsPrecedent":pygame.time.get_ticks(), "fogScrollX":0}
                 self._idParametres[nomTransformation], tempsPrecedent = idParam, self._donneesParametres[nomTransformation]["tempsPrecedent"]
                 fogScrollX = self._donneesParametres[nomTransformation]["fogScrollX"]
+            if p.get("minorChange", False) is True:
+                surfarray.pixels_alpha(fog)[:] = fogAlpha
             tempsActuel = pygame.time.get_ticks() 
             avancee = ((tempsActuel - tempsPrecedent) / 1000) * VITESSE_DEFILEMENT_FOG
             if avancee >= 1.0:

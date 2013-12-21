@@ -10,6 +10,7 @@ class EvenementConcret(Evenement):
     def __init__(self, jeu, gestionnaire):
         """<gestionnaire> est une instance du gestionnaire d'évènements"""
         Evenement.__init__(self, jeu, gestionnaire)
+        self._joueurProche = False
 
     def onCollision(self, nomPNJ, positionCarte):
         """Méthode à redéfinir appelée lorsque le PNJ <nomPNJ> en <positionCarte> est rentré dans le PNJ actuel."""

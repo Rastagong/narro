@@ -10,13 +10,15 @@ class Bloc:
     def __init__(self, infos=False, nomTileset=None, praticabilite=None, couleurTransparente=None, positionSource=None, positionCarte=None, positionCollision=False, positionVisible=False, positionCarteSuivante=None, nomPNJ=None, pnj=False, vide=False, enMouvement=False):
         """__init__(positionSource, carte, bloc)
         Initialise un bloc dont le tile est à <positionSource> dans un tileset nommé <nomTileset>. <pnj> vaut True si c'est un PNJ. """
-        self._vide = False
+        self._vide, self._pont = False, False
         if pnj is False and vide is False: #Un bloc plein sur la carte
             if infos: #Lors de la création de la carte
                 self._nomTileset, self._praticabilite, self._positionSource = infos[0], infos[1], infos[2]
             else:  #Méthode changerBloc
                 self._positionSource, self._nomTileset, self._couleurTransparente = positionSource, nomTileset, couleurTransparente
             self._couleurTransparente, self._vide = (0,0,0), False
+            pontsPositions = {"base_out_atlas.png": [(416, 512, 32, 32), (448, 512, 32, 32), (480, 512, 32, 32)]} #Liste des tiles de ponts, par tileset
+            self._pont = self._nomTileset in pontsPositions.keys() and self._positionSource in pontsPositions[self._nomTileset]
         elif vide is True:
             self._vide, self._praticabilite = True, True
         elif pnj is True:
@@ -91,6 +93,9 @@ class Bloc:
     def _setCouleurTransparente(self, nouvelleCouleurTransparente):
         self._couleurTransparente = nouvelleCouleurTransparente
 
+    def _getPont(self):
+        return self._pont
+
     positionSource = property(_getPositionSource, _setPositionSource)
     positionCarte = property(_getPositionCarte, _setPositionCarte)
     positionCarteSuivante = property(_getPositionCarteSuivante, _setPositionCarteSuivante)
@@ -101,4 +106,5 @@ class Bloc:
     couleurTransparente = property(_getCouleurTransparente, _setCouleurTransparente)
     vide = property(_getVide, _setVide)
     praticabilite = property(_getPraticabilite, _setPraticabilite)
+    pont = property(_getPont)
 
