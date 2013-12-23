@@ -82,19 +82,20 @@ class PNJ(Mobile):
         self._etapeMarche = 1
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet = args[0], list(args[1:]), argsv
         trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
-        self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
+        self._lancerTrajet(trajet, False, nouvelleIntelligence=argsv.get("intelligence", True))
         self._tempsPrecedent = pygame.time.get_ticks() #Evite un lag dû au delta timer, qui corrige le temps passé à trouver le trajet
 
     def _debloquerCollision(self):
         """Méthode qui ne s'applique qu'aux PNJ intelligents et qui peut être redéfinie. 
         Quand il y a collision, elle est appelée, permettant ainsi de débloquer la situation."""
         if self._intelligence is True and self._courage is True:
+            print("in",self._nom)
             self._collision = True
             etapeActuelle = self._etapeAction - 1 if self._fuyard and self._etapeAction == len(self._listeActions) else self._etapeAction 
             self._blocsExclusTrajet = [self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[etapeActuelle], self._positionCarte.left, self._positionCarte.top)]
-            self._argsvTrajet["blocsExclus"], self._argsTrajet[0], self._argsTrajet[1] = self._blocsExclusTrajet, self._positionCarte.left/32, self._positionCarte.top/32
+            self._argsvTrajet["blocsExclus"], self._argsTrajet[0], self._argsTrajet[1] = self._blocsExclusTrajet, self._xTile, self._yTile
             trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
-            self._lancerTrajet(trajet, False, nouvelleIntelligence=True)
+            self._lancerTrajet(trajet, False, nouvelleIntelligence=self._argsvTrajet.get("intelligence", True))
 
     def _lancerTrajet(self, *args, nouvelleIntelligence=False, deplacementLibre=False):
         """Lance un nouveau trajet (liste d'actions <nouveauTrajet>) au PNJ.

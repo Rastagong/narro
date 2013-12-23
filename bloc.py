@@ -17,7 +17,8 @@ class Bloc:
             else:  #Méthode changerBloc
                 self._positionSource, self._nomTileset, self._couleurTransparente = positionSource, nomTileset, couleurTransparente
             self._couleurTransparente, self._vide = (0,0,0), False
-            pontsPositions = {"base_out_atlas.png": [(416, 512, 32, 32), (448, 512, 32, 32), (480, 512, 32, 32)]} #Liste des tiles de ponts, par tileset
+            #Liste des tiles de ponts, par tileset
+            pontsPositions = {"base_out_atlas.png": [(416, 512, 32, 32), (448, 512, 32, 32), (480, 512, 32, 32), (448, 576, 32, 32), (448, 608, 32, 32), (448, 640, 32, 32),]} 
             self._pont = self._nomTileset in pontsPositions.keys() and self._positionSource in pontsPositions[self._nomTileset]
         elif vide is True:
             self._vide, self._praticabilite = True, True

@@ -83,10 +83,13 @@ class GestionnaireEvenements():
         evenementsPrevenus = []
         if (carteQuittee,carteEntree) in self._changementsCarteANotifier.keys(): #On prévient les évènements qui ont fait une demande précise
             for (nomEvenement,carteEvenement) in self._changementsCarteANotifier[carteQuittee,carteEntree].items():
-                if carteEvenement in self._evenements["concrets"].keys():
+                if carteEvenement != "abstrait" and carteEvenement in self._evenements["concrets"].keys():
                     if nomEvenement in self._evenements["concrets"][carteEvenement].keys():
                         evenementsPrevenus.append(nomEvenement)
                         self._evenements["concrets"][carteEvenement][nomEvenement][0].onChangementCarte(carteQuittee, carteEntree)
+                elif carteEvenement == "abstrait" and nomEvenement in self._evenements["abstraits"].keys():
+                        evenementsPrevenus.append(nomEvenement)
+                        self._evenements["abstraits"][nomEvenement][0].onChangementCarte(carteQuittee, carteEntree)
         if carteQuittee in self._evenements["concrets"].keys(): #On prévient les évènements concrets de la carte quittée
             for (nomEvenement, infosEvenement) in self._evenements["concrets"][carteQuittee].items():
                 if nomEvenement not in evenementsPrevenus:
@@ -135,9 +138,10 @@ class GestionnaireEvenements():
     def majActionsJoueur(self, nomEvenement):
         """Prévient l'évènement <nomEvenement> des actions du joueur."""
         infosEvenement, position = self._evenements["concrets"][self._nomCarte][nomEvenement], self._positionJoueur
-        evenement, abs, ord, directionEvenement = infosEvenement[0], infosEvenement[1][0], infosEvenement[1][1], infosEvenement[2]
-        nom, x, y, c, joueur, appui, directionJoueur = position[0], position[1], position[2], position[3], position[4], position[5], position[6]
-        self._prevenirEvenementActionJoueur(evenement, x, y, c, appui, directionJoueur, abs, ord, directionEvenement)
+        if position is not None:
+            evenement, abs, ord, directionEvenement = infosEvenement[0], infosEvenement[1][0], infosEvenement[1][1], infosEvenement[2]
+            nom, x, y, c, joueur, appui, directionJoueur = position[0], position[1], position[2], position[3], position[4], position[5], position[6]
+            self._prevenirEvenementActionJoueur(evenement, x, y, c, appui, directionJoueur, abs, ord, directionEvenement)
 
     def _traiterPosition(self, position):
         """Traite une position <position>."""

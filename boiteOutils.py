@@ -303,13 +303,13 @@ class BoiteOutils():
             i += 1
         return cheminDirections
 
-    def cheminVersJoueur(self, x, y, c, blocsExclus=None):
+    def cheminVersJoueur(self, x, y, c, blocsExclus=None, intelligence="foo"):
         """Retourne un chemin (une liste de directions) pour un mobile en <x><y><c> vers le joueur ne passant par aucun bloc de <blocsExclus>.
         Le chemin fait se tourner le mobile vers le joueur une fois à proximité (par une direction de regard)."""
         (xJoueur, yJoueur) = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
         return self.cheminVersPosition(x, y, c, xJoueur, yJoueur, arretAvant=True, regardAvant=True, blocsExclus=blocsExclus)
 
-    def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE, typeTile=False):
+    def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE, animationBalade=False, typeTile=False, intelligence="foo"):
         """Retourne un chemin (une liste de directions) pour un mobile en <x><y><c> vers <xArrivee><yArrivee> ne passant par aucun bloc de <blocsExclus>.
         Si <arretAvant> vaut <True>, le chemin s'arrêt une case avant la destination. 
         Si <regardAvant> vaut <True>, le PNJ regarde la position d'arrivée à la fin.
@@ -344,8 +344,9 @@ class BoiteOutils():
                         chemin.append(self.regardVersPnj(regardFinal, positionArrivee[0], positionArrivee[1]))
                 if balade:
                     nombrePauses, i = math.floor(len(chemin) / frequencePauseBalade), 0
+                    pauseBalade = "V" + self.getDirectionAuHasard() + str(dureePauseBalade) if animationBalade else dureePauseBalade
                     while i < nombrePauses:
-                        chemin.insert(i*frequencePauseBalade, dureePauseBalade)
+                        chemin.insert(i*frequencePauseBalade, pauseBalade)
                         i += 1
                 return chemin
             voisins = self._positionsAdjacentes(position, positionArrivee, blocsExclus, typeTile, c)
