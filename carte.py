@@ -191,11 +191,15 @@ class Carte(Observateur):
         """Retourne True si le tile de coordonnées <x>,<y> existe"""
         return x >= 0 and x < self._longueur and y >= 0 and y < self._largeur
 
-    def tilePraticable(self, x, y, c):
+    def tilePraticable(self, x, y, c, eau=False):
         if x < len(self._tiles):
             if y < len(self._tiles[x]):
                 if c < len(self._tiles[x][y].praticabilite):
-                    return self._tiles[x][y].praticabilite[c]
+                    praticabilite = self._tiles[x][y].praticabilite[c]
+                    if eau is False or praticabilite is True:
+                        return praticabilite
+                    else: #PNJ marin et pas de praticabilité terrestre : on vérifié la praticabilité marine
+                        return False if self._tiles[x][y].praticabiliteEau == False else self._tiles[x][y].praticabiliteEau[c]
                 else:
                     return False
             else:
@@ -227,12 +231,13 @@ class Carte(Observateur):
     def _prevenirCollision(self, pnjCogne, pnjCogneur, positionCogneur):
         self._messagesCollision.append((pnjCogne, pnjCogneur, positionCogneur))
 
-    def deplacementPossible(self, positionCarte, c, nomPNJ, verifPrecise=False, positionCollision=False, positionVisible=False, ecranVisible=False, exclusionCollision=[], collisionEffective=False, axeTiles=True):
+    def deplacementPossible(self, positionCarte, c, nomPNJ, verifPrecise=False, positionCollision=False, positionVisible=False, ecranVisible=False, exclusionCollision=[], collisionEffective=False, axeTiles=True, eau=False):
         """Indique si un déplacement en <x><y><c> est possible. Retourne un 2-tuple avec :
         * <True> si un PNJ peut être positionné en <x><y><c>, sinon <False>. Si <xOld>,<yOld> sont fournis, ne prend pas en compte le PNJ à cette position pour les collisions.
         * La praticabilité est vérifiée via des Rect quand <verifPrecise> vaut <True>.
         * Vérifie que l'objet est visible à l'écran quand <ecranVisible> vaut <True>.
         * Ne prend pas en compte les collisions avec tout PNJ dont le nom est présent dans la liste <exclusionCollision>.
+        * Prend en compte la praticabilité spécifique des tiles d'eaux si <eau> vaut <True>
         * Le tile qui vient d'être quitté."""
         deplacementPossible = True
         if positionCollision is False:
@@ -255,7 +260,7 @@ class Carte(Observateur):
                     self._prevenirCollision(pnj.nomPNJ, nomPNJ, positionCarte)
         if deplacementPossible:
             for (x,y) in self._determinerPresenceSurTiles(positionCarte.left, positionCarte.top, positionCarte.width, positionCarte.height):
-                if self.tilePraticable(x, y, c) is False: #Si le tile est impraticable
+                if self.tilePraticable(x, y, c, eau=eau) is False: #Si le tile est impraticable
                     self._tileRect.left, self._tileRect.top = x*32, y*32
                     if (verifPrecise and positionCollision.colliderect(self._tileRect)) or (not verifPrecise):
                         deplacementPossible = False
@@ -490,10 +495,11 @@ class Carte(Observateur):
                 self._donneesParametres[nomTransformation] = surfaceTexte
             if p.get("position", False) is not False:
                 position = p["position"]
-            else:
+                self._fenetre.blit(surfaceTexte, position)
+            elif self._ecranVisible.colliderect(self._pnj[p["couche"]][p["nomPNJ"]].positionCarte) or self._jeu.carteActuelle._ecranVisible.contains(self._pnj[p["couche"]][p["nomPNJ"]].positionCarte):
                 position = self._pnj[p["couche"]][p["nomPNJ"]].positionCarte.move(-16, -surfaceTexte.get_height())
                 position.move_ip(-self._scrollingX, -self._scrollingY)
-            self._fenetre.blit(surfaceTexte, position)
+                self._fenetre.blit(surfaceTexte, position)
         elif nomTransformation == "Nuit":
             self._fenetre.fill((0,0,0), rect=(0,0,FENETRE["longueurFenetre"],FENETRE["largeurFenetre"]))
             c = 0

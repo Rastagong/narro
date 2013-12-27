@@ -171,6 +171,12 @@ FICHIER_ICONE = False
 #La vitesse de défilement de l'effet Fog, en pixels/seconde.
 VITESSE_DEFILEMENT_FOG = 50
 
+#Position des tiles de ponts et d'eau
+POSITIONS_PONTS = {"base_out_atlas.png": [(416, 512, 32, 32), (448, 512, 32, 32), (480, 512, 32, 32), (448, 576, 32, 32), (448, 608, 32, 32), (448, 640, 32, 32),]}
+POSITIONS_EAUX = {"base_out_atlas.png": [(704, 352, 32, 32), (736, 352, 32), (704, 384, 32, 32), (736, 384, 32, 32), (704, 416, 32, 32), (672, 416, 32, 32), (736, 416, 32, 32), (704, 448, 32, 32), (672, 448, 32, 32), (736, 448, 32, 32), (704, 480, 32, 32), (672, 480, 32, 32), (736, 480, 32, 32)]} 
+
+JEU_MUET = False
+
 ##Messages d'erreurs
 ##
 ##

@@ -11,7 +11,7 @@ from .mobile import *
 class PNJ(Mobile):
     """Classe représentant un PNJ"""
 
-    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, fuyard=FUYARD_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT, deplacementLibre=False):
+    def __init__(self,jeu,gestionnaire,nom,x,y,c,fichier,couleurTransparente,persoCharset,repetitionActions,listeActions,vitesseDeplacement=VITESSE_DEPLACEMENT_MOBILE_PAR_DEFAUT, dureeAnimation=DUREE_ANIMATION_MOBILE_PAR_DEFAUT, dureeAnimationSP=DUREE_ANIMATION_SP_PAR_DEFAUT, directionDepart=DIRECTION_DEPART_MOBILE_PAR_DEFAUT, intelligence=INTELLIGENCE_PAR_DEFAUT, courage=COURAGE_PAR_DEFAUT, fuyard=FUYARD_PAR_DEFAUT, poseDepart=True, longueurSprite=LONGUEUR_SPRITE_PAR_DEFAUT, largeurSprite=LARGEUR_SPRITE_PAR_DEFAUT, deplacementLibre=False, eau=False):
         """Initialise le PNJ
         Paramètres obligatoires :
         <jeu> est l'application entière.
@@ -32,6 +32,7 @@ class PNJ(Mobile):
         <intelligence> est un booléen qui permet au PNJ de débloquer une situation de collision quand il vaut <True>.
         <courage> est un booléen qui définit l'attitude du PNJ en cas de collision : quand le PNJ n'est pas courageux, il abandonne ses actions.
         <fuyard> fait de même mais avec un résultat différent : quand le PNJ est fuyard, il oublie l'action actuelle et passe à la suivante.
+        <eau> vaut <True> si le PNJ est marrant.
         <poseDepart> est un booléen qui vaut <False> quand le PNJ ne doit pas être posé dès le départ.
         <largeurSprite> est la largeur du sprite. Valeur par défaut dans les constantes.
         <longueurSprite> est la longueur du sprite. Valeur par défaut dans les constantes."""
@@ -40,7 +41,7 @@ class PNJ(Mobile):
         self._repetitionActions, self._listeActions = repetitionActions, listeActions
         self._regardFait, self._trajetEtoileEnCours, self._intelligence, self._poseDepart, self._courage, self._fuyard = False, False, intelligence, poseDepart, courage, fuyard
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet, self._blocsExclusTrajet = None, None, None, []
-        self._positionSource = Rect(0, 0, longueurSprite, largeurSprite)
+        self._positionSource, self._eau = Rect(0, 0, longueurSprite, largeurSprite), eau
         self._deplacementLibre, self._positionCarteSuivante = deplacementLibre, None
 
     def traiter(self):
@@ -89,7 +90,7 @@ class PNJ(Mobile):
         """Méthode qui ne s'applique qu'aux PNJ intelligents et qui peut être redéfinie. 
         Quand il y a collision, elle est appelée, permettant ainsi de débloquer la situation."""
         if self._intelligence is True and self._courage is True:
-            print("in",self._nom)
+            print(self._blocsExclusTrajet)
             self._collision = True
             etapeActuelle = self._etapeAction - 1 if self._fuyard and self._etapeAction == len(self._listeActions) else self._etapeAction 
             self._blocsExclusTrajet = [self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[etapeActuelle], self._positionCarte.left, self._positionCarte.top)]
@@ -178,7 +179,7 @@ class PNJ(Mobile):
                             self._xTileSuivant, self._yTileSuivant =  self._positionCarteSuivante.left/32, self._positionCarteSuivante.top/32
                         self._xTilePrecedent, self._yTilePrecedent = self._xTile, self._yTile
                         if not self._deplacementLibre:
-                            deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom)
+                            deplacementPossible = self._jeu.carteActuelle.deplacementPossible(self._positionCarteSuivante, self._c, self._nom, eau=self._eau)
                     if (deplacementPossible or self._deplacementLibre) or (self._etapeMarche > 1 and deplacementAxe):
                         self._regardFait, self._collision = False, False
                         self._positionCarteOld.left, self._positionCarteOld.top = self._positionCarte.left, self._positionCarte.top

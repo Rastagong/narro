@@ -113,6 +113,8 @@ class BoiteOutils():
         self._canauxSons[instance].play(self._sons[nomSon], loops=nombreEcoutes-1, maxtime=duree)
         if crescendo:
             volumeFinal, volume = volume, 0
+        if JEU_MUET:
+            volumeFinal, volume = 0, 0
         self._canauxSons[instance].set_volume(volume)
         self._dureesSons[instance] = (self._sons[nomSon].get_length()*1000) * nombreEcoutes
         if crescendo:
@@ -243,7 +245,7 @@ class BoiteOutils():
         else:
             return False
 
-    def _positionsAdjacentes(self, position, positionArrivee, blocsExclus, typeTile, c):
+    def _positionsAdjacentes(self, position, positionArrivee, blocsExclus, typeTile, c, eau=False):
         """Retourne les positions adjacentes (pas en diagonale) à <position>."""
         positionsAdjacentes = [ (position[0]+1, position[1]), (position[0]-1, position[1]), (position[0], position[1]+1), (position[0], position[1]-1) ]
         positionsCorrectes, i = list(), 0
@@ -252,7 +254,7 @@ class BoiteOutils():
         while i < len(positionsAdjacentes):
             positionAdjacente = positionsAdjacentes[i]
             x, y = positionAdjacente[0], positionAdjacente[1]
-            if self._jeu.carteActuelle.tileExistant(x, y) is True and ((self._jeu.carteActuelle.tilePraticable(x, y, c) is True) or (positionAdjacente == positionArrivee)) and ((x,y) not in blocsExclus or positionAdjacente == positionArrivee):
+            if self._jeu.carteActuelle.tileExistant(x, y) is True and ((self._jeu.carteActuelle.tilePraticable(x, y, c, eau=eau) is True) or (positionAdjacente == positionArrivee)) and ((x,y) not in blocsExclus or positionAdjacente == positionArrivee):
                 if typeTile is False:
                     positionsCorrectes.append(positionAdjacente)
                 else: #Vérification du type de tile : on n'ajoute aux positions correctes que ceux faisant partie de la liste fournie
@@ -309,7 +311,7 @@ class BoiteOutils():
         (xJoueur, yJoueur) = (self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
         return self.cheminVersPosition(x, y, c, xJoueur, yJoueur, arretAvant=True, regardAvant=True, blocsExclus=blocsExclus)
 
-    def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE, animationBalade=False, typeTile=False, intelligence="foo"):
+    def cheminVersPosition(self, x, y, c, xArrivee, yArrivee, arretAvant=False, regardAvant=False, regardFinal=False, blocsExclus=None, balade=False, dureePauseBalade=DUREE_PAUSE_BALADE, frequencePauseBalade=FREQUENCE_PAUSE_BALADE, animationBalade=False, typeTile=False, intelligence="foo", eau=False):
         """Retourne un chemin (une liste de directions) pour un mobile en <x><y><c> vers <xArrivee><yArrivee> ne passant par aucun bloc de <blocsExclus>.
         Si <arretAvant> vaut <True>, le chemin s'arrêt une case avant la destination. 
         Si <regardAvant> vaut <True>, le PNJ regarde la position d'arrivée à la fin.
@@ -349,7 +351,7 @@ class BoiteOutils():
                         chemin.insert(i*frequencePauseBalade, pauseBalade)
                         i += 1
                 return chemin
-            voisins = self._positionsAdjacentes(position, positionArrivee, blocsExclus, typeTile, c)
+            voisins = self._positionsAdjacentes(position, positionArrivee, blocsExclus, typeTile, c, eau=eau)
             i = 0
             while i < len(voisins):
                 voisin = voisins[i]
