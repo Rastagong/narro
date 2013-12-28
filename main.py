@@ -93,6 +93,7 @@ class Narro:
             self._carteActuelle.parametresTransformations[transformation] = parametres
         self._premiereCarteChargee = True
         self._carteActuelle.initialiserScrolling(self._joueur.x, self._joueur.y) 
+        self._carteActuelle.initialiserScrollingBackground(self._joueur.x, self._joueur.y) 
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_surface", transmissionImmediate=True)
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_positionSurface", transmissionImmediate=True)
         self._zonePensee.obsAjouterObservateur(self._carteActuelle, "_faceActuelle", transmissionImmediate=True)

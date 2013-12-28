@@ -475,6 +475,19 @@ class MapObjectGroupLayer(object):
             map_obj.width = int(map_obj.width)
             map_obj.height = int(map_obj.height)
 
+class ImageLayer(object):
+    def __init__(self):
+        self.source = "";
+        self.is_object_group = False    # ISSUE 9
+        self.properties = {};
+
+    def convert(self):
+        self.width = int(self.width)
+        self.height = int(self.height)
+
+    def decode(self):
+        pass
+
 #  -----------------------------------------------------------------------------
 
 class MapObject(object):
@@ -683,6 +696,14 @@ class TileMapParser(object):
                         layer.encoded_content.append(val)
         world_map.layers.append(layer)
 
+    def _build_image_layer(self, image_layer_node, world_map):
+        imagesNodes = self._get_nodes(image_layer_node.childNodes, "image")
+        image_layer = ImageLayer()
+        self._set_attributes(image_layer_node, image_layer)
+        for imageNode in imagesNodes:
+            self._set_attributes(imageNode, image_layer)
+        world_map.layers.append(image_layer)
+
     def _build_world_map(self, world_node):
         world_map = TileMap()
         self._set_attributes(world_node, world_map)
@@ -694,6 +715,8 @@ class TileMapParser(object):
             self._build_layer(node, world_map)
         for node in self._get_nodes(world_node.childNodes, 'objectgroup'):
             self._build_object_groups(node, world_map)
+        for node in self._get_nodes(world_node.childNodes, 'imagelayer'):
+            self._build_image_layer(node, world_map)
         return world_map
 
     def _build_object_groups(self, object_group_node, world_map):

@@ -23,7 +23,13 @@ class Carte(Observateur):
         self._nom, self._description = self._carteTiled.properties.get("nom", nomCarte), self._carteTiled.properties.get("description", "")
         self._musique = self._carteTiled.properties.get("musique", "")
         self._longueur, self._largeur = self._carteTiled.width, self._carteTiled.height
-        self._nombreCouches, self._hauteurTile = len(self._carteTiled.layers), self._carteTiled.tilewidth
+        self._tmxLayers, self._scrollingBackground = [], False
+        for layer in self._carteTiled.layers:
+            if type(layer) == narro.tmxreader.TileLayer:
+                self._tmxLayers.append(layer)
+            elif type(layer) == narro.tmxreader.ImageLayer:
+                self._scrollingBackground = layer.source
+        self._nombreCouches, self._hauteurTile = len(self._tmxLayers), self._carteTiled.tilewidth
         self._scrollingX, self._scrollingY = 0,0
         self._jeu, self._toutAChanger = jeu, True
         self._dicoSurfaces, self._tiles, self._tileRect, self._tilesEtendus, self._blocsRef, self._pnj, i = dict(), list(), Rect(0, 0, 32, 32), dict(), list(), dict(), 0
@@ -37,6 +43,14 @@ class Carte(Observateur):
         self._fenetre, self._blitFrame = self._jeu.fenetre, False
         self._transformationsGlobales, self._transformationsParties, self._parametresTransformations = list(), list(), dict()
         self._idParametres, self._donneesParametres, self._messagesCollision = dict(), dict(), list()
+
+        if self._scrollingBackground is not False:
+            self._bgScrollingX, self._bgScrollingY = 0,0
+            self._bgEcranVisible = Rect(0, 0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
+            self._ajouterSurface(False, self._scrollingBackground, (0,0,0), mobile=False)
+            self._bgLongueur, self._bgLargeur = self._dicoSurfaces[self._scrollingBackground]["Source"].get_width(), self._dicoSurfaces[self._scrollingBackground]["Source"].get_height()
+            self._bgRatioX, self._bgRatioY = self._bgLongueur / (self._longueur*self._hauteurTile), self._bgLargeur / (self._largeur*self._hauteurTile)
+            self._bgRatioXWait, self._bgRatioYWait = 0,0
 
         self._dicoGid = dict()
         for tileset in self._carteTiled.tile_sets:
@@ -67,7 +81,7 @@ class Carte(Observateur):
             while y < self._largeur:
                 x = 0
                 while x < self._longueur:
-                    gid = self._carteTiled.layers[i].content2D[x][y]
+                    gid = self._tmxLayers[i].content2D[x][y]
                     if gid != 0: #Bloc plein
                         if gid not in self._tilesEtendus.keys(): #Tile plein standard
                             self._tiles[x][y].bloc.append(Bloc(infos=self._dicoGid[gid]))
@@ -96,7 +110,7 @@ class Carte(Observateur):
                                 yActuel += 1
                     else: #Bloc vide
                         self._tiles[x][y].bloc.append(Bloc(vide=True))
-                        if i == 0: #Sur la couche 0, il faut mettre du noir pour les blocs vides
+                        if i == 0 and self._scrollingBackground is False: #Sur la couche 0, il faut mettre du noir pour les blocs vides
                             self._tilesLayers[i].fill((0,0,0), (x * self._hauteurTile, y * self._hauteurTile, self._hauteurTile, self._hauteurTile))
                     if i == self._nombreCouches - 1:
                         self._tiles[x][y].recalculerPraticabilites()
@@ -141,7 +155,7 @@ class Carte(Observateur):
             y += tileHeight
 
 
-    def _ajouterSurface(self, positionSource, cheminVersTileset,couleurTransparente, tileset=False, mobile=True):
+    def _ajouterSurface(self, positionSource, cheminVersTileset, couleurTransparente, tileset=False, mobile=True):
         """Ajoute la surface correspondant à un bloc dans le dico de surfaces, si elle n'y est pas déjà. 
         Pour les tilesets, on ajoute la surface entière seulement. Pour les mobiles, on enregistre aussi la partie du tileset qui nous intéresse.
         Pour les tilesets, on complète le dico de GIDs (lors de la création de la carte)."""
@@ -313,7 +327,7 @@ class Carte(Observateur):
 
     def verifierScrollingPossible(self, x, y, direction):
         """Vérifie si le scrolling est possible pour faciliter le traitement dans gererScrolling"""
-        self._scrollingPossible, scrollingDirection = False, True
+        self._scrollingPossible, scrollingDirection, xOriginal, yOriginal = False, True, x, y
         if direction == "Bas" and int(self._scrollingY / 32) + int(FENETRE["largeurFenetre"]/32) >= self._largeur:
             scrollingDirection = False
         if direction == "Haut" and self._scrollingY == 0:
@@ -330,6 +344,28 @@ class Carte(Observateur):
                 self._scrollingPossible, self._directionScrolling = True, direction
             elif (direction == "Gauche" or direction == "Droite") and scrollingPossibleX is True:
                 self._scrollingPossible, self._directionScrolling = True, direction
+        if self._scrollingBackground is not False:
+            self._verifierScrollingPossibleBackground(xOriginal,yOriginal,direction)
+
+    def _verifierScrollingPossibleBackground(self, x, y, direction):
+        """Vérifie si le scrolling du background est possible pour faciliter le traitement dans gererScrolling"""
+        self._bgScrollingPossible, scrollingDirection = False, True
+        if direction == "Bas" and self._bgScrollingY + FENETRE["largeurFenetre"] >= self._bgLargeur:
+            scrollingDirection = False
+        if direction == "Haut" and self._bgScrollingY <= 0:
+            scrollingDirection = False
+        if direction == "Droite" and self._bgScrollingX + FENETRE["longueurFenetre"] >= self._bgLongueur:
+            scrollingDirection = False
+        if direction == "Gauche" and self._bgScrollingX <= 0:
+            scrollingDirection = False
+        if scrollingDirection is True:
+            x, y = x - self._scrollingX, y - self._scrollingY
+            scrollingPossibleX = self._coordonneeScrollingPossible(x, abs=True)
+            scrollingPossibleY = self._coordonneeScrollingPossible(y, abs=False)
+            if (direction == "Haut" or direction == "Bas") and scrollingPossibleY is True:
+                self._bgScrollingPossible, self._bgDirectionScrolling = True, direction
+            elif (direction == "Gauche" or direction == "Droite") and scrollingPossibleX is True:
+                self._bgScrollingPossible, self._bgDirectionScrolling = True, direction
     
     def gererScrolling(self, changement, direction):
         """Gère le scrolling"""
@@ -337,14 +373,35 @@ class Carte(Observateur):
             self._scrollingX += changement
             self.mettreToutAChanger()
             self._ecranVisible.move_ip(changement, 0)
-            return True
         elif (direction == "Bas" or direction == "Haut") and self._scrollingPossible is True:
             self._scrollingY += changement
             self.mettreToutAChanger()
             self._ecranVisible.move_ip(0, changement)
-            return True
-        else:
-            return False
+        if self._scrollingBackground is not False:
+            if (direction == "Droite" or direction == "Gauche") and self._bgScrollingPossible is True:
+                changement = self._bgRatioX if changement > 0 else (self._bgRatioX * -1)
+                if self._bgRatioX < 1.0:
+                    self._bgRatioXWait += changement
+                else:
+                    self._bgRatioXWait = changement
+                if self._bgRatioXWait >= 1.0 or self._bgRatioXWait <= -1.0:
+                    self._bgScrollingX += self._bgRatioXWait
+                    self._bgEcranVisible.move_ip(self._bgRatioXWait, 0)
+                    self._bgRatioXWait = 0
+                self.mettreToutAChanger()
+                return True
+            elif (direction == "Bas" or direction == "Haut") and self._bgScrollingPossible is True:
+                changement = self._bgRatioY if changement > 0 else (self._bgRatioY * -1)
+                if self._bgRatioY < 1.0:
+                    self._bgRatioYWait += changement
+                else:
+                    self._bgRatioYWait = changement
+                if self._bgRatioYWait >= 1.0 or self._bgRatioYWait <= -1.0:
+                    self._bgScrollingY += self._bgRatioYWait
+                    self._bgEcranVisible.move_ip(0, self._bgRatioYWait)
+                    self._bgRatioYWait = 0
+                self.mettreToutAChanger()
+                return True
 
     def initialiserScrolling(self, x, y):
         """Après la création de la carte, initialise le scrolling à la position du joueur si nécessaire.
@@ -369,6 +426,20 @@ class Carte(Observateur):
                 self._scrollingY = (self._largeur*32) - FENETRE["largeurFenetre"]
         self._ecranVisible = Rect(0, 0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
         self._ecranVisible.move_ip(self._scrollingX, self._scrollingY)
+
+    def initialiserScrollingBackground(self, x, y):
+        if self._scrollingBackground is False:
+            return
+        if x >= self._emplacementScrollingX:
+            self._bgScrollingX = x - self._emplacementScrollingX
+            if FENETRE["longueurFenetre"] + self._bgScrollingX >= self._bgLongueur: #Quand on est aux bords de la carte
+                self._bgScrollingX = self._bgLongueur - FENETRE["longueurFenetre"]
+        if y >= self._emplacementScrollingY:
+            self._bgScrollingY = y - self._emplacementScrollingY
+            if FENETRE["largeurFenetre"] + self._bgScrollingY >= self._bgLargeur: #Quand on est aux bords de la carte
+                self._bgScrollingY = self._bgLargeur - FENETRE["largeurFenetre"]
+        self._bgEcranVisible = Rect(0, 0, FENETRE["longueurFenetre"], FENETRE["largeurFenetre"])
+        self._bgEcranVisible.move_ip(self._bgScrollingX, self._bgScrollingY)
 
     def obsOnNouvelleObservation(self, instance, nomAttribut, info):
         if isinstance(instance, ZonePensee) is True and nomAttribut == "_surface":
@@ -550,6 +621,8 @@ class Carte(Observateur):
             coucheActuelle = 0
             self._fenetre.fill((0,0,0))
             while coucheActuelle < self._nombreCouches: 
+                if coucheActuelle == 0 and self._scrollingBackground is not False:
+                    self._fenetre.blit(self._dicoSurfaces[self._scrollingBackground]["Source"], (0,0), area=self._bgEcranVisible)
                 couche = self._tilesLayers[coucheActuelle]
                 if len(self._transformationsParties) > 0:
                     self._transformerPartie(couche, False, (0,0), (0,0))

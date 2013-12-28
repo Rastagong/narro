@@ -148,7 +148,7 @@ class Joueur(Mobile, Observable):
         hauteurTile = self._jeu.carteActuelle.hauteurTile
         carte = self._jeu.carteActuelle
         direction = self._direction
-        if direction != "Aucune":
+        if direction != "Aucune" and self._boiteOutils.joueurLibre.voir() is True:
             self._boiteOutils.directionJoueurReelle = direction
             if self._regardDansDirection[direction] == True: #Si on a déjà regardé dans la direction
                 tempsActuel = pygame.time.get_ticks()

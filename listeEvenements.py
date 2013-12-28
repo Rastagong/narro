@@ -81,19 +81,20 @@ class Activateur(EvenementConcret):
             self._boiteOutils.interrupteurs[self._nomInterrupteur].inverser()
 
 class Teleporteur(EvenementConcret):
-    def __init__(self, jeu, gestionnaire, nomCarte, x=-1, y=-1, c=-1, direction=-1, transition=True, condition=True, noCondition=True, fonctionAvant=False, parametresFAvant=[], fonctionApres=False):
+    def __init__(self, jeu, gestionnaire, nomCarte, x=-1, y=-1, c=-1, direction=-1, transition=True, condition=True, noCondition=True, fonctionAvant=False, parametresFAvant=[], fonctionApres=False, joueurBloque=False):
         """Téléporte le joueur sur la carte <nomCarte>.
         * On peut spécifier une position de destination <x><y><c> avec une <direction> à l'arrivée. Quand ce n'est pas spécifié, le joueur se retrouve à la même position sur l'autre carte.
         * Une <transition> a lieu sauf quand cela vaut <False>.
         * Il est possible de n'exécuter la téléportation que lorsque l'interrupteur <condition> est activé et/ou l'interrupteur <noCondition> désactivé.
         * Une <fonctionAvant>, identifiée par une <str> (à lier à une méthode du téléporteur) peut être appelée avec ses <parametresFAvant> juste avant la téléportation.
           Elle bloque la téléportation jusqu'à ce qu'elle retourne <True> (elle est appelée à chaque traitement du téléporteur).
+        * Le joueur est bloqué pendant la téléportation si <joueurBloque> vaut <True>
         * Une <fonctionApres> peut être appelée juste après la téléportation."""
         EvenementConcret.__init__(self, jeu, gestionnaire)
         self._nomCarte, self._transition, self._teleportationRetardee, self._etapeTexteTransition = nomCarte, True, False, 0
         self._xDestination, self._yDestination, self._coucheDestination, self._directionDestination, self._condition, self._noCondition = x, y, c, direction, condition, noCondition
         self._coefNoircisseur, self._fonctionAvant, self._fonctionApres, self._resultatFonctionAvant, self._executionTeleportation = 1, fonctionAvant, fonctionApres, True, False
-        self._parametresFonctionAvant = parametresFAvant
+        self._parametresFonctionAvant, self._joueurBloque = parametresFAvant, joueurBloque
         if self._fonctionAvant == "texteTransition":
             self._fonctionAvant = self._texteTransition
         self._penseePossible = InterrupteurInverse(self._boiteOutils.penseeAGerer)
@@ -129,6 +130,8 @@ class Teleporteur(EvenementConcret):
             else: #Transition de téléportation
                 Horloge.initialiser(id(self), 1, 500)
                 self._teleportationRetardee = True
+            if self._joueurBloque:
+                self._boiteOutils.joueurLibre.desactiver()
 
     def changerDestination(self, nouvelleCarte):
         self._nomCarte = nouvelleCarte
@@ -147,8 +150,9 @@ class Teleporteur(EvenementConcret):
             if self._resultatFonctionAvant is True: #Si la fonction avant dit qu'on peut téléporter // Si aucune fonction avant n'est à appeler
                 self._boiteOutils.teleporterSurCarte(self._nomCarte, self._xDestination, self._yDestination, self._coucheDestination, self._directionDestination)
                 self._executionTeleportation, self._teleportationRetardee = False, False
+                self._boiteOutils.joueurLibre.activer()
                 if self._fonctionApres is not False: 
-                    self._fonctionApres()
+                    self._fonctionApres(self)
 
     def _texteTransition(self, texte):
         if self._etapeTexteTransition == 0 and self._penseePossible.voir() is True: #Première étape : noir total et affichage du texte, on ne téléporte pas
