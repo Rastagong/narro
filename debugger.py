@@ -1,10 +1,10 @@
 # -*-coding:utf-8 -*
 import pygame
 from pygame.locals import *
-from constantes import *
-from evenement import *
-import pdb, pympler.summary, pympler.muppy, pympler.tracker, pympler.refbrowser 
-from pympler.classtracker import ClassTracker
+from .constantes import *
+from .evenement import *
+import pdb# pympler.summary, pympler.muppy, pympler.tracker, pympler.refbrowser 
+#from pympler.classtracker import ClassTracker
 
 class Debugger(Evenement):
     def __init__(self, jeu, gestionnaire, methode=False):

@@ -9,7 +9,7 @@ from .evenementConcret import *
 from .pnj import *
 
 if SESSION_DEBUG:
-    from debugger import *
+    from .debugger import *
 
 class LanceurPensee(EvenementConcret):
     def __init__(self, jeu, x, y, c, penseeADire, gestionnaire):

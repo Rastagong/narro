@@ -112,6 +112,14 @@ class ZonePensee(Observable):
             penseeCourante = self._queuePensees.get()
             self._majPenseeActuelle(penseeCourante["message"], penseeCourante["vitesse"], penseeCourante["police"], penseeCourante["couleur"], penseeCourante["tempsLecture"], penseeCourante["nom"], penseeCourante["faceset"])
 
+    def arreterPensees(self):
+        while self._queuePensees.empty() is False:
+            self._penseeAGerer.desactiver()
+            self._queuePensees.get()
+        Horloge.arreterSonnerie(id(self), 1)
+        Horloge.arreterSonnerie(id(self), 2)
+        self._faceset = False
+
     def gererSurfacePensee(self):
         self._gererPenseeActuelle()
 

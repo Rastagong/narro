@@ -24,9 +24,6 @@ class EvenementConcret(Evenement):
         """Fonction appelée lorsque le joueur se trouve à l'emplacement même de l'évènement, au tile de coordonnées <x>,<y> sur la couche <c>.
         Sa direction est <direction>."""
 
-    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
-        """Fonction appelée lors de toute interaction avec le joueur, quelle qu'elle soit. Doit être redéfinie."""
-
     def onJoueurInteraction(self, x, y, c, direction, enFace=False, dessus=False):
         """Fonction appelée lorsque le joueur interagit avec l'évènement, quelle que soit sa position par rapport à lui.
         <enFace> vaut <True> quand le joueur est en face de l'évènement, <dessus> vaut <True> quand ils sont sur la même position.
@@ -39,6 +36,9 @@ class EvenementConcret(Evenement):
             self._onJoueurInteractionFace(x, y, c, direction)
         if dessus is True and enFace is False:
             self._onJoueurInteractionDessus(x, y, c, direction)
+
+    def _onJoueurInteractionQuelconque(self, x, y, c, direction):
+        """Fonction appelée lors de toute interaction avec le joueur, quelle qu'elle soit. Doit être redéfinie."""
 
     def _onJoueurInteractionDessus(self, x, y, c, direction):
         """Fonction appelée lorsque le joueur se trouve à l'emplacement même de l'évènement ET appuie sur Entrée.

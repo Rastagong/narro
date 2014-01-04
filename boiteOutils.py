@@ -37,6 +37,9 @@ class BoiteOutils():
         """Actualise le message de la zone de pensée"""
         self._jeu.zonePensee.ajouterPensee(message, **parametres)
 
+    def arreterPensees(self):
+        self._jeu.zonePensee.arreterPensees()
+
     def mettreToutAChanger(self):
         """Prévient la carte que tout est à changer."""
         self._jeu.carteActuelle.mettreToutAChanger()
