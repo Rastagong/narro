@@ -136,6 +136,12 @@ class BoiteOutils():
             self._sourcesSonsFixes[instance] = sourceSon
             self.gererVolumeSonsFixes(self._gestionnaire.xJoueur, self._gestionnaire.yJoueur)
 
+    def changerVolumeInstance(self, instance, nouveauVolume):
+        self._canauxSons[instance].set_volume(nouveauVolume)
+
+    def getVolumeInstance(self, instance):
+        return self._canauxSons[instance].get_volume()
+
     def gererVolumeCrescendo(self):
         aSupprimer = []
         for (instance, (rythmeCrescendo, tempsFinCrescendo, etapeCrescendo, volumeFinal)) in self._sonsCrescendo.items():

@@ -61,13 +61,40 @@ class AnimateurToucheAction(Evenement):
             self._boiteOutils.retirerTransformation(False, "Action Joueur")
 
 class Panneau(EvenementConcret):
-    def __init__(self, jeu, gestionnaire, message, *directionsMessage):
+    def __init__(self, jeu, gestionnaire, message, *directionsMessage, splashTexte=False, position=(0,0), antialias=True, tailleTexte=12, couleurTexte=(255,255,255)):
         super().__init__(jeu, gestionnaire)
         self._message, self._directionsMessage, self._penseePossible = message, directionsMessage, InterrupteurInverse(self._boiteOutils.penseeAGerer)
+        self._splashTexte, self._positionMessage, self._antialias, self._tailleTexte, self._couleurTexte = splashTexte, position, antialias, tailleTexte, couleurTexte
+        self._ecritureEnCours, self._positionEcriture, = False, 1
 
     def _onJoueurInteractionCote(self, x, y, c, direction):
-        if direction in self._directionsMessage and self._penseePossible.voir() is True:
-            self._boiteOutils.ajouterPensee(self._message)
+        if self._splashTexte is False:
+            if direction in self._directionsMessage and self._penseePossible.voir() is True:
+                self._boiteOutils.ajouterPensee(self._message)
+        else:
+            if direction in self._directionsMessage:
+                self._ecritureEnCours = True
+                Horloge.initialiser(id(self), "Ecriture", 1)
+
+    def traiter(self):
+        if Horloge.sonner(id(self), "Fin lecture"):
+            self._boiteOutils.retirerTransformation(True, "SplashText Panneau "+self._message)
+            self._ecritureEnCours, self._positionEcriture = False, 1
+        elif self._ecritureEnCours and Horloge.sonner(id(self), "Ecriture"):
+                texte = self._message[:self._positionEcriture]
+                self._boiteOutils.ajouterTransformation(True, "SplashText Panneau "+self._message, texte=texte, taille=self._tailleTexte, antialias=self._antialias, couleurTexte=self._couleurTexte, position=self._positionMessage)
+                self._positionEcriture += 1
+                if self._positionEcriture <= len(self._message):
+                    if self._message[self._positionEcriture-1] == " ":
+                        if self._positionEcriture <= len(self._message):
+                            self._positionEcriture += 1
+                            Horloge.initialiser(id(self), "Ecriture", VITESSE_PENSEE_PAR_DEFAUT)
+                        else:
+                            Horloge.initialiser(id(self), "Fin lecture", 5000)
+                    else:
+                        Horloge.initialiser(id(self), "Ecriture", VITESSE_PENSEE_PAR_DEFAUT)
+                else:
+                    Horloge.initialiser(id(self), "Fin lecture", 5000)
 
 class Activateur(EvenementConcret):
     def __init__(self, jeu, gestionnaire, nomInterrupteur, valeur=-1, inverseur=False):

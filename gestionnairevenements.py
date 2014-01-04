@@ -8,6 +8,7 @@ from .joueur import *
 from .pnj import *
 from .listeEvenements import *
 from .boiteOutils import *
+from imp import reload
 
 class GestionnaireEvenements():
     def __init__(self, jeu):
@@ -50,6 +51,7 @@ class GestionnaireEvenements():
         """Gère tous les évènements"""
         self._nomCarte = nomCarteActuelle
         self._gererMessagesCollision()
+        self._recharger()
         for categorieEvenements in self._evenements["abstraits"].values():
             for evenement in categorieEvenements.values():
                 evenement.traiter()
@@ -180,6 +182,9 @@ class GestionnaireEvenements():
 
     def registerAppuiTir(self, appuiTir):
         self._appuiTir = appuiTir
+
+    def _recharger(self):
+        pass
 
     ##Accesseurs et mutateurs
     #

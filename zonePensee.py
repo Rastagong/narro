@@ -34,9 +34,9 @@ class ZonePensee(Observable):
                     self._surfaceFaceset[self._faceset]["Surface"] = pygame.image.load(os.path.join(DOSSIER_RESSOURCES, self._faceset))
                 except pygame.error as erreur:
                     print( MESSAGE_ERREUR_CHARGEMENT_TILESET.format(self._faceset), str(erreur) )
-            i, positionFace = 0, Rect(0, 0, 32, 32)
+            i, positionFace = 0, Rect(0, 0, 32, 32) if self._faceset != "DuckGod.png" else Rect(0,0,24,26)
             while i < 3:
-                positionFace.left = i * 32
+                positionFace.left = i * 32 if self._faceset != "DuckGod.png" else i * 24
                 self._surfaceFaceset[self._faceset][i] = self._surfaceFaceset[self._faceset]["Surface"].subsurface(positionFace)
                 i += 1
             self._etapeFace = 0
