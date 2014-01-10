@@ -17,10 +17,10 @@ class GestionnaireEvenements():
         self._jeu, self._nomCarte = jeu, None
         self._evenements = dict(concrets=dict(), abstraits=dict())
         self._boiteOutils, self._positionsARegistrer, self._evenementsATuer, self._appuiJoueur = BoiteOutils(self._jeu, self._getInterrupteurs(), self._getVariables()), [], [], False
-        self._appuiTir, self._changementsCarteANotifier, self._cartesChargees = False, dict(), list()
+        self._appuiTir, self._changementCarteImmediat, self._changementsCarteANotifier, self._cartesChargees = False, False, dict(), list()
         self._initialiserEvenements()
         if SESSION_DEBUG:
-            self._evenements["abstraits"]["Divers"]["Debugger"] = Debugger(self._jeu, self)
+            self._evenements["abstraits"]["Debugger"] = Debugger(self._jeu, self)
 
     def _getInterrupteurs(self):
         """Fonction à redéfinir au sein de chaque projet"""
@@ -52,12 +52,12 @@ class GestionnaireEvenements():
         self._nomCarte = nomCarteActuelle
         self._gererMessagesCollision()
         self._recharger()
-        for categorieEvenements in self._evenements["abstraits"].values():
-            for evenement in categorieEvenements.values():
-                evenement.traiter()
-        if nomCarteActuelle in self._evenements["concrets"]:
+        for evenement in self._evenements["abstraits"].values():
+            evenement.traiter()
+        if nomCarteActuelle in self._evenements["concrets"] and not self._changementCarteImmediat: #Si un évènement abstrait change de carte, on ne traite aucun concret
             for cle,infosEvenement in self._evenements["concrets"][nomCarteActuelle].items():
                 infosEvenement[0].traiter()
+        self._changementCarteImmediat = False
         self.tuerEvenementsATuer()
 
     def deplacerEvenementSurCarte(self, nomEvenement, carteQuittee, carteEntree, x, y, c, direction):
@@ -90,8 +90,8 @@ class GestionnaireEvenements():
                         evenementsPrevenus.append(nomEvenement)
                         self._evenements["concrets"][carteEvenement][nomEvenement][0].onChangementCarte(carteQuittee, carteEntree)
                 elif carteEvenement == "abstrait" and nomEvenement in self._evenements["abstraits"].keys():
-                        evenementsPrevenus.append(nomEvenement)
-                        self._evenements["abstraits"][nomEvenement][0].onChangementCarte(carteQuittee, carteEntree)
+                    evenementsPrevenus.append(nomEvenement)
+                    self._evenements["abstraits"][nomEvenement].onChangementCarte(carteQuittee, carteEntree)
         if carteQuittee in self._evenements["concrets"].keys(): #On prévient les évènements concrets de la carte quittée
             for (nomEvenement, infosEvenement) in self._evenements["concrets"][carteQuittee].items():
                 if nomEvenement not in evenementsPrevenus:
@@ -216,6 +216,9 @@ class GestionnaireEvenements():
     def _getNomCarte(self):
         return self._nomCarte
 
+    def _setChangementCarteImmediat(self, val):
+        self._changementCarteImmediat = val
+
     evenements = property(_getEvenements)
     boiteOutils = property(_getBoiteOutils)
     xJoueur = property(_getXJoueur)
@@ -225,3 +228,4 @@ class GestionnaireEvenements():
     directionJoueur = property(_getDirectionJoueur)
     appuiJoueur = property(_getAppuiJoueur)
     nomCarte = property(_getNomCarte)
+    changementCarteImmediat = property(fset=_setChangementCarteImmediat)

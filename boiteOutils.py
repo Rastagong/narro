@@ -142,6 +142,14 @@ class BoiteOutils():
     def changerVolumeInstance(self, instance, nouveauVolume):
         self._canauxSons[instance].set_volume(nouveauVolume)
 
+    def mettreEnPauseInstance(self, instance):
+        if instance in self._canauxSons.keys():
+            self._canauxSons[instance].pause()
+
+    def reprendreInstance(self, instance):
+        if instance in self._canauxSons.keys():
+            self._canauxSons[instance].unpause()
+
     def getVolumeInstance(self, instance):
         return self._canauxSons[instance].get_volume()
 
@@ -173,8 +181,9 @@ class BoiteOutils():
             Horloge.initialiser(id(self), instance, dureeFondu) #Au cas où le son est un son fixe : à la fin du fondu, il faut le retirer de la liste (cf. actualiserSonsFixes)
 
     def enleverInstanceSon(self, nomCarte, instance):
-        if instance in self._canauxSons.keys():
+        while instance in self._canauxSons.keys():
             self._canauxSons[instance].stop()
+            self._canauxSons.pop(instance)
         if nomCarte in self._sonsFixes.keys():
             while instance in self._sonsFixes[nomCarte]:
                 self._sonsFixes[nomCarte].remove(instance)
@@ -238,7 +247,8 @@ class BoiteOutils():
     def teleporterSurCarte(self, nomCarte, x, y, c, direction):
         """Téléporte le joueur sur la carte <nomCarte> en <x>,<y>,<c> avec un regard en <direction>."""
         jeu = self._jeu
-        jeu.carteAExecuter, jeu.changementCarte = nomCarte, True
+        jeu.carteAExecuter, jeu.changementCarte, self._gestionnaire.changementCarteImmediat = nomCarte, True, True
+        #Le changement de carte immédiat n'aura de conséquences que si on lance la téléportation depuis un évènement abstrait, il est réinitialisé à chaque frame (cf. gererEvenements)
         self._gestionnaire.evenements["concrets"][nomCarte]["Joueur"] = [jeu.joueur, (x,y), direction, c]
         self._gestionnaire.evenements["concrets"][nomCarte].move_to_end("Joueur", last=False)
         jeu.joueur.transfertCarte(x, y, c, direction)

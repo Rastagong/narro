@@ -119,6 +119,7 @@ class ZonePensee(Observable):
         Horloge.arreterSonnerie(id(self), 1)
         Horloge.arreterSonnerie(id(self), 2)
         self._faceset = False
+        self._penseeAGerer.desactiver()
 
     def gererSurfacePensee(self):
         self._gererPenseeActuelle()

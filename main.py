@@ -22,10 +22,11 @@ class Narro:
         self._gestionnaireEvenements = gestionnaireEvenements
         self._boiteOutils = self._gestionnaireEvenements.initialiserBoiteOutils()
 
-    def _initialiserAffichage(self, messageErreurInitialisationPygame, messageErreurInitialisationFenetre, longueurFenetre, largeurFenetre, largeurFenetreReelle, couleurFenetre, titreFenetre, flagsFenetre=0, forceDirectX=False):
+    def _initialiserAffichage(self, messageErreurInitialisationPygame, messageErreurInitialisationFenetre, longueurFenetre, largeurFenetre, largeurFenetreReelle, couleurFenetre, titreFenetre, positionX, positionY, flagsFenetre=0, forceDirectX=False):
         """Initialise Pygame et la fenêtre"""
         if sys.platform == "win32" and forceDirectX is True:
             os.environ["SDL_VIDEODRIVER"] = "directx"
+        os.environ['SDL_VIDEO_WINDOW_POS'] = str(positionX) + "," + str(positionY)
         try:
             pygame.init()
         except pygame.error:

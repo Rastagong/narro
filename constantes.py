@@ -136,6 +136,8 @@ FENETRE["couleurFenetre"] = (0,0,0) ##Couleur de fond de la fenêtre (hors zones
 FENETRE["titreFenetre"] = "Narro Engine"
 FENETRE["flagsFenetre"] = DOUBLEBUF#|FULLSCREEN|HWSURFACE
 FENETRE["forceDirectX"] = False
+FENETRE["positionX"] = 100
+FENETRE["positionY"] = 100
 
 #La taille de la police en splashscreen
 TAILLE_POLICE_SPLASH_SCREEN = int(FENETRE["largeurFenetre"] / 4)

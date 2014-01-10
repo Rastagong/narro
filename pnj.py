@@ -82,6 +82,7 @@ class PNJ(Mobile):
         Horloge.initialiser(id(self), 1, 1)
         self._etapeMarche = 1
         self._fonctionTrajet, self._argsTrajet, self._argsvTrajet = args[0], list(args[1:]), argsv
+        self._blocsExclusTrajet = []
         trajet = self._fonctionTrajet(*self._argsTrajet, **self._argsvTrajet)
         self._lancerTrajet(trajet, False, nouvelleIntelligence=argsv.get("intelligence", True))
         self._tempsPrecedent = pygame.time.get_ticks() #Evite un lag dû au delta timer, qui corrige le temps passé à trouver le trajet
@@ -90,7 +91,6 @@ class PNJ(Mobile):
         """Méthode qui ne s'applique qu'aux PNJ intelligents et qui peut être redéfinie. 
         Quand il y a collision, elle est appelée, permettant ainsi de débloquer la situation."""
         if self._intelligence is True and self._courage is True:
-            print(self._blocsExclusTrajet)
             self._collision = True
             etapeActuelle = self._etapeAction - 1 if self._fuyard and self._etapeAction == len(self._listeActions) else self._etapeAction 
             self._blocsExclusTrajet = [self._jeu.carteActuelle.coordonneesAuTileSuivant(self._listeActions[etapeActuelle], self._positionCarte.left, self._positionCarte.top)]
